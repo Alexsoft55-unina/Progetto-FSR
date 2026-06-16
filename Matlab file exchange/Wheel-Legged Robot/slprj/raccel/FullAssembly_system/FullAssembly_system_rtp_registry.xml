@@ -1,6 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<MF0 version="1.1" packageUris="http://schema.mathworks.com/mf0/slsa_mm_param_rtp/R2023a">
-  <slsa.mm.param.rtp.ModelMetadata type="slsa.mm.param.rtp.ModelMetadata" uuid="990eb3b3-c4f1-44cc-bbc7-13b70e02972c">
-    <modelName>FullAssembly_system</modelName>
-  </slsa.mm.param.rtp.ModelMetadata>
-</MF0>
