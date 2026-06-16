@@ -1,0 +1,134 @@
+<?xml version="1.0" encoding="utf-8"?>
+<System>
+  <P Name="Location">[-8, -8, 1928, 1048]</P>
+  <P Name="ZoomFactor">200</P>
+  <Block BlockType="Reference" Name="MechanismConfiguration" SID="82">
+    <PortCounts rconn="1"/>
+    <P Name="Position">[20, 80, 60, 120]</P>
+    <P Name="ZOrder">82</P>
+    <P Name="HideAutomaticName">off</P>
+    <P Name="LibraryVersion">25.21</P>
+    <P Name="SourceBlock">sm_lib/Utilities/Mechanism
+Configuration</P>
+    <P Name="SourceType">Mechanism
+Configuration</P>
+    <InstanceData>
+      <P Name="LogSimulationData">off</P>
+      <P Name="SimscapeInstrumentationLogging">off</P>
+      <P Name="SimscapeInstrumentationVariables" Ref="bdmxdata:SimscapeInstrumentationVariables_82"/>
+      <P Name="UniformGravity">Constant</P>
+      <P Name="GravityVector">[0 0 -9.80665]</P>
+      <P Name="GravityVector_conf">compiletime</P>
+      <P Name="GravityVectorUnits">m/s^2</P>
+      <P Name="LinearizationDelta">0.001</P>
+      <P Name="JointModeTransitionNonlinearIterations">2</P>
+    </InstanceData>
+  </Block>
+  <Block BlockType="Reference" Name="Solver&#xA;Configuration" SID="713">
+    <PortCounts rconn="1"/>
+    <P Name="Position">[20, 140, 60, 180]</P>
+    <P Name="ZOrder">164</P>
+    <P Name="HideAutomaticName">off</P>
+    <P Name="LibraryVersion">8.0</P>
+    <P Name="SourceBlock">nesl_utility/Solver
+Configuration</P>
+    <P Name="SourceType">Solver
+Configuration</P>
+    <InstanceData>
+      <P Name="RTWMemSecFuncInitTerm">Inherit from model</P>
+      <P Name="RTWMemSecFuncExecute">Inherit from model</P>
+      <P Name="RTWMemSecDataConstants">Inherit from model</P>
+      <P Name="RTWMemSecDataInternal">Inherit from model</P>
+      <P Name="RTWMemSecDataParameters">Inherit from model</P>
+      <P Name="ContentPreviewEnabled">on</P>
+      <P Name="PhysicalDomain">network_engine_domain</P>
+      <P Name="SubClassName">solver</P>
+      <P Name="LeftPortType">input</P>
+      <P Name="RightPortType">generic</P>
+      <P Name="Tones">[]</P>
+      <P Name="Harmonics">[]</P>
+      <P Name="SimulateNoise">off</P>
+      <P Name="Profile">off</P>
+      <P Name="UseLocalSampling">off</P>
+      <P Name="EnableSwitchedLinearOptims">on</P>
+      <P Name="FrequencyDomain">off</P>
+      <P Name="UseCCode">off</P>
+      <P Name="RelTol">0.001</P>
+      <P Name="AbsTol">1e-06</P>
+      <P Name="MinStep">1e-09</P>
+      <P Name="ToWorkspace">off</P>
+      <P Name="RevertToSquareIcSolve">off</P>
+      <P Name="NumHomotopyIterations">100</P>
+      <P Name="PhasorMode">off</P>
+      <P Name="PhasorModeNumHarmonics">1</P>
+      <P Name="ConsistencySolver">NEWTON_FTOL</P>
+      <P Name="IndexReductionMethod">DerivativeReplacement</P>
+      <P Name="DoDC">off</P>
+      <P Name="ResidualTolerance">1e-09</P>
+      <P Name="ConsistencyTolSource">GLOBAL</P>
+      <P Name="ConsistencyAbsTol">0.001</P>
+      <P Name="ConsistencyRelTol">0.001</P>
+      <P Name="ConsistencyTolFactor">0.001</P>
+      <P Name="UseLocalSolver">off</P>
+      <P Name="LocalSolverChoice">NE_BACKWARD_EULER_ADVANCER</P>
+      <P Name="ResolveIndetEquations">on</P>
+      <P Name="FunctionEvalNumThread">1</P>
+      <P Name="LocalSolverSampleTime">0.001</P>
+      <P Name="DoFixedCost">off</P>
+      <P Name="MaxNonlinIter">3</P>
+      <P Name="MaxModeIter">2</P>
+      <P Name="ComputeImpulses">off</P>
+      <P Name="ImpulseIterations">2</P>
+      <P Name="LinearAlgebra">auto</P>
+      <P Name="LinearAlgebraNumThread">0</P>
+      <P Name="EquationFormulation">NE_TIME_EF</P>
+      <P Name="DelaysMemoryBudget">1024</P>
+      <P Name="AutomaticFiltering">on</P>
+      <P Name="FilteringTimeConstant">0.001</P>
+      <P Name="PartitionStorageMethod">AS_NEEDED</P>
+      <P Name="PartitionMemoryBudget">1024</P>
+      <P Name="PartitionMethod">ROBUST</P>
+      <P Name="MultibodyUseLocalSolver">off</P>
+      <P Name="MultibodyLocalSolverChoice">ODE1</P>
+      <P Name="MultibodyLocalSolverSampleTime">0.001</P>
+    </InstanceData>
+  </Block>
+  <Block BlockType="Reference" Name="World" SID="163">
+    <PortCounts rconn="1"/>
+    <P Name="Position">[20, 20, 60, 60]</P>
+    <P Name="ZOrder">163</P>
+    <P Name="HideAutomaticName">off</P>
+    <P Name="LibraryVersion">25.21</P>
+    <P Name="SourceBlock">sm_lib/Frames and
+Transforms/World Frame</P>
+    <P Name="SourceType">World Frame</P>
+    <InstanceData>
+      <P Name="LogSimulationData">off</P>
+      <P Name="SimscapeInstrumentationLogging">off</P>
+      <P Name="SimscapeInstrumentationVariables" Ref="bdmxdata:SimscapeInstrumentationVariables_163"/>
+    </InstanceData>
+  </Block>
+  <Block BlockType="PMIOPort" Name="a" SID="805">
+    <P Name="Position">[390, 93, 420, 107]</P>
+    <P Name="ZOrder">165</P>
+    <P Name="BlockMirror">on</P>
+    <P Name="Side">Right</P>
+  </Block>
+  <Line LineType="Connection">
+    <P Name="ZOrder">3</P>
+    <P Name="Src">82#rconn:1</P>
+    <P Name="Points">[229, 0]</P>
+    <Branch ConnectType="DEST_DEST">
+      <P Name="Src">805#rconn:1</P>
+      <P Name="Points">[-71, 0]</P>
+    </Branch>
+    <Branch ConnectType="DEST_SRC">
+      <P Name="Points">[0, 60]</P>
+      <P Name="Dst">713#rconn:1</P>
+    </Branch>
+    <Branch ConnectType="DEST_SRC">
+      <P Name="Points">[0, -60]</P>
+      <P Name="Dst">163#rconn:1</P>
+    </Branch>
+  </Line>
+</System>

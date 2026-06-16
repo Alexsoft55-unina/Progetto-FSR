@@ -1,0 +1,2823 @@
+{
+    "GraphicalInterface":{
+        "ExternalFileReferences":[
+            {
+                "Path":"$bdroot\/Ground plane",
+                "Reference":"sm_lib\/Body Elements\/Brick Solid",
+                "SID":"714",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/HEAD\/Arduino_block_1_RIGID\/ReferenceFrame",
+                "Reference":"sm_lib\/Frames and\nTransforms\/Reference\nFrame",
+                "SID":"164",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/HEAD\/Arduino_block_1_RIGID\/Solid",
+                "Reference":"sm_lib\/Body Elements\/File Solid",
+                "SID":"165",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/HEAD\/Arduino_block_1_RIGID\/Transform",
+                "Reference":"sm_lib\/Frames and\nTransforms\/Rigid\nTransform",
+                "SID":"166",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/HEAD\/Battery_1_RIGID\/ReferenceFrame",
+                "Reference":"sm_lib\/Frames and\nTransforms\/Reference\nFrame",
+                "SID":"168",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/HEAD\/Battery_1_RIGID\/Solid",
+                "Reference":"sm_lib\/Body Elements\/File Solid",
+                "SID":"169",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/HEAD\/Battery_1_RIGID\/Transform",
+                "Reference":"sm_lib\/Frames and\nTransforms\/Rigid\nTransform",
+                "SID":"170",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/HEAD\/Battery_1_RIGID\/Transform1",
+                "Reference":"sm_lib\/Frames and\nTransforms\/Rigid\nTransform",
+                "SID":"171",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/HEAD\/Battery_1_RIGID\/Transform2",
+                "Reference":"sm_lib\/Frames and\nTransforms\/Rigid\nTransform",
+                "SID":"172",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/HEAD\/Battery_1_RIGID\/Transform3",
+                "Reference":"sm_lib\/Frames and\nTransforms\/Rigid\nTransform",
+                "SID":"173",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/HEAD\/Battery_1_RIGID\/Transform4",
+                "Reference":"sm_lib\/Frames and\nTransforms\/Rigid\nTransform",
+                "SID":"174",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/HEAD\/Battery_holder_1_RIGID\/ReferenceFrame",
+                "Reference":"sm_lib\/Frames and\nTransforms\/Reference\nFrame",
+                "SID":"180",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/HEAD\/Battery_holder_1_RIGID\/Solid",
+                "Reference":"sm_lib\/Body Elements\/File Solid",
+                "SID":"181",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/HEAD\/Battery_holder_1_RIGID\/Transform",
+                "Reference":"sm_lib\/Frames and\nTransforms\/Rigid\nTransform",
+                "SID":"182",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/HEAD\/Battery_holder_1_RIGID\/Transform1",
+                "Reference":"sm_lib\/Frames and\nTransforms\/Rigid\nTransform",
+                "SID":"183",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/HEAD\/Battery_holder_2_RIGID\/ReferenceFrame",
+                "Reference":"sm_lib\/Frames and\nTransforms\/Reference\nFrame",
+                "SID":"186",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/HEAD\/Battery_holder_2_RIGID\/Solid",
+                "Reference":"sm_lib\/Body Elements\/File Solid",
+                "SID":"187",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/HEAD\/Battery_holder_2_RIGID\/Transform",
+                "Reference":"sm_lib\/Frames and\nTransforms\/Rigid\nTransform",
+                "SID":"188",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/HEAD\/Battery_holder_2_RIGID\/Transform1",
+                "Reference":"sm_lib\/Frames and\nTransforms\/Rigid\nTransform",
+                "SID":"189",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/HEAD\/Battery_holder_3_RIGID\/ReferenceFrame",
+                "Reference":"sm_lib\/Frames and\nTransforms\/Reference\nFrame",
+                "SID":"192",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/HEAD\/Battery_holder_3_RIGID\/Solid",
+                "Reference":"sm_lib\/Body Elements\/File Solid",
+                "SID":"193",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/HEAD\/Battery_holder_3_RIGID\/Transform",
+                "Reference":"sm_lib\/Frames and\nTransforms\/Rigid\nTransform",
+                "SID":"194",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/HEAD\/Battery_holder_3_RIGID\/Transform1",
+                "Reference":"sm_lib\/Frames and\nTransforms\/Rigid\nTransform",
+                "SID":"195",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/HEAD\/Battery_holder_4_RIGID\/ReferenceFrame",
+                "Reference":"sm_lib\/Frames and\nTransforms\/Reference\nFrame",
+                "SID":"198",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/HEAD\/Battery_holder_4_RIGID\/Solid",
+                "Reference":"sm_lib\/Body Elements\/File Solid",
+                "SID":"199",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/HEAD\/Battery_holder_4_RIGID\/Transform",
+                "Reference":"sm_lib\/Frames and\nTransforms\/Rigid\nTransform",
+                "SID":"200",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/HEAD\/Battery_holder_4_RIGID\/Transform1",
+                "Reference":"sm_lib\/Frames and\nTransforms\/Rigid\nTransform",
+                "SID":"201",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/HEAD\/Head_control_power_1_RIGID\/ReferenceFrame",
+                "Reference":"sm_lib\/Frames and\nTransforms\/Reference\nFrame",
+                "SID":"228",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/HEAD\/Head_control_power_1_RIGID\/Solid",
+                "Reference":"sm_lib\/Body Elements\/File Solid",
+                "SID":"229",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/HEAD\/Head_control_power_1_RIGID\/Transform",
+                "Reference":"sm_lib\/Frames and\nTransforms\/Rigid\nTransform",
+                "SID":"230",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/HEAD\/Head_control_power_1_RIGID\/Transform1",
+                "Reference":"sm_lib\/Frames and\nTransforms\/Rigid\nTransform",
+                "SID":"231",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/HEAD\/Head_control_power_1_RIGID\/Transform10",
+                "Reference":"sm_lib\/Frames and\nTransforms\/Rigid\nTransform",
+                "SID":"232",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/HEAD\/Head_control_power_1_RIGID\/Transform11",
+                "Reference":"sm_lib\/Frames and\nTransforms\/Rigid\nTransform",
+                "SID":"233",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/HEAD\/Head_control_power_1_RIGID\/Transform12",
+                "Reference":"sm_lib\/Frames and\nTransforms\/Rigid\nTransform",
+                "SID":"234",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/HEAD\/Head_control_power_1_RIGID\/Transform13",
+                "Reference":"sm_lib\/Frames and\nTransforms\/Rigid\nTransform",
+                "SID":"235",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/HEAD\/Head_control_power_1_RIGID\/Transform14",
+                "Reference":"sm_lib\/Frames and\nTransforms\/Rigid\nTransform",
+                "SID":"236",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/HEAD\/Head_control_power_1_RIGID\/Transform15",
+                "Reference":"sm_lib\/Frames and\nTransforms\/Rigid\nTransform",
+                "SID":"237",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/HEAD\/Head_control_power_1_RIGID\/Transform16",
+                "Reference":"sm_lib\/Frames and\nTransforms\/Rigid\nTransform",
+                "SID":"238",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/HEAD\/Head_control_power_1_RIGID\/Transform2",
+                "Reference":"sm_lib\/Frames and\nTransforms\/Rigid\nTransform",
+                "SID":"239",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/HEAD\/Head_control_power_1_RIGID\/Transform3",
+                "Reference":"sm_lib\/Frames and\nTransforms\/Rigid\nTransform",
+                "SID":"240",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/HEAD\/Head_control_power_1_RIGID\/Transform4",
+                "Reference":"sm_lib\/Frames and\nTransforms\/Rigid\nTransform",
+                "SID":"241",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/HEAD\/Head_control_power_1_RIGID\/Transform5",
+                "Reference":"sm_lib\/Frames and\nTransforms\/Rigid\nTransform",
+                "SID":"242",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/HEAD\/Head_control_power_1_RIGID\/Transform6",
+                "Reference":"sm_lib\/Frames and\nTransforms\/Rigid\nTransform",
+                "SID":"243",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/HEAD\/Head_control_power_1_RIGID\/Transform7",
+                "Reference":"sm_lib\/Frames and\nTransforms\/Rigid\nTransform",
+                "SID":"244",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/HEAD\/Head_control_power_1_RIGID\/Transform8",
+                "Reference":"sm_lib\/Frames and\nTransforms\/Rigid\nTransform",
+                "SID":"245",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/HEAD\/Head_control_power_1_RIGID\/Transform9",
+                "Reference":"sm_lib\/Frames and\nTransforms\/Rigid\nTransform",
+                "SID":"246",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/HEAD\/IMU_controller_1_RIGID\/ReferenceFrame",
+                "Reference":"sm_lib\/Frames and\nTransforms\/Reference\nFrame",
+                "SID":"284",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/HEAD\/IMU_controller_1_RIGID\/Solid",
+                "Reference":"sm_lib\/Body Elements\/File Solid",
+                "SID":"285",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/HEAD\/IMU_controller_1_RIGID\/Transform",
+                "Reference":"sm_lib\/Frames and\nTransforms\/Rigid\nTransform",
+                "SID":"286",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/HEAD\/M2dot5_Screw_withBolt_SHORT_1_RIGID\/ReferenceFrame",
+                "Reference":"sm_lib\/Frames and\nTransforms\/Reference\nFrame",
+                "SID":"502",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/HEAD\/M2dot5_Screw_withBolt_SHORT_1_RIGID\/Solid",
+                "Reference":"sm_lib\/Body Elements\/File Solid",
+                "SID":"503",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/HEAD\/M2dot5_Screw_withBolt_SHORT_1_RIGID\/Transform",
+                "Reference":"sm_lib\/Frames and\nTransforms\/Rigid\nTransform",
+                "SID":"504",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/HEAD\/M2dot5_Screw_withBolt_SHORT_2_RIGID\/ReferenceFrame",
+                "Reference":"sm_lib\/Frames and\nTransforms\/Reference\nFrame",
+                "SID":"506",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/HEAD\/M2dot5_Screw_withBolt_SHORT_2_RIGID\/Solid",
+                "Reference":"sm_lib\/Body Elements\/File Solid",
+                "SID":"507",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/HEAD\/M2dot5_Screw_withBolt_SHORT_2_RIGID\/Transform",
+                "Reference":"sm_lib\/Frames and\nTransforms\/Rigid\nTransform",
+                "SID":"508",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/HEAD\/M2dot5_Screw_withBolt_SHORT_3_RIGID\/ReferenceFrame",
+                "Reference":"sm_lib\/Frames and\nTransforms\/Reference\nFrame",
+                "SID":"510",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/HEAD\/M2dot5_Screw_withBolt_SHORT_3_RIGID\/Solid",
+                "Reference":"sm_lib\/Body Elements\/File Solid",
+                "SID":"511",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/HEAD\/M2dot5_Screw_withBolt_SHORT_3_RIGID\/Transform",
+                "Reference":"sm_lib\/Frames and\nTransforms\/Rigid\nTransform",
+                "SID":"512",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/HEAD\/M2dot5_Screw_withBolt_SHORT_4_RIGID\/ReferenceFrame",
+                "Reference":"sm_lib\/Frames and\nTransforms\/Reference\nFrame",
+                "SID":"514",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/HEAD\/M2dot5_Screw_withBolt_SHORT_4_RIGID\/Solid",
+                "Reference":"sm_lib\/Body Elements\/File Solid",
+                "SID":"515",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/HEAD\/M2dot5_Screw_withBolt_SHORT_4_RIGID\/Transform",
+                "Reference":"sm_lib\/Frames and\nTransforms\/Rigid\nTransform",
+                "SID":"516",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/HEAD\/M2dot5_Screw_withBolt_SHORT_5_RIGID\/ReferenceFrame",
+                "Reference":"sm_lib\/Frames and\nTransforms\/Reference\nFrame",
+                "SID":"518",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/HEAD\/M2dot5_Screw_withBolt_SHORT_5_RIGID\/Solid",
+                "Reference":"sm_lib\/Body Elements\/File Solid",
+                "SID":"519",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/HEAD\/M2dot5_Screw_withBolt_SHORT_5_RIGID\/Transform",
+                "Reference":"sm_lib\/Frames and\nTransforms\/Rigid\nTransform",
+                "SID":"520",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/HEAD\/M2dot5_Screw_withBolt_SHORT_6_RIGID\/ReferenceFrame",
+                "Reference":"sm_lib\/Frames and\nTransforms\/Reference\nFrame",
+                "SID":"522",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/HEAD\/M2dot5_Screw_withBolt_SHORT_6_RIGID\/Solid",
+                "Reference":"sm_lib\/Body Elements\/File Solid",
+                "SID":"523",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/HEAD\/M2dot5_Screw_withBolt_SHORT_6_RIGID\/Transform",
+                "Reference":"sm_lib\/Frames and\nTransforms\/Rigid\nTransform",
+                "SID":"524",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/HEAD\/M2dot5_Screw_withBolt_SHORT_7_RIGID\/ReferenceFrame",
+                "Reference":"sm_lib\/Frames and\nTransforms\/Reference\nFrame",
+                "SID":"526",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/HEAD\/M2dot5_Screw_withBolt_SHORT_7_RIGID\/Solid",
+                "Reference":"sm_lib\/Body Elements\/File Solid",
+                "SID":"527",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/HEAD\/M2dot5_Screw_withBolt_SHORT_7_RIGID\/Transform",
+                "Reference":"sm_lib\/Frames and\nTransforms\/Rigid\nTransform",
+                "SID":"528",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/HEAD\/M2dot5_Screw_withBolt_SHORT_8_RIGID\/ReferenceFrame",
+                "Reference":"sm_lib\/Frames and\nTransforms\/Reference\nFrame",
+                "SID":"530",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/HEAD\/M2dot5_Screw_withBolt_SHORT_8_RIGID\/Solid",
+                "Reference":"sm_lib\/Body Elements\/File Solid",
+                "SID":"531",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/HEAD\/M2dot5_Screw_withBolt_SHORT_8_RIGID\/Transform",
+                "Reference":"sm_lib\/Frames and\nTransforms\/Rigid\nTransform",
+                "SID":"532",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/HEAD\/Planar1",
+                "Reference":"sm_lib\/Joints\/Planar Joint",
+                "SID":"84",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/HEAD\/Planar2",
+                "Reference":"sm_lib\/Joints\/Planar Joint",
+                "SID":"95",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/HEAD\/Planar3",
+                "Reference":"sm_lib\/Joints\/Planar Joint",
+                "SID":"100",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/HEAD\/Planar4",
+                "Reference":"sm_lib\/Joints\/Planar Joint",
+                "SID":"101",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/HEAD\/Prismatic",
+                "Reference":"sm_lib\/Joints\/Prismatic\nJoint",
+                "SID":"107",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/HEAD\/Revolute10",
+                "Reference":"sm_lib\/Joints\/Revolute Joint",
+                "SID":"110",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/HEAD\/Revolute11",
+                "Reference":"sm_lib\/Joints\/Revolute Joint",
+                "SID":"111",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/HEAD\/Revolute12",
+                "Reference":"sm_lib\/Joints\/Revolute Joint",
+                "SID":"112",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/HEAD\/Revolute13",
+                "Reference":"sm_lib\/Joints\/Revolute Joint",
+                "SID":"113",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/HEAD\/Revolute14",
+                "Reference":"sm_lib\/Joints\/Revolute Joint",
+                "SID":"114",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/HEAD\/Revolute15",
+                "Reference":"sm_lib\/Joints\/Revolute Joint",
+                "SID":"115",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/HEAD\/Revolute16",
+                "Reference":"sm_lib\/Joints\/Revolute Joint",
+                "SID":"116",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/HEAD\/Revolute17",
+                "Reference":"sm_lib\/Joints\/Revolute Joint",
+                "SID":"117",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/HEAD\/Revolute6",
+                "Reference":"sm_lib\/Joints\/Revolute Joint",
+                "SID":"142",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/HEAD\/Revolute7",
+                "Reference":"sm_lib\/Joints\/Revolute Joint",
+                "SID":"143",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/HEAD\/Revolute8",
+                "Reference":"sm_lib\/Joints\/Revolute Joint",
+                "SID":"144",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/HEAD\/Revolute9",
+                "Reference":"sm_lib\/Joints\/Revolute Joint",
+                "SID":"145",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/HEAD\/Spatial Contact Force",
+                "Reference":"sm_lib\/Forces and\nTorques\/Spatial\nContact Force",
+                "SID":"806",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/HEAD\/Spatial Contact Force1",
+                "Reference":"sm_lib\/Forces and\nTorques\/Spatial\nContact Force",
+                "SID":"807",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/IMU Sensor",
+                "Reference":"sm_lib\/Frames and\nTransforms\/Transform\nSensor",
+                "SID":"815",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/L_shoulder\/Coupling_shoulder_left_1_RIGID\/ReferenceFrame",
+                "Reference":"sm_lib\/Frames and\nTransforms\/Reference\nFrame",
+                "SID":"204",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/L_shoulder\/Coupling_shoulder_left_1_RIGID\/Solid",
+                "Reference":"sm_lib\/Body Elements\/File Solid",
+                "SID":"205",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/L_shoulder\/Coupling_shoulder_left_1_RIGID\/Transform",
+                "Reference":"sm_lib\/Frames and\nTransforms\/Rigid\nTransform",
+                "SID":"206",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/L_shoulder\/Coupling_shoulder_left_1_RIGID\/Transform1",
+                "Reference":"sm_lib\/Frames and\nTransforms\/Rigid\nTransform",
+                "SID":"207",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/L_shoulder\/Coupling_shoulder_left_1_RIGID\/Transform2",
+                "Reference":"sm_lib\/Frames and\nTransforms\/Rigid\nTransform",
+                "SID":"208",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/L_shoulder\/Coupling_shoulder_left_1_RIGID\/Transform3",
+                "Reference":"sm_lib\/Frames and\nTransforms\/Rigid\nTransform",
+                "SID":"209",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/L_shoulder\/Coupling_shoulder_left_1_RIGID\/Transform4",
+                "Reference":"sm_lib\/Frames and\nTransforms\/Rigid\nTransform",
+                "SID":"210",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/L_shoulder\/Cylindrical10",
+                "Reference":"sm_lib\/Joints\/Cylindrical\nJoint",
+                "SID":"11",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/L_shoulder\/Cylindrical16",
+                "Reference":"sm_lib\/Joints\/Cylindrical\nJoint",
+                "SID":"17",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/L_shoulder\/Cylindrical17",
+                "Reference":"sm_lib\/Joints\/Cylindrical\nJoint",
+                "SID":"18",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/L_shoulder\/Cylindrical18",
+                "Reference":"sm_lib\/Joints\/Cylindrical\nJoint",
+                "SID":"19",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/L_shoulder\/Cylindrical19",
+                "Reference":"sm_lib\/Joints\/Cylindrical\nJoint",
+                "SID":"20",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/L_shoulder\/Cylindrical2",
+                "Reference":"sm_lib\/Joints\/Cylindrical\nJoint",
+                "SID":"21",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/L_shoulder\/L_Shoulder_motor",
+                "Reference":"sm_lib\/Joints\/Revolute Joint",
+                "SID":"131",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/L_shoulder\/Left_shoulder_bone_1_RIGID\/ReferenceFrame",
+                "Reference":"sm_lib\/Frames and\nTransforms\/Reference\nFrame",
+                "SID":"332",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/L_shoulder\/Left_shoulder_bone_1_RIGID\/Solid",
+                "Reference":"sm_lib\/Body Elements\/File Solid",
+                "SID":"333",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/L_shoulder\/Left_shoulder_bone_1_RIGID\/Transform",
+                "Reference":"sm_lib\/Frames and\nTransforms\/Rigid\nTransform",
+                "SID":"334",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/L_shoulder\/Left_shoulder_bone_1_RIGID\/Transform1",
+                "Reference":"sm_lib\/Frames and\nTransforms\/Rigid\nTransform",
+                "SID":"335",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/L_shoulder\/Left_shoulder_bone_1_RIGID\/Transform2",
+                "Reference":"sm_lib\/Frames and\nTransforms\/Rigid\nTransform",
+                "SID":"336",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/L_shoulder\/Left_shoulder_bone_1_RIGID\/Transform3",
+                "Reference":"sm_lib\/Frames and\nTransforms\/Rigid\nTransform",
+                "SID":"337",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/L_shoulder\/Left_shoulder_bone_1_RIGID\/Transform4",
+                "Reference":"sm_lib\/Frames and\nTransforms\/Rigid\nTransform",
+                "SID":"338",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/L_shoulder\/Left_shoulder_bone_1_RIGID\/Transform5",
+                "Reference":"sm_lib\/Frames and\nTransforms\/Rigid\nTransform",
+                "SID":"339",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/L_shoulder\/Left_shoulder_bone_1_RIGID\/Transform6",
+                "Reference":"sm_lib\/Frames and\nTransforms\/Rigid\nTransform",
+                "SID":"340",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/L_shoulder\/Left_shoulder_bone_1_RIGID\/Transform7",
+                "Reference":"sm_lib\/Frames and\nTransforms\/Rigid\nTransform",
+                "SID":"341",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/L_shoulder\/Left_shoulder_bone_1_RIGID\/Transform8",
+                "Reference":"sm_lib\/Frames and\nTransforms\/Rigid\nTransform",
+                "SID":"342",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/L_shoulder\/Left_shoulder_joint_connect_2_RIGID\/ReferenceFrame",
+                "Reference":"sm_lib\/Frames and\nTransforms\/Reference\nFrame",
+                "SID":"352",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/L_shoulder\/Left_shoulder_joint_connect_2_RIGID\/Solid",
+                "Reference":"sm_lib\/Body Elements\/File Solid",
+                "SID":"353",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/L_shoulder\/Left_shoulder_joint_connect_2_RIGID\/Transform",
+                "Reference":"sm_lib\/Frames and\nTransforms\/Rigid\nTransform",
+                "SID":"354",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/L_shoulder\/Left_shoulder_joint_connect_2_RIGID\/Transform1",
+                "Reference":"sm_lib\/Frames and\nTransforms\/Rigid\nTransform",
+                "SID":"355",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/L_shoulder\/Left_shoulder_joint_connect_2_RIGID\/Transform2",
+                "Reference":"sm_lib\/Frames and\nTransforms\/Rigid\nTransform",
+                "SID":"356",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/L_shoulder\/Left_shoulder_joint_connect_2_RIGID\/Transform3",
+                "Reference":"sm_lib\/Frames and\nTransforms\/Rigid\nTransform",
+                "SID":"357",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/L_shoulder\/Left_shoulder_joint_connect_2_RIGID\/Transform4",
+                "Reference":"sm_lib\/Frames and\nTransforms\/Rigid\nTransform",
+                "SID":"358",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/L_shoulder\/Left_shoulder_joint_connect_2_RIGID\/Transform5",
+                "Reference":"sm_lib\/Frames and\nTransforms\/Rigid\nTransform",
+                "SID":"359",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/L_shoulder\/Left_shoulder_joint_connect_2_RIGID\/Transform6",
+                "Reference":"sm_lib\/Frames and\nTransforms\/Rigid\nTransform",
+                "SID":"360",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/L_shoulder\/Left_shoulder_joint_connect_2_RIGID\/Transform7",
+                "Reference":"sm_lib\/Frames and\nTransforms\/Rigid\nTransform",
+                "SID":"361",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/L_shoulder\/M2dot5_Screw_Stepper_5_RIGID\/ReferenceFrame",
+                "Reference":"sm_lib\/Frames and\nTransforms\/Reference\nFrame",
+                "SID":"406",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/L_shoulder\/M2dot5_Screw_Stepper_5_RIGID\/Solid",
+                "Reference":"sm_lib\/Body Elements\/File Solid",
+                "SID":"407",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/L_shoulder\/M2dot5_Screw_Stepper_5_RIGID\/Transform",
+                "Reference":"sm_lib\/Frames and\nTransforms\/Rigid\nTransform",
+                "SID":"408",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/L_shoulder\/M2dot5_Screw_Stepper_6_RIGID\/ReferenceFrame",
+                "Reference":"sm_lib\/Frames and\nTransforms\/Reference\nFrame",
+                "SID":"410",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/L_shoulder\/M2dot5_Screw_Stepper_6_RIGID\/Solid",
+                "Reference":"sm_lib\/Body Elements\/File Solid",
+                "SID":"411",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/L_shoulder\/M2dot5_Screw_Stepper_6_RIGID\/Transform",
+                "Reference":"sm_lib\/Frames and\nTransforms\/Rigid\nTransform",
+                "SID":"412",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/L_shoulder\/M2dot5_Screw_Stepper_7_RIGID\/ReferenceFrame",
+                "Reference":"sm_lib\/Frames and\nTransforms\/Reference\nFrame",
+                "SID":"414",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/L_shoulder\/M2dot5_Screw_Stepper_7_RIGID\/Solid",
+                "Reference":"sm_lib\/Body Elements\/File Solid",
+                "SID":"415",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/L_shoulder\/M2dot5_Screw_Stepper_7_RIGID\/Transform",
+                "Reference":"sm_lib\/Frames and\nTransforms\/Rigid\nTransform",
+                "SID":"416",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/L_shoulder\/M2dot5_Screw_Stepper_8_RIGID\/ReferenceFrame",
+                "Reference":"sm_lib\/Frames and\nTransforms\/Reference\nFrame",
+                "SID":"418",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/L_shoulder\/M2dot5_Screw_Stepper_8_RIGID\/Solid",
+                "Reference":"sm_lib\/Body Elements\/File Solid",
+                "SID":"419",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/L_shoulder\/M2dot5_Screw_Stepper_8_RIGID\/Transform",
+                "Reference":"sm_lib\/Frames and\nTransforms\/Rigid\nTransform",
+                "SID":"420",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/L_shoulder\/M2dot5_Screw_withBolt_13_RIGID\/ReferenceFrame",
+                "Reference":"sm_lib\/Frames and\nTransforms\/Reference\nFrame",
+                "SID":"440",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/L_shoulder\/M2dot5_Screw_withBolt_13_RIGID\/Solid",
+                "Reference":"sm_lib\/Body Elements\/File Solid",
+                "SID":"441",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/L_shoulder\/M2dot5_Screw_withBolt_13_RIGID\/Transform",
+                "Reference":"sm_lib\/Frames and\nTransforms\/Rigid\nTransform",
+                "SID":"442",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/L_shoulder\/M2dot5_Screw_withBolt_13_RIGID\/Transform1",
+                "Reference":"sm_lib\/Frames and\nTransforms\/Rigid\nTransform",
+                "SID":"443",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/L_shoulder\/M2dot5_Screw_withBolt_14_RIGID\/ReferenceFrame",
+                "Reference":"sm_lib\/Frames and\nTransforms\/Reference\nFrame",
+                "SID":"446",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/L_shoulder\/M2dot5_Screw_withBolt_14_RIGID\/Solid",
+                "Reference":"sm_lib\/Body Elements\/File Solid",
+                "SID":"447",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/L_shoulder\/M2dot5_Screw_withBolt_14_RIGID\/Transform",
+                "Reference":"sm_lib\/Frames and\nTransforms\/Rigid\nTransform",
+                "SID":"448",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/L_shoulder\/M2dot5_Screw_withBolt_14_RIGID\/Transform1",
+                "Reference":"sm_lib\/Frames and\nTransforms\/Rigid\nTransform",
+                "SID":"449",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/L_shoulder\/M2dot5_Screw_withBolt_15_RIGID\/ReferenceFrame",
+                "Reference":"sm_lib\/Frames and\nTransforms\/Reference\nFrame",
+                "SID":"452",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/L_shoulder\/M2dot5_Screw_withBolt_15_RIGID\/Solid",
+                "Reference":"sm_lib\/Body Elements\/File Solid",
+                "SID":"453",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/L_shoulder\/M2dot5_Screw_withBolt_15_RIGID\/Transform",
+                "Reference":"sm_lib\/Frames and\nTransforms\/Rigid\nTransform",
+                "SID":"454",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/L_shoulder\/M2dot5_Screw_withBolt_15_RIGID\/Transform1",
+                "Reference":"sm_lib\/Frames and\nTransforms\/Rigid\nTransform",
+                "SID":"455",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/L_shoulder\/M2dot5_Screw_withBolt_16_RIGID\/ReferenceFrame",
+                "Reference":"sm_lib\/Frames and\nTransforms\/Reference\nFrame",
+                "SID":"458",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/L_shoulder\/M2dot5_Screw_withBolt_16_RIGID\/Solid",
+                "Reference":"sm_lib\/Body Elements\/File Solid",
+                "SID":"459",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/L_shoulder\/M2dot5_Screw_withBolt_16_RIGID\/Transform",
+                "Reference":"sm_lib\/Frames and\nTransforms\/Rigid\nTransform",
+                "SID":"460",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/L_shoulder\/M2dot5_Screw_withBolt_16_RIGID\/Transform1",
+                "Reference":"sm_lib\/Frames and\nTransforms\/Rigid\nTransform",
+                "SID":"461",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/L_shoulder\/M3_shaft_screw_6_RIGID\/ReferenceFrame",
+                "Reference":"sm_lib\/Frames and\nTransforms\/Reference\nFrame",
+                "SID":"552",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/L_shoulder\/M3_shaft_screw_6_RIGID\/Solid",
+                "Reference":"sm_lib\/Body Elements\/File Solid",
+                "SID":"553",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/L_shoulder\/M3_shaft_screw_6_RIGID\/Transform",
+                "Reference":"sm_lib\/Frames and\nTransforms\/Rigid\nTransform",
+                "SID":"554",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/L_shoulder\/M3_shaft_screw_6_RIGID\/Transform1",
+                "Reference":"sm_lib\/Frames and\nTransforms\/Rigid\nTransform",
+                "SID":"555",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/L_shoulder\/PID Controller",
+                "Reference":"slpidlib\/PID Controller",
+                "SID":"834",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/L_shoulder\/PS-Simulink Converter",
+                "Reference":"nesl_utility\/PS-Simulink\nConverter",
+                "SID":"835",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/L_shoulder\/Planar",
+                "Reference":"sm_lib\/Joints\/Planar Joint",
+                "SID":"83",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/L_shoulder\/Planar20",
+                "Reference":"sm_lib\/Joints\/Planar Joint",
+                "SID":"96",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/L_shoulder\/Planar21",
+                "Reference":"sm_lib\/Joints\/Planar Joint",
+                "SID":"97",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/L_shoulder\/Planar22",
+                "Reference":"sm_lib\/Joints\/Planar Joint",
+                "SID":"98",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/L_shoulder\/Planar23",
+                "Reference":"sm_lib\/Joints\/Planar Joint",
+                "SID":"99",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/L_shoulder\/Planar7",
+                "Reference":"sm_lib\/Joints\/Planar Joint",
+                "SID":"104",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/L_shoulder\/Revolute",
+                "Reference":"sm_lib\/Joints\/Revolute Joint",
+                "SID":"108",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/L_shoulder\/Revolute1",
+                "Reference":"sm_lib\/Joints\/Revolute Joint",
+                "SID":"109",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/L_shoulder\/Revolute27",
+                "Reference":"sm_lib\/Joints\/Revolute Joint",
+                "SID":"128",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/L_shoulder\/Revolute28",
+                "Reference":"sm_lib\/Joints\/Revolute Joint",
+                "SID":"129",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/L_shoulder\/Simulink-PS Converter",
+                "Reference":"nesl_utility\/Simulink-PS\nConverter",
+                "SID":"836",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/L_shoulder\/Step_Left_motor1_1_RIGID\/ReferenceFrame",
+                "Reference":"sm_lib\/Frames and\nTransforms\/Reference\nFrame",
+                "SID":"656",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/L_shoulder\/Step_Left_motor1_1_RIGID\/Solid",
+                "Reference":"sm_lib\/Body Elements\/File Solid",
+                "SID":"657",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/L_shoulder\/Step_Left_motor1_1_RIGID\/Transform",
+                "Reference":"sm_lib\/Frames and\nTransforms\/Rigid\nTransform",
+                "SID":"658",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/L_shoulder\/Step_Left_motor1_1_RIGID\/Transform1",
+                "Reference":"sm_lib\/Frames and\nTransforms\/Rigid\nTransform",
+                "SID":"659",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/L_shoulder\/Step_Left_motor2_1_RIGID\/ReferenceFrame",
+                "Reference":"sm_lib\/Frames and\nTransforms\/Reference\nFrame",
+                "SID":"662",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/L_shoulder\/Step_Left_motor2_1_RIGID\/Solid",
+                "Reference":"sm_lib\/Body Elements\/File Solid",
+                "SID":"663",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/L_shoulder\/Step_Left_motor2_1_RIGID\/Transform",
+                "Reference":"sm_lib\/Frames and\nTransforms\/Rigid\nTransform",
+                "SID":"664",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/L_shoulder\/Step_Left_motor2_1_RIGID\/Transform1",
+                "Reference":"sm_lib\/Frames and\nTransforms\/Rigid\nTransform",
+                "SID":"665",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/L_shoulder\/Step_Left_motor_shaft2_1_RIGID\/ReferenceFrame",
+                "Reference":"sm_lib\/Frames and\nTransforms\/Reference\nFrame",
+                "SID":"676",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/L_shoulder\/Step_Left_motor_shaft2_1_RIGID\/Solid",
+                "Reference":"sm_lib\/Body Elements\/File Solid",
+                "SID":"677",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/L_shoulder\/Step_Left_motor_shaft2_1_RIGID\/Transform",
+                "Reference":"sm_lib\/Frames and\nTransforms\/Rigid\nTransform",
+                "SID":"678",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/L_shoulder\/Step_Left_motor_shaft2_1_RIGID\/Transform1",
+                "Reference":"sm_lib\/Frames and\nTransforms\/Rigid\nTransform",
+                "SID":"679",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/L_shoulder\/Step_Left_motor_shaft2_1_RIGID\/Transform2",
+                "Reference":"sm_lib\/Frames and\nTransforms\/Rigid\nTransform",
+                "SID":"680",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/Left Wheel\/Cylindrical5",
+                "Reference":"sm_lib\/Joints\/Cylindrical\nJoint",
+                "SID":"24",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/Left Wheel\/Cylindrical6",
+                "Reference":"sm_lib\/Joints\/Cylindrical\nJoint",
+                "SID":"25",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/Left Wheel\/Hex2_2_RIGID\/ReferenceFrame",
+                "Reference":"sm_lib\/Frames and\nTransforms\/Reference\nFrame",
+                "SID":"274",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/Left Wheel\/Hex2_2_RIGID\/Solid",
+                "Reference":"sm_lib\/Body Elements\/File Solid",
+                "SID":"275",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/Left Wheel\/Hex2_2_RIGID\/Transform",
+                "Reference":"sm_lib\/Frames and\nTransforms\/Rigid\nTransform",
+                "SID":"276",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/Left Wheel\/Hex2_2_RIGID\/Transform1",
+                "Reference":"sm_lib\/Frames and\nTransforms\/Rigid\nTransform",
+                "SID":"277",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/Left Wheel\/Hex2_2_RIGID\/Transform2",
+                "Reference":"sm_lib\/Frames and\nTransforms\/Rigid\nTransform",
+                "SID":"278",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/Left Wheel\/Hex2_2_RIGID\/Transform3",
+                "Reference":"sm_lib\/Frames and\nTransforms\/Rigid\nTransform",
+                "SID":"279",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/Left Wheel\/L_Wheel_motor",
+                "Reference":"sm_lib\/Joints\/Revolute Joint",
+                "SID":"125",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/Left Wheel\/Left_motor_1_RIGID\/ReferenceFrame",
+                "Reference":"sm_lib\/Frames and\nTransforms\/Reference\nFrame",
+                "SID":"318",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/Left Wheel\/Left_motor_1_RIGID\/Solid",
+                "Reference":"sm_lib\/Body Elements\/File Solid",
+                "SID":"319",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/Left Wheel\/Left_motor_1_RIGID\/Transform",
+                "Reference":"sm_lib\/Frames and\nTransforms\/Rigid\nTransform",
+                "SID":"320",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/Left Wheel\/Left_motor_1_RIGID\/Transform1",
+                "Reference":"sm_lib\/Frames and\nTransforms\/Rigid\nTransform",
+                "SID":"321",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/Left Wheel\/Left_motor_shaft_1_RIGID\/ReferenceFrame",
+                "Reference":"sm_lib\/Frames and\nTransforms\/Reference\nFrame",
+                "SID":"324",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/Left Wheel\/Left_motor_shaft_1_RIGID\/Solid",
+                "Reference":"sm_lib\/Body Elements\/File Solid",
+                "SID":"325",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/Left Wheel\/Left_motor_shaft_1_RIGID\/Transform",
+                "Reference":"sm_lib\/Frames and\nTransforms\/Rigid\nTransform",
+                "SID":"326",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/Left Wheel\/Left_motor_shaft_1_RIGID\/Transform1",
+                "Reference":"sm_lib\/Frames and\nTransforms\/Rigid\nTransform",
+                "SID":"327",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/Left Wheel\/Left_motor_shaft_1_RIGID\/Transform2",
+                "Reference":"sm_lib\/Frames and\nTransforms\/Rigid\nTransform",
+                "SID":"328",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/Left Wheel\/Left_wheel_1_RIGID\/ReferenceFrame",
+                "Reference":"sm_lib\/Frames and\nTransforms\/Reference\nFrame",
+                "SID":"370",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/Left Wheel\/Left_wheel_1_RIGID\/Solid",
+                "Reference":"sm_lib\/Body Elements\/File Solid",
+                "SID":"371",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/Left Wheel\/Left_wheel_1_RIGID\/Transform",
+                "Reference":"sm_lib\/Frames and\nTransforms\/Rigid\nTransform",
+                "SID":"372",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/Left Wheel\/M3_shaft_screw_2_RIGID\/ReferenceFrame",
+                "Reference":"sm_lib\/Frames and\nTransforms\/Reference\nFrame",
+                "SID":"540",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/Left Wheel\/M3_shaft_screw_2_RIGID\/Solid",
+                "Reference":"sm_lib\/Body Elements\/File Solid",
+                "SID":"541",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/Left Wheel\/M3_shaft_screw_2_RIGID\/Transform",
+                "Reference":"sm_lib\/Frames and\nTransforms\/Rigid\nTransform",
+                "SID":"542",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/Left Wheel\/M3_shaft_screw_2_RIGID\/Transform1",
+                "Reference":"sm_lib\/Frames and\nTransforms\/Rigid\nTransform",
+                "SID":"543",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/Left Wheel\/Planar12",
+                "Reference":"sm_lib\/Joints\/Planar Joint",
+                "SID":"87",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/Left_knee\/Cylindrical1",
+                "Reference":"sm_lib\/Joints\/Cylindrical\nJoint",
+                "SID":"10",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/Left_knee\/Cylindrical7",
+                "Reference":"sm_lib\/Joints\/Cylindrical\nJoint",
+                "SID":"26",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/Left_knee\/L_knee_motor",
+                "Reference":"sm_lib\/Joints\/Revolute Joint",
+                "SID":"120",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/Left_knee\/Left_joint_connect_1_RIGID\/ReferenceFrame",
+                "Reference":"sm_lib\/Frames and\nTransforms\/Reference\nFrame",
+                "SID":"288",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/Left_knee\/Left_joint_connect_1_RIGID\/Solid",
+                "Reference":"sm_lib\/Body Elements\/File Solid",
+                "SID":"289",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/Left_knee\/Left_joint_connect_1_RIGID\/Transform",
+                "Reference":"sm_lib\/Frames and\nTransforms\/Rigid\nTransform",
+                "SID":"290",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/Left_knee\/Left_joint_connect_1_RIGID\/Transform1",
+                "Reference":"sm_lib\/Frames and\nTransforms\/Rigid\nTransform",
+                "SID":"291",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/Left_knee\/Left_joint_connect_1_RIGID\/Transform2",
+                "Reference":"sm_lib\/Frames and\nTransforms\/Rigid\nTransform",
+                "SID":"292",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/Left_knee\/Left_joint_connect_1_RIGID\/Transform3",
+                "Reference":"sm_lib\/Frames and\nTransforms\/Rigid\nTransform",
+                "SID":"293",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/Left_knee\/Left_knee_bone_1_RIGID\/ReferenceFrame",
+                "Reference":"sm_lib\/Frames and\nTransforms\/Reference\nFrame",
+                "SID":"298",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/Left_knee\/Left_knee_bone_1_RIGID\/Solid",
+                "Reference":"sm_lib\/Body Elements\/File Solid",
+                "SID":"299",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/Left_knee\/Left_knee_bone_1_RIGID\/Transform",
+                "Reference":"sm_lib\/Frames and\nTransforms\/Rigid\nTransform",
+                "SID":"300",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/Left_knee\/Left_knee_bone_1_RIGID\/Transform1",
+                "Reference":"sm_lib\/Frames and\nTransforms\/Rigid\nTransform",
+                "SID":"301",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/Left_knee\/Left_knee_bone_1_RIGID\/Transform2",
+                "Reference":"sm_lib\/Frames and\nTransforms\/Rigid\nTransform",
+                "SID":"302",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/Left_knee\/Left_knee_bone_1_RIGID\/Transform3",
+                "Reference":"sm_lib\/Frames and\nTransforms\/Rigid\nTransform",
+                "SID":"303",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/Left_knee\/Left_knee_bone_1_RIGID\/Transform4",
+                "Reference":"sm_lib\/Frames and\nTransforms\/Rigid\nTransform",
+                "SID":"304",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/Left_knee\/Left_knee_bone_1_RIGID\/Transform5",
+                "Reference":"sm_lib\/Frames and\nTransforms\/Rigid\nTransform",
+                "SID":"305",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/Left_knee\/Left_knee_bone_1_RIGID\/Transform6",
+                "Reference":"sm_lib\/Frames and\nTransforms\/Rigid\nTransform",
+                "SID":"306",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/Left_knee\/Left_knee_bone_1_RIGID\/Transform7",
+                "Reference":"sm_lib\/Frames and\nTransforms\/Rigid\nTransform",
+                "SID":"307",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/Left_knee\/Left_knee_bone_1_RIGID\/Transform8",
+                "Reference":"sm_lib\/Frames and\nTransforms\/Rigid\nTransform",
+                "SID":"308",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/Left_knee\/M2dot5_Screw_DC_3_RIGID\/ReferenceFrame",
+                "Reference":"sm_lib\/Frames and\nTransforms\/Reference\nFrame",
+                "SID":"382",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/Left_knee\/M2dot5_Screw_DC_3_RIGID\/Solid",
+                "Reference":"sm_lib\/Body Elements\/File Solid",
+                "SID":"383",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/Left_knee\/M2dot5_Screw_DC_3_RIGID\/Transform",
+                "Reference":"sm_lib\/Frames and\nTransforms\/Rigid\nTransform",
+                "SID":"384",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/Left_knee\/M2dot5_Screw_DC_4_RIGID\/ReferenceFrame",
+                "Reference":"sm_lib\/Frames and\nTransforms\/Reference\nFrame",
+                "SID":"386",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/Left_knee\/M2dot5_Screw_DC_4_RIGID\/Solid",
+                "Reference":"sm_lib\/Body Elements\/File Solid",
+                "SID":"387",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/Left_knee\/M2dot5_Screw_DC_4_RIGID\/Transform",
+                "Reference":"sm_lib\/Frames and\nTransforms\/Rigid\nTransform",
+                "SID":"388",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/Left_knee\/M2dot5_Screw_withBolt_5_RIGID\/ReferenceFrame",
+                "Reference":"sm_lib\/Frames and\nTransforms\/Reference\nFrame",
+                "SID":"480",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/Left_knee\/M2dot5_Screw_withBolt_5_RIGID\/Solid",
+                "Reference":"sm_lib\/Body Elements\/File Solid",
+                "SID":"481",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/Left_knee\/M2dot5_Screw_withBolt_5_RIGID\/Transform",
+                "Reference":"sm_lib\/Frames and\nTransforms\/Rigid\nTransform",
+                "SID":"482",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/Left_knee\/M2dot5_Screw_withBolt_6_RIGID\/ReferenceFrame",
+                "Reference":"sm_lib\/Frames and\nTransforms\/Reference\nFrame",
+                "SID":"484",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/Left_knee\/M2dot5_Screw_withBolt_6_RIGID\/Solid",
+                "Reference":"sm_lib\/Body Elements\/File Solid",
+                "SID":"485",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/Left_knee\/M2dot5_Screw_withBolt_6_RIGID\/Transform",
+                "Reference":"sm_lib\/Frames and\nTransforms\/Rigid\nTransform",
+                "SID":"486",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/Left_knee\/M2dot5_Screw_withBolt_7_RIGID\/ReferenceFrame",
+                "Reference":"sm_lib\/Frames and\nTransforms\/Reference\nFrame",
+                "SID":"488",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/Left_knee\/M2dot5_Screw_withBolt_7_RIGID\/Solid",
+                "Reference":"sm_lib\/Body Elements\/File Solid",
+                "SID":"489",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/Left_knee\/M2dot5_Screw_withBolt_7_RIGID\/Transform",
+                "Reference":"sm_lib\/Frames and\nTransforms\/Rigid\nTransform",
+                "SID":"490",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/Left_knee\/M2dot5_Screw_withBolt_8_RIGID\/ReferenceFrame",
+                "Reference":"sm_lib\/Frames and\nTransforms\/Reference\nFrame",
+                "SID":"492",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/Left_knee\/M2dot5_Screw_withBolt_8_RIGID\/Solid",
+                "Reference":"sm_lib\/Body Elements\/File Solid",
+                "SID":"493",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/Left_knee\/M2dot5_Screw_withBolt_8_RIGID\/Transform",
+                "Reference":"sm_lib\/Frames and\nTransforms\/Rigid\nTransform",
+                "SID":"494",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/Left_knee\/M3_shaft_screw_8_RIGID\/ReferenceFrame",
+                "Reference":"sm_lib\/Frames and\nTransforms\/Reference\nFrame",
+                "SID":"564",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/Left_knee\/M3_shaft_screw_8_RIGID\/Solid",
+                "Reference":"sm_lib\/Body Elements\/File Solid",
+                "SID":"565",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/Left_knee\/M3_shaft_screw_8_RIGID\/Transform",
+                "Reference":"sm_lib\/Frames and\nTransforms\/Rigid\nTransform",
+                "SID":"566",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/Left_knee\/M3_shaft_screw_8_RIGID\/Transform1",
+                "Reference":"sm_lib\/Frames and\nTransforms\/Rigid\nTransform",
+                "SID":"567",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/Left_knee\/PID Controller",
+                "Reference":"slpidlib\/PID Controller",
+                "SID":"844",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/Left_knee\/PS-Simulink Converter",
+                "Reference":"nesl_utility\/PS-Simulink\nConverter",
+                "SID":"845",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/Left_knee\/Planar5",
+                "Reference":"sm_lib\/Joints\/Planar Joint",
+                "SID":"102",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/Left_knee\/Planar6",
+                "Reference":"sm_lib\/Joints\/Planar Joint",
+                "SID":"103",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/Left_knee\/Planar9",
+                "Reference":"sm_lib\/Joints\/Planar Joint",
+                "SID":"106",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/Left_knee\/Revolute18",
+                "Reference":"sm_lib\/Joints\/Revolute Joint",
+                "SID":"118",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/Left_knee\/Revolute19",
+                "Reference":"sm_lib\/Joints\/Revolute Joint",
+                "SID":"119",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/Left_knee\/Revolute20",
+                "Reference":"sm_lib\/Joints\/Revolute Joint",
+                "SID":"121",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/Left_knee\/Revolute21",
+                "Reference":"sm_lib\/Joints\/Revolute Joint",
+                "SID":"122",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/Left_knee\/Revolute22",
+                "Reference":"sm_lib\/Joints\/Revolute Joint",
+                "SID":"123",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/Left_knee\/Revolute23",
+                "Reference":"sm_lib\/Joints\/Revolute Joint",
+                "SID":"124",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/Left_knee\/Simulink-PS Converter",
+                "Reference":"nesl_utility\/Simulink-PS\nConverter",
+                "SID":"846",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/Left_knee\/Spatial Contact Force1",
+                "Reference":"sm_lib\/Forces and\nTorques\/Spatial\nContact Force",
+                "SID":"759",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/Left_knee\/Step_Left_motor_shaft1_1_RIGID\/ReferenceFrame",
+                "Reference":"sm_lib\/Frames and\nTransforms\/Reference\nFrame",
+                "SID":"668",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/Left_knee\/Step_Left_motor_shaft1_1_RIGID\/Solid",
+                "Reference":"sm_lib\/Body Elements\/File Solid",
+                "SID":"669",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/Left_knee\/Step_Left_motor_shaft1_1_RIGID\/Transform",
+                "Reference":"sm_lib\/Frames and\nTransforms\/Rigid\nTransform",
+                "SID":"670",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/Left_knee\/Step_Left_motor_shaft1_1_RIGID\/Transform1",
+                "Reference":"sm_lib\/Frames and\nTransforms\/Rigid\nTransform",
+                "SID":"671",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/Left_knee\/Step_Left_motor_shaft1_1_RIGID\/Transform2",
+                "Reference":"sm_lib\/Frames and\nTransforms\/Rigid\nTransform",
+                "SID":"672",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/PID Controller",
+                "Reference":"slpidlib\/PID Controller",
+                "SID":"810",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/PID Controller1",
+                "Reference":"slpidlib\/PID Controller",
+                "SID":"811",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/PS-Simulink Converter",
+                "Reference":"nesl_utility\/PS-Simulink\nConverter",
+                "SID":"816",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/PlaneOrientation",
+                "Reference":"sm_lib\/Frames and\nTransforms\/Rigid\nTransform",
+                "SID":"715",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/R_shoulder\/Coupling_shoulder_right_1_RIGID\/ReferenceFrame",
+                "Reference":"sm_lib\/Frames and\nTransforms\/Reference\nFrame",
+                "SID":"216",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/R_shoulder\/Coupling_shoulder_right_1_RIGID\/Solid",
+                "Reference":"sm_lib\/Body Elements\/File Solid",
+                "SID":"217",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/R_shoulder\/Coupling_shoulder_right_1_RIGID\/Transform",
+                "Reference":"sm_lib\/Frames and\nTransforms\/Rigid\nTransform",
+                "SID":"218",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/R_shoulder\/Coupling_shoulder_right_1_RIGID\/Transform1",
+                "Reference":"sm_lib\/Frames and\nTransforms\/Rigid\nTransform",
+                "SID":"219",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/R_shoulder\/Coupling_shoulder_right_1_RIGID\/Transform2",
+                "Reference":"sm_lib\/Frames and\nTransforms\/Rigid\nTransform",
+                "SID":"220",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/R_shoulder\/Coupling_shoulder_right_1_RIGID\/Transform3",
+                "Reference":"sm_lib\/Frames and\nTransforms\/Rigid\nTransform",
+                "SID":"221",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/R_shoulder\/Coupling_shoulder_right_1_RIGID\/Transform4",
+                "Reference":"sm_lib\/Frames and\nTransforms\/Rigid\nTransform",
+                "SID":"222",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/R_shoulder\/Cylindrical",
+                "Reference":"sm_lib\/Joints\/Cylindrical\nJoint",
+                "SID":"9",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/R_shoulder\/Cylindrical11",
+                "Reference":"sm_lib\/Joints\/Cylindrical\nJoint",
+                "SID":"12",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/R_shoulder\/Cylindrical13",
+                "Reference":"sm_lib\/Joints\/Cylindrical\nJoint",
+                "SID":"14",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/R_shoulder\/Cylindrical14",
+                "Reference":"sm_lib\/Joints\/Cylindrical\nJoint",
+                "SID":"15",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/R_shoulder\/Cylindrical15",
+                "Reference":"sm_lib\/Joints\/Cylindrical\nJoint",
+                "SID":"16",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/R_shoulder\/Cylindrical9",
+                "Reference":"sm_lib\/Joints\/Cylindrical\nJoint",
+                "SID":"28",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/R_shoulder\/M2dot5_Screw_Stepper_1_RIGID\/ReferenceFrame",
+                "Reference":"sm_lib\/Frames and\nTransforms\/Reference\nFrame",
+                "SID":"390",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/R_shoulder\/M2dot5_Screw_Stepper_1_RIGID\/Solid",
+                "Reference":"sm_lib\/Body Elements\/File Solid",
+                "SID":"391",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/R_shoulder\/M2dot5_Screw_Stepper_1_RIGID\/Transform",
+                "Reference":"sm_lib\/Frames and\nTransforms\/Rigid\nTransform",
+                "SID":"392",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/R_shoulder\/M2dot5_Screw_Stepper_2_RIGID\/ReferenceFrame",
+                "Reference":"sm_lib\/Frames and\nTransforms\/Reference\nFrame",
+                "SID":"394",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/R_shoulder\/M2dot5_Screw_Stepper_2_RIGID\/Solid",
+                "Reference":"sm_lib\/Body Elements\/File Solid",
+                "SID":"395",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/R_shoulder\/M2dot5_Screw_Stepper_2_RIGID\/Transform",
+                "Reference":"sm_lib\/Frames and\nTransforms\/Rigid\nTransform",
+                "SID":"396",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/R_shoulder\/M2dot5_Screw_Stepper_3_RIGID\/ReferenceFrame",
+                "Reference":"sm_lib\/Frames and\nTransforms\/Reference\nFrame",
+                "SID":"398",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/R_shoulder\/M2dot5_Screw_Stepper_3_RIGID\/Solid",
+                "Reference":"sm_lib\/Body Elements\/File Solid",
+                "SID":"399",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/R_shoulder\/M2dot5_Screw_Stepper_3_RIGID\/Transform",
+                "Reference":"sm_lib\/Frames and\nTransforms\/Rigid\nTransform",
+                "SID":"400",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/R_shoulder\/M2dot5_Screw_Stepper_4_RIGID\/ReferenceFrame",
+                "Reference":"sm_lib\/Frames and\nTransforms\/Reference\nFrame",
+                "SID":"402",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/R_shoulder\/M2dot5_Screw_Stepper_4_RIGID\/Solid",
+                "Reference":"sm_lib\/Body Elements\/File Solid",
+                "SID":"403",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/R_shoulder\/M2dot5_Screw_Stepper_4_RIGID\/Transform",
+                "Reference":"sm_lib\/Frames and\nTransforms\/Rigid\nTransform",
+                "SID":"404",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/R_shoulder\/M2dot5_Screw_withBolt_10_RIGID\/ReferenceFrame",
+                "Reference":"sm_lib\/Frames and\nTransforms\/Reference\nFrame",
+                "SID":"422",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/R_shoulder\/M2dot5_Screw_withBolt_10_RIGID\/Solid",
+                "Reference":"sm_lib\/Body Elements\/File Solid",
+                "SID":"423",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/R_shoulder\/M2dot5_Screw_withBolt_10_RIGID\/Transform",
+                "Reference":"sm_lib\/Frames and\nTransforms\/Rigid\nTransform",
+                "SID":"424",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/R_shoulder\/M2dot5_Screw_withBolt_10_RIGID\/Transform1",
+                "Reference":"sm_lib\/Frames and\nTransforms\/Rigid\nTransform",
+                "SID":"425",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/R_shoulder\/M2dot5_Screw_withBolt_11_RIGID\/ReferenceFrame",
+                "Reference":"sm_lib\/Frames and\nTransforms\/Reference\nFrame",
+                "SID":"428",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/R_shoulder\/M2dot5_Screw_withBolt_11_RIGID\/Solid",
+                "Reference":"sm_lib\/Body Elements\/File Solid",
+                "SID":"429",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/R_shoulder\/M2dot5_Screw_withBolt_11_RIGID\/Transform",
+                "Reference":"sm_lib\/Frames and\nTransforms\/Rigid\nTransform",
+                "SID":"430",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/R_shoulder\/M2dot5_Screw_withBolt_11_RIGID\/Transform1",
+                "Reference":"sm_lib\/Frames and\nTransforms\/Rigid\nTransform",
+                "SID":"431",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/R_shoulder\/M2dot5_Screw_withBolt_12_RIGID\/ReferenceFrame",
+                "Reference":"sm_lib\/Frames and\nTransforms\/Reference\nFrame",
+                "SID":"434",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/R_shoulder\/M2dot5_Screw_withBolt_12_RIGID\/Solid",
+                "Reference":"sm_lib\/Body Elements\/File Solid",
+                "SID":"435",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/R_shoulder\/M2dot5_Screw_withBolt_12_RIGID\/Transform",
+                "Reference":"sm_lib\/Frames and\nTransforms\/Rigid\nTransform",
+                "SID":"436",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/R_shoulder\/M2dot5_Screw_withBolt_12_RIGID\/Transform1",
+                "Reference":"sm_lib\/Frames and\nTransforms\/Rigid\nTransform",
+                "SID":"437",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/R_shoulder\/M2dot5_Screw_withBolt_9_RIGID\/ReferenceFrame",
+                "Reference":"sm_lib\/Frames and\nTransforms\/Reference\nFrame",
+                "SID":"496",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/R_shoulder\/M2dot5_Screw_withBolt_9_RIGID\/Solid",
+                "Reference":"sm_lib\/Body Elements\/File Solid",
+                "SID":"497",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/R_shoulder\/M2dot5_Screw_withBolt_9_RIGID\/Transform",
+                "Reference":"sm_lib\/Frames and\nTransforms\/Rigid\nTransform",
+                "SID":"498",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/R_shoulder\/M2dot5_Screw_withBolt_9_RIGID\/Transform1",
+                "Reference":"sm_lib\/Frames and\nTransforms\/Rigid\nTransform",
+                "SID":"499",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/R_shoulder\/M3_shaft_screw_5_RIGID\/ReferenceFrame",
+                "Reference":"sm_lib\/Frames and\nTransforms\/Reference\nFrame",
+                "SID":"546",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/R_shoulder\/M3_shaft_screw_5_RIGID\/Solid",
+                "Reference":"sm_lib\/Body Elements\/File Solid",
+                "SID":"547",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/R_shoulder\/M3_shaft_screw_5_RIGID\/Transform",
+                "Reference":"sm_lib\/Frames and\nTransforms\/Rigid\nTransform",
+                "SID":"548",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/R_shoulder\/M3_shaft_screw_5_RIGID\/Transform1",
+                "Reference":"sm_lib\/Frames and\nTransforms\/Rigid\nTransform",
+                "SID":"549",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/R_shoulder\/PID Controller",
+                "Reference":"slpidlib\/PID Controller",
+                "SID":"830",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/R_shoulder\/PS-Simulink Converter",
+                "Reference":"nesl_utility\/PS-Simulink\nConverter",
+                "SID":"829",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/R_shoulder\/Planar11",
+                "Reference":"sm_lib\/Joints\/Planar Joint",
+                "SID":"86",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/R_shoulder\/Planar13",
+                "Reference":"sm_lib\/Joints\/Planar Joint",
+                "SID":"88",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/R_shoulder\/Planar14",
+                "Reference":"sm_lib\/Joints\/Planar Joint",
+                "SID":"89",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/R_shoulder\/Planar15",
+                "Reference":"sm_lib\/Joints\/Planar Joint",
+                "SID":"90",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/R_shoulder\/Planar16",
+                "Reference":"sm_lib\/Joints\/Planar Joint",
+                "SID":"91",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/R_shoulder\/Planar17",
+                "Reference":"sm_lib\/Joints\/Planar Joint",
+                "SID":"92",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/R_shoulder\/R_Shoulder_motor",
+                "Reference":"sm_lib\/Joints\/Revolute Joint",
+                "SID":"132",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/R_shoulder\/Revolute25",
+                "Reference":"sm_lib\/Joints\/Revolute Joint",
+                "SID":"126",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/R_shoulder\/Revolute26",
+                "Reference":"sm_lib\/Joints\/Revolute Joint",
+                "SID":"127",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/R_shoulder\/Revolute4",
+                "Reference":"sm_lib\/Joints\/Revolute Joint",
+                "SID":"140",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/R_shoulder\/Revolute5",
+                "Reference":"sm_lib\/Joints\/Revolute Joint",
+                "SID":"141",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/R_shoulder\/Right_shoulder_bone_1_RIGID\/ReferenceFrame",
+                "Reference":"sm_lib\/Frames and\nTransforms\/Reference\nFrame",
+                "SID":"614",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/R_shoulder\/Right_shoulder_bone_1_RIGID\/Solid",
+                "Reference":"sm_lib\/Body Elements\/File Solid",
+                "SID":"615",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/R_shoulder\/Right_shoulder_bone_1_RIGID\/Transform",
+                "Reference":"sm_lib\/Frames and\nTransforms\/Rigid\nTransform",
+                "SID":"616",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/R_shoulder\/Right_shoulder_bone_1_RIGID\/Transform1",
+                "Reference":"sm_lib\/Frames and\nTransforms\/Rigid\nTransform",
+                "SID":"617",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/R_shoulder\/Right_shoulder_bone_1_RIGID\/Transform2",
+                "Reference":"sm_lib\/Frames and\nTransforms\/Rigid\nTransform",
+                "SID":"618",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/R_shoulder\/Right_shoulder_bone_1_RIGID\/Transform3",
+                "Reference":"sm_lib\/Frames and\nTransforms\/Rigid\nTransform",
+                "SID":"619",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/R_shoulder\/Right_shoulder_bone_1_RIGID\/Transform4",
+                "Reference":"sm_lib\/Frames and\nTransforms\/Rigid\nTransform",
+                "SID":"620",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/R_shoulder\/Right_shoulder_bone_1_RIGID\/Transform5",
+                "Reference":"sm_lib\/Frames and\nTransforms\/Rigid\nTransform",
+                "SID":"621",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/R_shoulder\/Right_shoulder_bone_1_RIGID\/Transform6",
+                "Reference":"sm_lib\/Frames and\nTransforms\/Rigid\nTransform",
+                "SID":"622",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/R_shoulder\/Right_shoulder_bone_1_RIGID\/Transform7",
+                "Reference":"sm_lib\/Frames and\nTransforms\/Rigid\nTransform",
+                "SID":"623",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/R_shoulder\/Right_shoulder_bone_1_RIGID\/Transform8",
+                "Reference":"sm_lib\/Frames and\nTransforms\/Rigid\nTransform",
+                "SID":"624",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/R_shoulder\/Right_shoulder_joint_connect_1_RIGID\/ReferenceFrame",
+                "Reference":"sm_lib\/Frames and\nTransforms\/Reference\nFrame",
+                "SID":"634",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/R_shoulder\/Right_shoulder_joint_connect_1_RIGID\/Solid",
+                "Reference":"sm_lib\/Body Elements\/File Solid",
+                "SID":"635",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/R_shoulder\/Right_shoulder_joint_connect_1_RIGID\/Transform",
+                "Reference":"sm_lib\/Frames and\nTransforms\/Rigid\nTransform",
+                "SID":"636",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/R_shoulder\/Right_shoulder_joint_connect_1_RIGID\/Transform1",
+                "Reference":"sm_lib\/Frames and\nTransforms\/Rigid\nTransform",
+                "SID":"637",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/R_shoulder\/Right_shoulder_joint_connect_1_RIGID\/Transform2",
+                "Reference":"sm_lib\/Frames and\nTransforms\/Rigid\nTransform",
+                "SID":"638",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/R_shoulder\/Right_shoulder_joint_connect_1_RIGID\/Transform3",
+                "Reference":"sm_lib\/Frames and\nTransforms\/Rigid\nTransform",
+                "SID":"639",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/R_shoulder\/Right_shoulder_joint_connect_1_RIGID\/Transform4",
+                "Reference":"sm_lib\/Frames and\nTransforms\/Rigid\nTransform",
+                "SID":"640",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/R_shoulder\/Right_shoulder_joint_connect_1_RIGID\/Transform5",
+                "Reference":"sm_lib\/Frames and\nTransforms\/Rigid\nTransform",
+                "SID":"641",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/R_shoulder\/Right_shoulder_joint_connect_1_RIGID\/Transform6",
+                "Reference":"sm_lib\/Frames and\nTransforms\/Rigid\nTransform",
+                "SID":"642",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/R_shoulder\/Right_shoulder_joint_connect_1_RIGID\/Transform7",
+                "Reference":"sm_lib\/Frames and\nTransforms\/Rigid\nTransform",
+                "SID":"643",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/R_shoulder\/Simulink-PS Converter",
+                "Reference":"nesl_utility\/Simulink-PS\nConverter",
+                "SID":"831",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/R_shoulder\/Step_Right_motor2_1_RIGID\/ReferenceFrame",
+                "Reference":"sm_lib\/Frames and\nTransforms\/Reference\nFrame",
+                "SID":"690",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/R_shoulder\/Step_Right_motor2_1_RIGID\/Solid",
+                "Reference":"sm_lib\/Body Elements\/File Solid",
+                "SID":"691",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/R_shoulder\/Step_Right_motor2_1_RIGID\/Transform",
+                "Reference":"sm_lib\/Frames and\nTransforms\/Rigid\nTransform",
+                "SID":"692",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/R_shoulder\/Step_Right_motor2_1_RIGID\/Transform1",
+                "Reference":"sm_lib\/Frames and\nTransforms\/Rigid\nTransform",
+                "SID":"693",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/R_shoulder\/Step_Right_motor_shaft2_1_RIGID\/ReferenceFrame",
+                "Reference":"sm_lib\/Frames and\nTransforms\/Reference\nFrame",
+                "SID":"705",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/R_shoulder\/Step_Right_motor_shaft2_1_RIGID\/Solid",
+                "Reference":"sm_lib\/Body Elements\/File Solid",
+                "SID":"706",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/R_shoulder\/Step_Right_motor_shaft2_1_RIGID\/Transform",
+                "Reference":"sm_lib\/Frames and\nTransforms\/Rigid\nTransform",
+                "SID":"707",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/R_shoulder\/Step_Right_motor_shaft2_1_RIGID\/Transform1",
+                "Reference":"sm_lib\/Frames and\nTransforms\/Rigid\nTransform",
+                "SID":"708",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/R_shoulder\/Step_Right_motor_shaft2_1_RIGID\/Transform2",
+                "Reference":"sm_lib\/Frames and\nTransforms\/Rigid\nTransform",
+                "SID":"709",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/Right wheel\/Cylindrical3",
+                "Reference":"sm_lib\/Joints\/Cylindrical\nJoint",
+                "SID":"22",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/Right wheel\/Cylindrical4",
+                "Reference":"sm_lib\/Joints\/Cylindrical\nJoint",
+                "SID":"23",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/Right wheel\/Hex1_1_RIGID\/ReferenceFrame",
+                "Reference":"sm_lib\/Frames and\nTransforms\/Reference\nFrame",
+                "SID":"264",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/Right wheel\/Hex1_1_RIGID\/Solid",
+                "Reference":"sm_lib\/Body Elements\/File Solid",
+                "SID":"265",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/Right wheel\/Hex1_1_RIGID\/Transform",
+                "Reference":"sm_lib\/Frames and\nTransforms\/Rigid\nTransform",
+                "SID":"266",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/Right wheel\/Hex1_1_RIGID\/Transform1",
+                "Reference":"sm_lib\/Frames and\nTransforms\/Rigid\nTransform",
+                "SID":"267",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/Right wheel\/Hex1_1_RIGID\/Transform2",
+                "Reference":"sm_lib\/Frames and\nTransforms\/Rigid\nTransform",
+                "SID":"268",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/Right wheel\/Hex1_1_RIGID\/Transform3",
+                "Reference":"sm_lib\/Frames and\nTransforms\/Rigid\nTransform",
+                "SID":"269",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/Right wheel\/M3_shaft_screw_1_RIGID\/ReferenceFrame",
+                "Reference":"sm_lib\/Frames and\nTransforms\/Reference\nFrame",
+                "SID":"534",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/Right wheel\/M3_shaft_screw_1_RIGID\/Solid",
+                "Reference":"sm_lib\/Body Elements\/File Solid",
+                "SID":"535",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/Right wheel\/M3_shaft_screw_1_RIGID\/Transform",
+                "Reference":"sm_lib\/Frames and\nTransforms\/Rigid\nTransform",
+                "SID":"536",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/Right wheel\/M3_shaft_screw_1_RIGID\/Transform1",
+                "Reference":"sm_lib\/Frames and\nTransforms\/Rigid\nTransform",
+                "SID":"537",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/Right wheel\/Planar19",
+                "Reference":"sm_lib\/Joints\/Planar Joint",
+                "SID":"94",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/Right wheel\/Planar8",
+                "Reference":"sm_lib\/Joints\/Planar Joint",
+                "SID":"105",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/Right wheel\/R_Wheel_motor",
+                "Reference":"sm_lib\/Joints\/Revolute Joint",
+                "SID":"133",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/Right wheel\/Right_motor_1_RIGID\/ReferenceFrame",
+                "Reference":"sm_lib\/Frames and\nTransforms\/Reference\nFrame",
+                "SID":"600",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/Right wheel\/Right_motor_1_RIGID\/Solid",
+                "Reference":"sm_lib\/Body Elements\/File Solid",
+                "SID":"601",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/Right wheel\/Right_motor_1_RIGID\/Transform",
+                "Reference":"sm_lib\/Frames and\nTransforms\/Rigid\nTransform",
+                "SID":"602",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/Right wheel\/Right_motor_1_RIGID\/Transform1",
+                "Reference":"sm_lib\/Frames and\nTransforms\/Rigid\nTransform",
+                "SID":"603",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/Right wheel\/Right_motor_shaft_1_RIGID\/ReferenceFrame",
+                "Reference":"sm_lib\/Frames and\nTransforms\/Reference\nFrame",
+                "SID":"606",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/Right wheel\/Right_motor_shaft_1_RIGID\/Solid",
+                "Reference":"sm_lib\/Body Elements\/File Solid",
+                "SID":"607",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/Right wheel\/Right_motor_shaft_1_RIGID\/Transform",
+                "Reference":"sm_lib\/Frames and\nTransforms\/Rigid\nTransform",
+                "SID":"608",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/Right wheel\/Right_motor_shaft_1_RIGID\/Transform1",
+                "Reference":"sm_lib\/Frames and\nTransforms\/Rigid\nTransform",
+                "SID":"609",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/Right wheel\/Right_motor_shaft_1_RIGID\/Transform2",
+                "Reference":"sm_lib\/Frames and\nTransforms\/Rigid\nTransform",
+                "SID":"610",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/Right wheel\/Right_wheel_1_RIGID\/ReferenceFrame",
+                "Reference":"sm_lib\/Frames and\nTransforms\/Reference\nFrame",
+                "SID":"652",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/Right wheel\/Right_wheel_1_RIGID\/Solid",
+                "Reference":"sm_lib\/Body Elements\/File Solid",
+                "SID":"653",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/Right wheel\/Right_wheel_1_RIGID\/Transform",
+                "Reference":"sm_lib\/Frames and\nTransforms\/Rigid\nTransform",
+                "SID":"654",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/Right_knee\/Cylindrical12",
+                "Reference":"sm_lib\/Joints\/Cylindrical\nJoint",
+                "SID":"13",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/Right_knee\/Cylindrical8",
+                "Reference":"sm_lib\/Joints\/Cylindrical\nJoint",
+                "SID":"27",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/Right_knee\/M2dot5_Screw_DC_1_RIGID\/ReferenceFrame",
+                "Reference":"sm_lib\/Frames and\nTransforms\/Reference\nFrame",
+                "SID":"374",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/Right_knee\/M2dot5_Screw_DC_1_RIGID\/Solid",
+                "Reference":"sm_lib\/Body Elements\/File Solid",
+                "SID":"375",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/Right_knee\/M2dot5_Screw_DC_1_RIGID\/Transform",
+                "Reference":"sm_lib\/Frames and\nTransforms\/Rigid\nTransform",
+                "SID":"376",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/Right_knee\/M2dot5_Screw_DC_2_RIGID\/ReferenceFrame",
+                "Reference":"sm_lib\/Frames and\nTransforms\/Reference\nFrame",
+                "SID":"378",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/Right_knee\/M2dot5_Screw_DC_2_RIGID\/Solid",
+                "Reference":"sm_lib\/Body Elements\/File Solid",
+                "SID":"379",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/Right_knee\/M2dot5_Screw_DC_2_RIGID\/Transform",
+                "Reference":"sm_lib\/Frames and\nTransforms\/Rigid\nTransform",
+                "SID":"380",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/Right_knee\/M2dot5_Screw_withBolt_1_RIGID\/ReferenceFrame",
+                "Reference":"sm_lib\/Frames and\nTransforms\/Reference\nFrame",
+                "SID":"464",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/Right_knee\/M2dot5_Screw_withBolt_1_RIGID\/Solid",
+                "Reference":"sm_lib\/Body Elements\/File Solid",
+                "SID":"465",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/Right_knee\/M2dot5_Screw_withBolt_1_RIGID\/Transform",
+                "Reference":"sm_lib\/Frames and\nTransforms\/Rigid\nTransform",
+                "SID":"466",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/Right_knee\/M2dot5_Screw_withBolt_2_RIGID\/ReferenceFrame",
+                "Reference":"sm_lib\/Frames and\nTransforms\/Reference\nFrame",
+                "SID":"468",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/Right_knee\/M2dot5_Screw_withBolt_2_RIGID\/Solid",
+                "Reference":"sm_lib\/Body Elements\/File Solid",
+                "SID":"469",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/Right_knee\/M2dot5_Screw_withBolt_2_RIGID\/Transform",
+                "Reference":"sm_lib\/Frames and\nTransforms\/Rigid\nTransform",
+                "SID":"470",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/Right_knee\/M2dot5_Screw_withBolt_3_RIGID\/ReferenceFrame",
+                "Reference":"sm_lib\/Frames and\nTransforms\/Reference\nFrame",
+                "SID":"472",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/Right_knee\/M2dot5_Screw_withBolt_3_RIGID\/Solid",
+                "Reference":"sm_lib\/Body Elements\/File Solid",
+                "SID":"473",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/Right_knee\/M2dot5_Screw_withBolt_3_RIGID\/Transform",
+                "Reference":"sm_lib\/Frames and\nTransforms\/Rigid\nTransform",
+                "SID":"474",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/Right_knee\/M2dot5_Screw_withBolt_4_RIGID\/ReferenceFrame",
+                "Reference":"sm_lib\/Frames and\nTransforms\/Reference\nFrame",
+                "SID":"476",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/Right_knee\/M2dot5_Screw_withBolt_4_RIGID\/Solid",
+                "Reference":"sm_lib\/Body Elements\/File Solid",
+                "SID":"477",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/Right_knee\/M2dot5_Screw_withBolt_4_RIGID\/Transform",
+                "Reference":"sm_lib\/Frames and\nTransforms\/Rigid\nTransform",
+                "SID":"478",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/Right_knee\/M3_shaft_screw_7_RIGID\/ReferenceFrame",
+                "Reference":"sm_lib\/Frames and\nTransforms\/Reference\nFrame",
+                "SID":"558",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/Right_knee\/M3_shaft_screw_7_RIGID\/Solid",
+                "Reference":"sm_lib\/Body Elements\/File Solid",
+                "SID":"559",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/Right_knee\/M3_shaft_screw_7_RIGID\/Transform",
+                "Reference":"sm_lib\/Frames and\nTransforms\/Rigid\nTransform",
+                "SID":"560",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/Right_knee\/M3_shaft_screw_7_RIGID\/Transform1",
+                "Reference":"sm_lib\/Frames and\nTransforms\/Rigid\nTransform",
+                "SID":"561",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/Right_knee\/PID Controller",
+                "Reference":"slpidlib\/PID Controller",
+                "SID":"839",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/Right_knee\/PS-Simulink Converter",
+                "Reference":"nesl_utility\/PS-Simulink\nConverter",
+                "SID":"840",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/Right_knee\/Planar10",
+                "Reference":"sm_lib\/Joints\/Planar Joint",
+                "SID":"85",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/Right_knee\/Planar18",
+                "Reference":"sm_lib\/Joints\/Planar Joint",
+                "SID":"93",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/Right_knee\/R_Knee_motor",
+                "Reference":"sm_lib\/Joints\/Revolute Joint",
+                "SID":"130",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/Right_knee\/Revolute32",
+                "Reference":"sm_lib\/Joints\/Revolute Joint",
+                "SID":"134",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/Right_knee\/Revolute33",
+                "Reference":"sm_lib\/Joints\/Revolute Joint",
+                "SID":"135",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/Right_knee\/Revolute34",
+                "Reference":"sm_lib\/Joints\/Revolute Joint",
+                "SID":"136",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/Right_knee\/Revolute35",
+                "Reference":"sm_lib\/Joints\/Revolute Joint",
+                "SID":"137",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/Right_knee\/Revolute36",
+                "Reference":"sm_lib\/Joints\/Revolute Joint",
+                "SID":"138",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/Right_knee\/Revolute37",
+                "Reference":"sm_lib\/Joints\/Revolute Joint",
+                "SID":"139",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/Right_knee\/Right_joint_connect_1_RIGID\/ReferenceFrame",
+                "Reference":"sm_lib\/Frames and\nTransforms\/Reference\nFrame",
+                "SID":"570",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/Right_knee\/Right_joint_connect_1_RIGID\/Solid",
+                "Reference":"sm_lib\/Body Elements\/File Solid",
+                "SID":"571",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/Right_knee\/Right_joint_connect_1_RIGID\/Transform",
+                "Reference":"sm_lib\/Frames and\nTransforms\/Rigid\nTransform",
+                "SID":"572",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/Right_knee\/Right_joint_connect_1_RIGID\/Transform1",
+                "Reference":"sm_lib\/Frames and\nTransforms\/Rigid\nTransform",
+                "SID":"573",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/Right_knee\/Right_joint_connect_1_RIGID\/Transform2",
+                "Reference":"sm_lib\/Frames and\nTransforms\/Rigid\nTransform",
+                "SID":"574",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/Right_knee\/Right_joint_connect_1_RIGID\/Transform3",
+                "Reference":"sm_lib\/Frames and\nTransforms\/Rigid\nTransform",
+                "SID":"575",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/Right_knee\/Right_knee_bone_1_RIGID\/ReferenceFrame",
+                "Reference":"sm_lib\/Frames and\nTransforms\/Reference\nFrame",
+                "SID":"580",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/Right_knee\/Right_knee_bone_1_RIGID\/Solid",
+                "Reference":"sm_lib\/Body Elements\/File Solid",
+                "SID":"581",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/Right_knee\/Right_knee_bone_1_RIGID\/Transform",
+                "Reference":"sm_lib\/Frames and\nTransforms\/Rigid\nTransform",
+                "SID":"582",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/Right_knee\/Right_knee_bone_1_RIGID\/Transform1",
+                "Reference":"sm_lib\/Frames and\nTransforms\/Rigid\nTransform",
+                "SID":"583",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/Right_knee\/Right_knee_bone_1_RIGID\/Transform2",
+                "Reference":"sm_lib\/Frames and\nTransforms\/Rigid\nTransform",
+                "SID":"584",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/Right_knee\/Right_knee_bone_1_RIGID\/Transform3",
+                "Reference":"sm_lib\/Frames and\nTransforms\/Rigid\nTransform",
+                "SID":"585",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/Right_knee\/Right_knee_bone_1_RIGID\/Transform4",
+                "Reference":"sm_lib\/Frames and\nTransforms\/Rigid\nTransform",
+                "SID":"586",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/Right_knee\/Right_knee_bone_1_RIGID\/Transform5",
+                "Reference":"sm_lib\/Frames and\nTransforms\/Rigid\nTransform",
+                "SID":"587",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/Right_knee\/Right_knee_bone_1_RIGID\/Transform6",
+                "Reference":"sm_lib\/Frames and\nTransforms\/Rigid\nTransform",
+                "SID":"588",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/Right_knee\/Right_knee_bone_1_RIGID\/Transform7",
+                "Reference":"sm_lib\/Frames and\nTransforms\/Rigid\nTransform",
+                "SID":"589",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/Right_knee\/Right_knee_bone_1_RIGID\/Transform8",
+                "Reference":"sm_lib\/Frames and\nTransforms\/Rigid\nTransform",
+                "SID":"590",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/Right_knee\/Simulink-PS Converter",
+                "Reference":"nesl_utility\/Simulink-PS\nConverter",
+                "SID":"841",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/Right_knee\/Spatial Contact Force",
+                "Reference":"sm_lib\/Forces and\nTorques\/Spatial\nContact Force",
+                "SID":"758",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/Right_knee\/Step_Right_motor1_2_RIGID\/ReferenceFrame",
+                "Reference":"sm_lib\/Frames and\nTransforms\/Reference\nFrame",
+                "SID":"684",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/Right_knee\/Step_Right_motor1_2_RIGID\/Solid",
+                "Reference":"sm_lib\/Body Elements\/File Solid",
+                "SID":"685",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/Right_knee\/Step_Right_motor1_2_RIGID\/Transform",
+                "Reference":"sm_lib\/Frames and\nTransforms\/Rigid\nTransform",
+                "SID":"686",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/Right_knee\/Step_Right_motor1_2_RIGID\/Transform1",
+                "Reference":"sm_lib\/Frames and\nTransforms\/Rigid\nTransform",
+                "SID":"687",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/Right_knee\/Step_Right_motor_shaft1_2_RIGID\/ReferenceFrame",
+                "Reference":"sm_lib\/Frames and\nTransforms\/Reference\nFrame",
+                "SID":"696",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/Right_knee\/Step_Right_motor_shaft1_2_RIGID\/Solid",
+                "Reference":"sm_lib\/Body Elements\/File Solid",
+                "SID":"697",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/Right_knee\/Step_Right_motor_shaft1_2_RIGID\/Transform",
+                "Reference":"sm_lib\/Frames and\nTransforms\/Rigid\nTransform",
+                "SID":"698",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/Right_knee\/Step_Right_motor_shaft1_2_RIGID\/Transform1",
+                "Reference":"sm_lib\/Frames and\nTransforms\/Rigid\nTransform",
+                "SID":"699",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/Right_knee\/Step_Right_motor_shaft1_2_RIGID\/Transform2",
+                "Reference":"sm_lib\/Frames and\nTransforms\/Rigid\nTransform",
+                "SID":"700",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/Robot_orientation",
+                "Reference":"sm_lib\/Frames and\nTransforms\/Rigid\nTransform",
+                "SID":"716",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/Simulink-PS Converter",
+                "Reference":"nesl_utility\/Simulink-PS\nConverter",
+                "SID":"812",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/Simulink-PS Converter1",
+                "Reference":"nesl_utility\/Simulink-PS\nConverter",
+                "SID":"813",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/SixDOF",
+                "Reference":"sm_lib\/Joints\/6-DOF Joint",
+                "SID":"153",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/Subsystem\/Contacts\/Spatial Contact Force",
+                "Reference":"sm_lib\/Forces and\nTorques\/Spatial\nContact Force",
+                "SID":"718",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/Subsystem\/Contacts\/Spatial Contact Force1",
+                "Reference":"sm_lib\/Forces and\nTorques\/Spatial\nContact Force",
+                "SID":"720",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/Subsystem\/Contacts\/Spatial Contact Force2",
+                "Reference":"sm_lib\/Forces and\nTorques\/Spatial\nContact Force",
+                "SID":"722",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/Subsystem\/Contacts\/Spatial Contact Force3",
+                "Reference":"sm_lib\/Forces and\nTorques\/Spatial\nContact Force",
+                "SID":"724",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/Subsystem\/Contacts\/Spatial Contact Force4",
+                "Reference":"sm_lib\/Forces and\nTorques\/Spatial\nContact Force",
+                "SID":"726",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/Subsystem\/Contacts\/Spatial Contact Force5",
+                "Reference":"sm_lib\/Forces and\nTorques\/Spatial\nContact Force",
+                "SID":"728",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/Subsystem\/Contacts\/Spatial Contact Force6",
+                "Reference":"sm_lib\/Forces and\nTorques\/Spatial\nContact Force",
+                "SID":"730",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/WORLD_settings\/MechanismConfiguration",
+                "Reference":"sm_lib\/Utilities\/Mechanism\nConfiguration",
+                "SID":"82",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/WORLD_settings\/Solver Configuration",
+                "Reference":"nesl_utility\/Solver\nConfiguration",
+                "SID":"713",
+                "Type":"LIBRARY_BLOCK"
+            },
+            {
+                "Path":"$bdroot\/WORLD_settings\/World",
+                "Reference":"sm_lib\/Frames and\nTransforms\/World Frame",
+                "SID":"163",
+                "Type":"LIBRARY_BLOCK"
+            }
+        ],
+        "PreCompExecutionDomainType":"Unset",
+        "SimulinkSubDomainType":"Simulink",
+        "SolverName":"VariableStepAuto"
+    }
+}
