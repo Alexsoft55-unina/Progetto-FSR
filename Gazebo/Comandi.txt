@@ -1,0 +1,2 @@
+source /opt/ros/humble/setup.bash
+~/Scrivania/fsr$ ros2 launch ./simula.launch.py
