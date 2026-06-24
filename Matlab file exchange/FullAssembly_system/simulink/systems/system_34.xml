@@ -1,0 +1,731 @@
+<?xml version="1.0" encoding="utf-8"?>
+<System>
+  <P Name="Location">[-8, -8, 1928, 1048]</P>
+  <Block BlockType="Reference" Name="ReferenceFrame" SID="298">
+    <PortCounts rconn="1"/>
+    <P Name="Position">[30, 480, 70, 520]</P>
+    <P Name="ZOrder">2</P>
+    <P Name="LibraryVersion">25.21</P>
+    <P Name="SourceBlock">sm_lib/Frames and
+Transforms/Reference
+Frame</P>
+    <P Name="SourceType">Reference
+Frame</P>
+    <InstanceData>
+      <P Name="LogSimulationData">off</P>
+      <P Name="SimscapeInstrumentationLogging">off</P>
+      <P Name="SimscapeInstrumentationVariables" Ref="bdmxdata:SimscapeInstrumentationVariables_298"/>
+    </InstanceData>
+  </Block>
+  <Block BlockType="Reference" Name="Solid" SID="299">
+    <PortCounts lconn="1" rconn="1"/>
+    <P Name="Position">[30, 380, 70, 420]</P>
+    <P Name="ZOrder">7</P>
+    <P Name="LibraryVersion">25.21</P>
+    <P Name="SourceBlock">sm_lib/Body Elements/File Solid</P>
+    <P Name="SourceType">File Solid</P>
+    <InstanceData>
+      <P Name="LogSimulationData">off</P>
+      <P Name="SimscapeInstrumentationLogging">off</P>
+      <P Name="SimscapeInstrumentationVariables" Ref="bdmxdata:SimscapeInstrumentationVariables_299"/>
+      <P Name="ExtGeomFileName">Left_knee_bone_Default_sldprt.STEP</P>
+      <P Name="UnitType">FromFile</P>
+      <P Name="ExtGeomFileUnits">m</P>
+      <P Name="StepReaderType">HEX</P>
+      <P Name="ExportConvexHullGeometry">on</P>
+      <P Name="InertiaType">Custom</P>
+      <P Name="BasedOnType">DensityFromFile</P>
+      <P Name="Density">1000</P>
+      <P Name="Density_conf">compiletime</P>
+      <P Name="DensityUnits">kg/m^3</P>
+      <P Name="Mass">smiData.Solid(30).mass</P>
+      <P Name="Mass_conf">compiletime</P>
+      <P Name="MassUnits">kg</P>
+      <P Name="CenterOfMass">smiData.Solid(30).CoM</P>
+      <P Name="CenterOfMass_conf">compiletime</P>
+      <P Name="CenterOfMassUnits">mm</P>
+      <P Name="MomentsOfInertia">smiData.Solid(30).MoI</P>
+      <P Name="MomentsOfInertia_conf">compiletime</P>
+      <P Name="MomentsOfInertiaUnits">kg*mm^2</P>
+      <P Name="ProductsOfInertia">smiData.Solid(30).PoI</P>
+      <P Name="ProductsOfInertia_conf">compiletime</P>
+      <P Name="ProductsOfInertiaUnits">kg*mm^2</P>
+      <P Name="GraphicType">FromGeometry</P>
+      <P Name="MarkerShape">Sphere</P>
+      <P Name="MarkerSize">10</P>
+      <P Name="MarkerSize_conf">compiletime</P>
+      <P Name="GraphicVisPropType">SimpleVisualProperties</P>
+      <P Name="GraphicDiffuseColor">[1.0 1.0 1.0]</P>
+      <P Name="GraphicDiffuseColor_conf">compiletime</P>
+      <P Name="GraphicOpacity">smiData.Solid(30).opacity</P>
+      <P Name="GraphicOpacity_conf">compiletime</P>
+      <P Name="GraphicSpecularColor">[0.5 0.5 0.5 1.0]</P>
+      <P Name="GraphicSpecularColor_conf">compiletime</P>
+      <P Name="GraphicAmbientColor">[0.15 0.15 0.15 1.0]</P>
+      <P Name="GraphicAmbientColor_conf">compiletime</P>
+      <P Name="GraphicEmissiveColor">[0.0 0.0 0.0 1.0]</P>
+      <P Name="GraphicEmissiveColor_conf">compiletime</P>
+      <P Name="GraphicShininess">75</P>
+      <P Name="GraphicShininess_conf">compiletime</P>
+      <P Name="DoExposeReferenceFrame">on</P>
+      <P Name="SerializedFrames">&lt;Frames/&gt;</P>
+    </InstanceData>
+  </Block>
+  <Block BlockType="Reference" Name="Transform" SID="300">
+    <PortCounts lconn="1" rconn="1"/>
+    <P Name="Position">[130, 830, 170, 870]</P>
+    <P Name="ZOrder">8</P>
+    <P Name="LibraryVersion">25.21</P>
+    <P Name="SourceBlock">sm_lib/Frames and
+Transforms/Rigid
+Transform</P>
+    <P Name="SourceType">Rigid
+Transform</P>
+    <InstanceData>
+      <P Name="LogSimulationData">off</P>
+      <P Name="SimscapeInstrumentationLogging">off</P>
+      <P Name="SimscapeInstrumentationVariables" Ref="bdmxdata:SimscapeInstrumentationVariables_300"/>
+      <P Name="RotationMethod">ArbitraryAxis</P>
+      <P Name="FollAlignAxisA">+X</P>
+      <P Name="BaseAlignAxisA">+Y</P>
+      <P Name="FollAlignAxisB">+Y</P>
+      <P Name="BaseAlignAxisB">+Z</P>
+      <P Name="RotationStandardAxis">+Z</P>
+      <P Name="RotationAngle">smiData.RigidTransform(55).angle</P>
+      <P Name="RotationAngle_conf">compiletime</P>
+      <P Name="RotationAngleUnits">rad</P>
+      <P Name="RotationArbitraryAxis">smiData.RigidTransform(55).axis</P>
+      <P Name="RotationArbitraryAxis_conf">compiletime</P>
+      <P Name="RotationSequenceAxes">FollowerAxes</P>
+      <P Name="RotationSequence">XYX</P>
+      <P Name="RotationSequenceAngles">[0 0 0]</P>
+      <P Name="RotationSequenceAngles_conf">compiletime</P>
+      <P Name="RotationSequenceAnglesUnits">deg</P>
+      <P Name="RotationMatrix">[1 0 0; 0 1 0; 0 0 1]</P>
+      <P Name="RotationMatrix_conf">compiletime</P>
+      <P Name="Quaternion">[1 0 0 0]</P>
+      <P Name="Quaternion_conf">compiletime</P>
+      <P Name="TranslationMethod">Cartesian</P>
+      <P Name="TranslationCartesianOffset">smiData.RigidTransform(55).translation</P>
+      <P Name="TranslationCartesianOffset_conf">compiletime</P>
+      <P Name="TranslationCartesianOffsetUnits">mm</P>
+      <P Name="TranslationStandardAxis">+Z</P>
+      <P Name="TranslationStandardOffset">0</P>
+      <P Name="TranslationStandardOffset_conf">compiletime</P>
+      <P Name="TranslationStandardOffsetUnits">mm</P>
+      <P Name="TranslationROffset">0</P>
+      <P Name="TranslationROffset_conf">compiletime</P>
+      <P Name="TranslationROffsetUnits">m</P>
+      <P Name="TranslationThetaOffset">0</P>
+      <P Name="TranslationThetaOffset_conf">compiletime</P>
+      <P Name="TranslationThetaOffsetUnits">deg</P>
+      <P Name="TranslationZOffset">0</P>
+      <P Name="TranslationZOffset_conf">compiletime</P>
+      <P Name="TranslationZOffsetUnits">m</P>
+    </InstanceData>
+  </Block>
+  <Block BlockType="Reference" Name="Transform1" SID="301">
+    <PortCounts lconn="1" rconn="1"/>
+    <P Name="Position">[130, 730, 170, 770]</P>
+    <P Name="ZOrder">9</P>
+    <P Name="LibraryVersion">25.21</P>
+    <P Name="SourceBlock">sm_lib/Frames and
+Transforms/Rigid
+Transform</P>
+    <P Name="SourceType">Rigid
+Transform</P>
+    <InstanceData>
+      <P Name="LogSimulationData">off</P>
+      <P Name="SimscapeInstrumentationLogging">off</P>
+      <P Name="SimscapeInstrumentationVariables" Ref="bdmxdata:SimscapeInstrumentationVariables_301"/>
+      <P Name="RotationMethod">ArbitraryAxis</P>
+      <P Name="FollAlignAxisA">+X</P>
+      <P Name="BaseAlignAxisA">+Y</P>
+      <P Name="FollAlignAxisB">+Y</P>
+      <P Name="BaseAlignAxisB">+Z</P>
+      <P Name="RotationStandardAxis">+Z</P>
+      <P Name="RotationAngle">smiData.RigidTransform(57).angle</P>
+      <P Name="RotationAngle_conf">compiletime</P>
+      <P Name="RotationAngleUnits">rad</P>
+      <P Name="RotationArbitraryAxis">smiData.RigidTransform(57).axis</P>
+      <P Name="RotationArbitraryAxis_conf">compiletime</P>
+      <P Name="RotationSequenceAxes">FollowerAxes</P>
+      <P Name="RotationSequence">XYX</P>
+      <P Name="RotationSequenceAngles">[0 0 0]</P>
+      <P Name="RotationSequenceAngles_conf">compiletime</P>
+      <P Name="RotationSequenceAnglesUnits">deg</P>
+      <P Name="RotationMatrix">[1 0 0; 0 1 0; 0 0 1]</P>
+      <P Name="RotationMatrix_conf">compiletime</P>
+      <P Name="Quaternion">[1 0 0 0]</P>
+      <P Name="Quaternion_conf">compiletime</P>
+      <P Name="TranslationMethod">Cartesian</P>
+      <P Name="TranslationCartesianOffset">smiData.RigidTransform(57).translation</P>
+      <P Name="TranslationCartesianOffset_conf">compiletime</P>
+      <P Name="TranslationCartesianOffsetUnits">mm</P>
+      <P Name="TranslationStandardAxis">+Z</P>
+      <P Name="TranslationStandardOffset">0</P>
+      <P Name="TranslationStandardOffset_conf">compiletime</P>
+      <P Name="TranslationStandardOffsetUnits">mm</P>
+      <P Name="TranslationROffset">0</P>
+      <P Name="TranslationROffset_conf">compiletime</P>
+      <P Name="TranslationROffsetUnits">m</P>
+      <P Name="TranslationThetaOffset">0</P>
+      <P Name="TranslationThetaOffset_conf">compiletime</P>
+      <P Name="TranslationThetaOffsetUnits">deg</P>
+      <P Name="TranslationZOffset">0</P>
+      <P Name="TranslationZOffset_conf">compiletime</P>
+      <P Name="TranslationZOffsetUnits">m</P>
+    </InstanceData>
+  </Block>
+  <Block BlockType="Reference" Name="Transform2" SID="302">
+    <PortCounts lconn="1" rconn="1"/>
+    <P Name="Position">[130, 630, 170, 670]</P>
+    <P Name="ZOrder">10</P>
+    <P Name="LibraryVersion">25.21</P>
+    <P Name="SourceBlock">sm_lib/Frames and
+Transforms/Rigid
+Transform</P>
+    <P Name="SourceType">Rigid
+Transform</P>
+    <InstanceData>
+      <P Name="LogSimulationData">off</P>
+      <P Name="SimscapeInstrumentationLogging">off</P>
+      <P Name="SimscapeInstrumentationVariables" Ref="bdmxdata:SimscapeInstrumentationVariables_302"/>
+      <P Name="RotationMethod">ArbitraryAxis</P>
+      <P Name="FollAlignAxisA">+X</P>
+      <P Name="BaseAlignAxisA">+Y</P>
+      <P Name="FollAlignAxisB">+Y</P>
+      <P Name="BaseAlignAxisB">+Z</P>
+      <P Name="RotationStandardAxis">+Z</P>
+      <P Name="RotationAngle">smiData.RigidTransform(59).angle</P>
+      <P Name="RotationAngle_conf">compiletime</P>
+      <P Name="RotationAngleUnits">rad</P>
+      <P Name="RotationArbitraryAxis">smiData.RigidTransform(59).axis</P>
+      <P Name="RotationArbitraryAxis_conf">compiletime</P>
+      <P Name="RotationSequenceAxes">FollowerAxes</P>
+      <P Name="RotationSequence">XYX</P>
+      <P Name="RotationSequenceAngles">[0 0 0]</P>
+      <P Name="RotationSequenceAngles_conf">compiletime</P>
+      <P Name="RotationSequenceAnglesUnits">deg</P>
+      <P Name="RotationMatrix">[1 0 0; 0 1 0; 0 0 1]</P>
+      <P Name="RotationMatrix_conf">compiletime</P>
+      <P Name="Quaternion">[1 0 0 0]</P>
+      <P Name="Quaternion_conf">compiletime</P>
+      <P Name="TranslationMethod">Cartesian</P>
+      <P Name="TranslationCartesianOffset">smiData.RigidTransform(59).translation</P>
+      <P Name="TranslationCartesianOffset_conf">compiletime</P>
+      <P Name="TranslationCartesianOffsetUnits">mm</P>
+      <P Name="TranslationStandardAxis">+Z</P>
+      <P Name="TranslationStandardOffset">0</P>
+      <P Name="TranslationStandardOffset_conf">compiletime</P>
+      <P Name="TranslationStandardOffsetUnits">mm</P>
+      <P Name="TranslationROffset">0</P>
+      <P Name="TranslationROffset_conf">compiletime</P>
+      <P Name="TranslationROffsetUnits">m</P>
+      <P Name="TranslationThetaOffset">0</P>
+      <P Name="TranslationThetaOffset_conf">compiletime</P>
+      <P Name="TranslationThetaOffsetUnits">deg</P>
+      <P Name="TranslationZOffset">0</P>
+      <P Name="TranslationZOffset_conf">compiletime</P>
+      <P Name="TranslationZOffsetUnits">m</P>
+    </InstanceData>
+  </Block>
+  <Block BlockType="Reference" Name="Transform3" SID="303">
+    <PortCounts lconn="1" rconn="1"/>
+    <P Name="Position">[130, 530, 170, 570]</P>
+    <P Name="ZOrder">11</P>
+    <P Name="LibraryVersion">25.21</P>
+    <P Name="SourceBlock">sm_lib/Frames and
+Transforms/Rigid
+Transform</P>
+    <P Name="SourceType">Rigid
+Transform</P>
+    <InstanceData>
+      <P Name="LogSimulationData">off</P>
+      <P Name="SimscapeInstrumentationLogging">off</P>
+      <P Name="SimscapeInstrumentationVariables" Ref="bdmxdata:SimscapeInstrumentationVariables_303"/>
+      <P Name="RotationMethod">ArbitraryAxis</P>
+      <P Name="FollAlignAxisA">+X</P>
+      <P Name="BaseAlignAxisA">+Y</P>
+      <P Name="FollAlignAxisB">+Y</P>
+      <P Name="BaseAlignAxisB">+Z</P>
+      <P Name="RotationStandardAxis">+Z</P>
+      <P Name="RotationAngle">smiData.RigidTransform(61).angle</P>
+      <P Name="RotationAngle_conf">compiletime</P>
+      <P Name="RotationAngleUnits">rad</P>
+      <P Name="RotationArbitraryAxis">smiData.RigidTransform(61).axis</P>
+      <P Name="RotationArbitraryAxis_conf">compiletime</P>
+      <P Name="RotationSequenceAxes">FollowerAxes</P>
+      <P Name="RotationSequence">XYX</P>
+      <P Name="RotationSequenceAngles">[0 0 0]</P>
+      <P Name="RotationSequenceAngles_conf">compiletime</P>
+      <P Name="RotationSequenceAnglesUnits">deg</P>
+      <P Name="RotationMatrix">[1 0 0; 0 1 0; 0 0 1]</P>
+      <P Name="RotationMatrix_conf">compiletime</P>
+      <P Name="Quaternion">[1 0 0 0]</P>
+      <P Name="Quaternion_conf">compiletime</P>
+      <P Name="TranslationMethod">Cartesian</P>
+      <P Name="TranslationCartesianOffset">smiData.RigidTransform(61).translation</P>
+      <P Name="TranslationCartesianOffset_conf">compiletime</P>
+      <P Name="TranslationCartesianOffsetUnits">mm</P>
+      <P Name="TranslationStandardAxis">+Z</P>
+      <P Name="TranslationStandardOffset">0</P>
+      <P Name="TranslationStandardOffset_conf">compiletime</P>
+      <P Name="TranslationStandardOffsetUnits">mm</P>
+      <P Name="TranslationROffset">0</P>
+      <P Name="TranslationROffset_conf">compiletime</P>
+      <P Name="TranslationROffsetUnits">m</P>
+      <P Name="TranslationThetaOffset">0</P>
+      <P Name="TranslationThetaOffset_conf">compiletime</P>
+      <P Name="TranslationThetaOffsetUnits">deg</P>
+      <P Name="TranslationZOffset">0</P>
+      <P Name="TranslationZOffset_conf">compiletime</P>
+      <P Name="TranslationZOffsetUnits">m</P>
+    </InstanceData>
+  </Block>
+  <Block BlockType="Reference" Name="Transform4" SID="304">
+    <PortCounts lconn="1" rconn="1"/>
+    <P Name="Position">[130, 430, 170, 470]</P>
+    <P Name="ZOrder">12</P>
+    <P Name="LibraryVersion">25.21</P>
+    <P Name="SourceBlock">sm_lib/Frames and
+Transforms/Rigid
+Transform</P>
+    <P Name="SourceType">Rigid
+Transform</P>
+    <InstanceData>
+      <P Name="LogSimulationData">off</P>
+      <P Name="SimscapeInstrumentationLogging">off</P>
+      <P Name="SimscapeInstrumentationVariables" Ref="bdmxdata:SimscapeInstrumentationVariables_304"/>
+      <P Name="RotationMethod">ArbitraryAxis</P>
+      <P Name="FollAlignAxisA">+X</P>
+      <P Name="BaseAlignAxisA">+Y</P>
+      <P Name="FollAlignAxisB">+Y</P>
+      <P Name="BaseAlignAxisB">+Z</P>
+      <P Name="RotationStandardAxis">+Z</P>
+      <P Name="RotationAngle">smiData.RigidTransform(63).angle</P>
+      <P Name="RotationAngle_conf">compiletime</P>
+      <P Name="RotationAngleUnits">rad</P>
+      <P Name="RotationArbitraryAxis">smiData.RigidTransform(63).axis</P>
+      <P Name="RotationArbitraryAxis_conf">compiletime</P>
+      <P Name="RotationSequenceAxes">FollowerAxes</P>
+      <P Name="RotationSequence">XYX</P>
+      <P Name="RotationSequenceAngles">[0 0 0]</P>
+      <P Name="RotationSequenceAngles_conf">compiletime</P>
+      <P Name="RotationSequenceAnglesUnits">deg</P>
+      <P Name="RotationMatrix">[1 0 0; 0 1 0; 0 0 1]</P>
+      <P Name="RotationMatrix_conf">compiletime</P>
+      <P Name="Quaternion">[1 0 0 0]</P>
+      <P Name="Quaternion_conf">compiletime</P>
+      <P Name="TranslationMethod">Cartesian</P>
+      <P Name="TranslationCartesianOffset">smiData.RigidTransform(63).translation</P>
+      <P Name="TranslationCartesianOffset_conf">compiletime</P>
+      <P Name="TranslationCartesianOffsetUnits">mm</P>
+      <P Name="TranslationStandardAxis">+Z</P>
+      <P Name="TranslationStandardOffset">0</P>
+      <P Name="TranslationStandardOffset_conf">compiletime</P>
+      <P Name="TranslationStandardOffsetUnits">mm</P>
+      <P Name="TranslationROffset">0</P>
+      <P Name="TranslationROffset_conf">compiletime</P>
+      <P Name="TranslationROffsetUnits">m</P>
+      <P Name="TranslationThetaOffset">0</P>
+      <P Name="TranslationThetaOffset_conf">compiletime</P>
+      <P Name="TranslationThetaOffsetUnits">deg</P>
+      <P Name="TranslationZOffset">0</P>
+      <P Name="TranslationZOffset_conf">compiletime</P>
+      <P Name="TranslationZOffsetUnits">m</P>
+    </InstanceData>
+  </Block>
+  <Block BlockType="Reference" Name="Transform5" SID="305">
+    <PortCounts lconn="1" rconn="1"/>
+    <P Name="Position">[130, 330, 170, 370]</P>
+    <P Name="ZOrder">13</P>
+    <P Name="LibraryVersion">25.21</P>
+    <P Name="SourceBlock">sm_lib/Frames and
+Transforms/Rigid
+Transform</P>
+    <P Name="SourceType">Rigid
+Transform</P>
+    <InstanceData>
+      <P Name="LogSimulationData">off</P>
+      <P Name="SimscapeInstrumentationLogging">off</P>
+      <P Name="SimscapeInstrumentationVariables" Ref="bdmxdata:SimscapeInstrumentationVariables_305"/>
+      <P Name="RotationMethod">ArbitraryAxis</P>
+      <P Name="FollAlignAxisA">+X</P>
+      <P Name="BaseAlignAxisA">+Y</P>
+      <P Name="FollAlignAxisB">+Y</P>
+      <P Name="BaseAlignAxisB">+Z</P>
+      <P Name="RotationStandardAxis">+Z</P>
+      <P Name="RotationAngle">smiData.RigidTransform(65).angle</P>
+      <P Name="RotationAngle_conf">compiletime</P>
+      <P Name="RotationAngleUnits">rad</P>
+      <P Name="RotationArbitraryAxis">smiData.RigidTransform(65).axis</P>
+      <P Name="RotationArbitraryAxis_conf">compiletime</P>
+      <P Name="RotationSequenceAxes">FollowerAxes</P>
+      <P Name="RotationSequence">XYX</P>
+      <P Name="RotationSequenceAngles">[0 0 0]</P>
+      <P Name="RotationSequenceAngles_conf">compiletime</P>
+      <P Name="RotationSequenceAnglesUnits">deg</P>
+      <P Name="RotationMatrix">[1 0 0; 0 1 0; 0 0 1]</P>
+      <P Name="RotationMatrix_conf">compiletime</P>
+      <P Name="Quaternion">[1 0 0 0]</P>
+      <P Name="Quaternion_conf">compiletime</P>
+      <P Name="TranslationMethod">Cartesian</P>
+      <P Name="TranslationCartesianOffset">smiData.RigidTransform(65).translation</P>
+      <P Name="TranslationCartesianOffset_conf">compiletime</P>
+      <P Name="TranslationCartesianOffsetUnits">mm</P>
+      <P Name="TranslationStandardAxis">+Z</P>
+      <P Name="TranslationStandardOffset">0</P>
+      <P Name="TranslationStandardOffset_conf">compiletime</P>
+      <P Name="TranslationStandardOffsetUnits">mm</P>
+      <P Name="TranslationROffset">0</P>
+      <P Name="TranslationROffset_conf">compiletime</P>
+      <P Name="TranslationROffsetUnits">m</P>
+      <P Name="TranslationThetaOffset">0</P>
+      <P Name="TranslationThetaOffset_conf">compiletime</P>
+      <P Name="TranslationThetaOffsetUnits">deg</P>
+      <P Name="TranslationZOffset">0</P>
+      <P Name="TranslationZOffset_conf">compiletime</P>
+      <P Name="TranslationZOffsetUnits">m</P>
+    </InstanceData>
+  </Block>
+  <Block BlockType="Reference" Name="Transform6" SID="306">
+    <PortCounts lconn="1" rconn="1"/>
+    <P Name="Position">[130, 230, 170, 270]</P>
+    <P Name="ZOrder">14</P>
+    <P Name="LibraryVersion">25.21</P>
+    <P Name="SourceBlock">sm_lib/Frames and
+Transforms/Rigid
+Transform</P>
+    <P Name="SourceType">Rigid
+Transform</P>
+    <InstanceData>
+      <P Name="LogSimulationData">off</P>
+      <P Name="SimscapeInstrumentationLogging">off</P>
+      <P Name="SimscapeInstrumentationVariables" Ref="bdmxdata:SimscapeInstrumentationVariables_306"/>
+      <P Name="RotationMethod">ArbitraryAxis</P>
+      <P Name="FollAlignAxisA">+X</P>
+      <P Name="BaseAlignAxisA">+Y</P>
+      <P Name="FollAlignAxisB">+Y</P>
+      <P Name="BaseAlignAxisB">+Z</P>
+      <P Name="RotationStandardAxis">+Z</P>
+      <P Name="RotationAngle">smiData.RigidTransform(67).angle</P>
+      <P Name="RotationAngle_conf">compiletime</P>
+      <P Name="RotationAngleUnits">rad</P>
+      <P Name="RotationArbitraryAxis">smiData.RigidTransform(67).axis</P>
+      <P Name="RotationArbitraryAxis_conf">compiletime</P>
+      <P Name="RotationSequenceAxes">FollowerAxes</P>
+      <P Name="RotationSequence">XYX</P>
+      <P Name="RotationSequenceAngles">[0 0 0]</P>
+      <P Name="RotationSequenceAngles_conf">compiletime</P>
+      <P Name="RotationSequenceAnglesUnits">deg</P>
+      <P Name="RotationMatrix">[1 0 0; 0 1 0; 0 0 1]</P>
+      <P Name="RotationMatrix_conf">compiletime</P>
+      <P Name="Quaternion">[1 0 0 0]</P>
+      <P Name="Quaternion_conf">compiletime</P>
+      <P Name="TranslationMethod">Cartesian</P>
+      <P Name="TranslationCartesianOffset">smiData.RigidTransform(67).translation</P>
+      <P Name="TranslationCartesianOffset_conf">compiletime</P>
+      <P Name="TranslationCartesianOffsetUnits">mm</P>
+      <P Name="TranslationStandardAxis">+Z</P>
+      <P Name="TranslationStandardOffset">0</P>
+      <P Name="TranslationStandardOffset_conf">compiletime</P>
+      <P Name="TranslationStandardOffsetUnits">mm</P>
+      <P Name="TranslationROffset">0</P>
+      <P Name="TranslationROffset_conf">compiletime</P>
+      <P Name="TranslationROffsetUnits">m</P>
+      <P Name="TranslationThetaOffset">0</P>
+      <P Name="TranslationThetaOffset_conf">compiletime</P>
+      <P Name="TranslationThetaOffsetUnits">deg</P>
+      <P Name="TranslationZOffset">0</P>
+      <P Name="TranslationZOffset_conf">compiletime</P>
+      <P Name="TranslationZOffsetUnits">m</P>
+    </InstanceData>
+  </Block>
+  <Block BlockType="Reference" Name="Transform7" SID="307">
+    <PortCounts lconn="1" rconn="1"/>
+    <P Name="Position">[130, 130, 170, 170]</P>
+    <P Name="ZOrder">15</P>
+    <P Name="LibraryVersion">25.21</P>
+    <P Name="SourceBlock">sm_lib/Frames and
+Transforms/Rigid
+Transform</P>
+    <P Name="SourceType">Rigid
+Transform</P>
+    <InstanceData>
+      <P Name="LogSimulationData">off</P>
+      <P Name="SimscapeInstrumentationLogging">off</P>
+      <P Name="SimscapeInstrumentationVariables" Ref="bdmxdata:SimscapeInstrumentationVariables_307"/>
+      <P Name="RotationMethod">ArbitraryAxis</P>
+      <P Name="FollAlignAxisA">+X</P>
+      <P Name="BaseAlignAxisA">+Y</P>
+      <P Name="FollAlignAxisB">+Y</P>
+      <P Name="BaseAlignAxisB">+Z</P>
+      <P Name="RotationStandardAxis">+Z</P>
+      <P Name="RotationAngle">smiData.RigidTransform(69).angle</P>
+      <P Name="RotationAngle_conf">compiletime</P>
+      <P Name="RotationAngleUnits">rad</P>
+      <P Name="RotationArbitraryAxis">smiData.RigidTransform(69).axis</P>
+      <P Name="RotationArbitraryAxis_conf">compiletime</P>
+      <P Name="RotationSequenceAxes">FollowerAxes</P>
+      <P Name="RotationSequence">XYX</P>
+      <P Name="RotationSequenceAngles">[0 0 0]</P>
+      <P Name="RotationSequenceAngles_conf">compiletime</P>
+      <P Name="RotationSequenceAnglesUnits">deg</P>
+      <P Name="RotationMatrix">[1 0 0; 0 1 0; 0 0 1]</P>
+      <P Name="RotationMatrix_conf">compiletime</P>
+      <P Name="Quaternion">[1 0 0 0]</P>
+      <P Name="Quaternion_conf">compiletime</P>
+      <P Name="TranslationMethod">Cartesian</P>
+      <P Name="TranslationCartesianOffset">smiData.RigidTransform(69).translation</P>
+      <P Name="TranslationCartesianOffset_conf">compiletime</P>
+      <P Name="TranslationCartesianOffsetUnits">mm</P>
+      <P Name="TranslationStandardAxis">+Z</P>
+      <P Name="TranslationStandardOffset">0</P>
+      <P Name="TranslationStandardOffset_conf">compiletime</P>
+      <P Name="TranslationStandardOffsetUnits">mm</P>
+      <P Name="TranslationROffset">0</P>
+      <P Name="TranslationROffset_conf">compiletime</P>
+      <P Name="TranslationROffsetUnits">m</P>
+      <P Name="TranslationThetaOffset">0</P>
+      <P Name="TranslationThetaOffset_conf">compiletime</P>
+      <P Name="TranslationThetaOffsetUnits">deg</P>
+      <P Name="TranslationZOffset">0</P>
+      <P Name="TranslationZOffset_conf">compiletime</P>
+      <P Name="TranslationZOffsetUnits">m</P>
+    </InstanceData>
+  </Block>
+  <Block BlockType="Reference" Name="Transform8" SID="308">
+    <PortCounts lconn="1" rconn="1"/>
+    <P Name="Position">[130, 30, 170, 70]</P>
+    <P Name="ZOrder">16</P>
+    <P Name="LibraryVersion">25.21</P>
+    <P Name="SourceBlock">sm_lib/Frames and
+Transforms/Rigid
+Transform</P>
+    <P Name="SourceType">Rigid
+Transform</P>
+    <InstanceData>
+      <P Name="LogSimulationData">off</P>
+      <P Name="SimscapeInstrumentationLogging">off</P>
+      <P Name="SimscapeInstrumentationVariables" Ref="bdmxdata:SimscapeInstrumentationVariables_308"/>
+      <P Name="RotationMethod">ArbitraryAxis</P>
+      <P Name="FollAlignAxisA">+X</P>
+      <P Name="BaseAlignAxisA">+Y</P>
+      <P Name="FollAlignAxisB">+Y</P>
+      <P Name="BaseAlignAxisB">+Z</P>
+      <P Name="RotationStandardAxis">+Z</P>
+      <P Name="RotationAngle">smiData.RigidTransform(71).angle</P>
+      <P Name="RotationAngle_conf">compiletime</P>
+      <P Name="RotationAngleUnits">rad</P>
+      <P Name="RotationArbitraryAxis">smiData.RigidTransform(71).axis</P>
+      <P Name="RotationArbitraryAxis_conf">compiletime</P>
+      <P Name="RotationSequenceAxes">FollowerAxes</P>
+      <P Name="RotationSequence">XYX</P>
+      <P Name="RotationSequenceAngles">[0 0 0]</P>
+      <P Name="RotationSequenceAngles_conf">compiletime</P>
+      <P Name="RotationSequenceAnglesUnits">deg</P>
+      <P Name="RotationMatrix">[1 0 0; 0 1 0; 0 0 1]</P>
+      <P Name="RotationMatrix_conf">compiletime</P>
+      <P Name="Quaternion">[1 0 0 0]</P>
+      <P Name="Quaternion_conf">compiletime</P>
+      <P Name="TranslationMethod">Cartesian</P>
+      <P Name="TranslationCartesianOffset">smiData.RigidTransform(71).translation</P>
+      <P Name="TranslationCartesianOffset_conf">compiletime</P>
+      <P Name="TranslationCartesianOffsetUnits">mm</P>
+      <P Name="TranslationStandardAxis">+Z</P>
+      <P Name="TranslationStandardOffset">0</P>
+      <P Name="TranslationStandardOffset_conf">compiletime</P>
+      <P Name="TranslationStandardOffsetUnits">mm</P>
+      <P Name="TranslationROffset">0</P>
+      <P Name="TranslationROffset_conf">compiletime</P>
+      <P Name="TranslationROffsetUnits">m</P>
+      <P Name="TranslationThetaOffset">0</P>
+      <P Name="TranslationThetaOffset_conf">compiletime</P>
+      <P Name="TranslationThetaOffsetUnits">deg</P>
+      <P Name="TranslationZOffset">0</P>
+      <P Name="TranslationZOffset_conf">compiletime</P>
+      <P Name="TranslationZOffsetUnits">m</P>
+    </InstanceData>
+  </Block>
+  <Block BlockType="PMIOPort" Name="F" SID="309">
+    <P Name="Position">[230, 840, 250, 860]</P>
+    <P Name="ZOrder">17</P>
+    <P Name="BlockMirror">on</P>
+    <P Name="Side">Left</P>
+  </Block>
+  <Block BlockType="PMIOPort" Name="LeftKNEE_to_ground" SID="725">
+    <P Name="Position">[-200, 390, -180, 410]</P>
+    <P Name="ZOrder">26</P>
+    <P Name="Port">2</P>
+    <P Name="Side">Left</P>
+  </Block>
+  <Block BlockType="PMIOPort" Name="F6" SID="310">
+    <P Name="Position">[230, 240, 250, 260]</P>
+    <P Name="ZOrder">18</P>
+    <P Name="BlockMirror">on</P>
+    <P Name="Port">3</P>
+    <P Name="Side">Left</P>
+  </Block>
+  <Block BlockType="PMIOPort" Name="F8" SID="311">
+    <P Name="Position">[230, 40, 250, 60]</P>
+    <P Name="ZOrder">19</P>
+    <P Name="BlockMirror">on</P>
+    <P Name="Port">4</P>
+    <P Name="Side">Right</P>
+  </Block>
+  <Block BlockType="PMIOPort" Name="F7" SID="312">
+    <P Name="Position">[230, 140, 250, 160]</P>
+    <P Name="ZOrder">20</P>
+    <P Name="BlockMirror">on</P>
+    <P Name="Port">5</P>
+    <P Name="Side">Right</P>
+  </Block>
+  <Block BlockType="PMIOPort" Name="F5" SID="313">
+    <P Name="Position">[230, 340, 250, 360]</P>
+    <P Name="ZOrder">21</P>
+    <P Name="BlockMirror">on</P>
+    <P Name="Port">6</P>
+    <P Name="Side">Right</P>
+  </Block>
+  <Block BlockType="PMIOPort" Name="F4" SID="314">
+    <P Name="Position">[230, 440, 250, 460]</P>
+    <P Name="ZOrder">22</P>
+    <P Name="BlockMirror">on</P>
+    <P Name="Port">7</P>
+    <P Name="Side">Right</P>
+  </Block>
+  <Block BlockType="PMIOPort" Name="F3" SID="315">
+    <P Name="Position">[230, 540, 250, 560]</P>
+    <P Name="ZOrder">23</P>
+    <P Name="BlockMirror">on</P>
+    <P Name="Port">8</P>
+    <P Name="Side">Right</P>
+  </Block>
+  <Block BlockType="PMIOPort" Name="F2" SID="316">
+    <P Name="Position">[230, 640, 250, 660]</P>
+    <P Name="ZOrder">24</P>
+    <P Name="BlockMirror">on</P>
+    <P Name="Port">9</P>
+    <P Name="Side">Right</P>
+  </Block>
+  <Block BlockType="PMIOPort" Name="F1" SID="317">
+    <P Name="Position">[230, 740, 250, 760]</P>
+    <P Name="ZOrder">25</P>
+    <P Name="BlockMirror">on</P>
+    <P Name="Port">10</P>
+    <P Name="Side">Right</P>
+  </Block>
+  <Line LineType="Connection">
+    <P Name="ZOrder">1</P>
+    <P Name="Points">[95, 500; 0, -100; -10, 0]</P>
+    <P Name="Dst">299#rconn:1</P>
+    <Branch ConnectType="SRC_DEST">
+      <P Name="Src">298#rconn:1</P>
+      <P Name="Points">[10, 0]</P>
+    </Branch>
+    <Branch ConnectType="SRC_SRC">
+      <P Name="Points">[5, 0]</P>
+      <Branch ConnectType="DEST_SRC">
+        <P Name="Points">[0, 50]</P>
+        <Branch ConnectType="DEST_SRC">
+          <P Name="Points">[0, 100]</P>
+          <Branch ConnectType="DEST_SRC">
+            <P Name="Points">[0, 100]</P>
+            <Branch ConnectType="DEST_SRC">
+              <P Name="Points">[0, 100]</P>
+              <P Name="Dst">300#lconn:1</P>
+            </Branch>
+            <Branch ConnectType="DEST_SRC">
+              <P Name="Dst">301#lconn:1</P>
+            </Branch>
+          </Branch>
+          <Branch ConnectType="DEST_SRC">
+            <P Name="Dst">302#lconn:1</P>
+          </Branch>
+        </Branch>
+        <Branch ConnectType="DEST_SRC">
+          <P Name="Dst">303#lconn:1</P>
+        </Branch>
+      </Branch>
+      <Branch ConnectType="DEST_SRC">
+        <P Name="Points">[0, -50]</P>
+        <Branch ConnectType="DEST_SRC">
+          <P Name="Points">[0, -100]</P>
+          <Branch ConnectType="DEST_SRC">
+            <P Name="Points">[0, -100]</P>
+            <Branch ConnectType="DEST_SRC">
+              <P Name="Points">[0, -100]</P>
+              <Branch ConnectType="DEST_SRC">
+                <P Name="Dst">307#lconn:1</P>
+              </Branch>
+              <Branch ConnectType="DEST_SRC">
+                <P Name="Points">[0, -100]</P>
+                <P Name="Dst">308#lconn:1</P>
+              </Branch>
+            </Branch>
+            <Branch ConnectType="DEST_SRC">
+              <P Name="Dst">306#lconn:1</P>
+            </Branch>
+          </Branch>
+          <Branch ConnectType="DEST_SRC">
+            <P Name="Dst">305#lconn:1</P>
+          </Branch>
+        </Branch>
+        <Branch ConnectType="DEST_SRC">
+          <P Name="Dst">304#lconn:1</P>
+        </Branch>
+      </Branch>
+    </Branch>
+  </Line>
+  <Line LineType="Connection">
+    <P Name="ZOrder">12</P>
+    <P Name="Src">300#rconn:1</P>
+    <P Name="Dst">309#rconn:1</P>
+  </Line>
+  <Line LineType="Connection">
+    <P Name="ZOrder">13</P>
+    <P Name="Src">301#rconn:1</P>
+    <P Name="Dst">317#rconn:1</P>
+  </Line>
+  <Line LineType="Connection">
+    <P Name="ZOrder">14</P>
+    <P Name="Src">302#rconn:1</P>
+    <P Name="Dst">316#rconn:1</P>
+  </Line>
+  <Line LineType="Connection">
+    <P Name="ZOrder">15</P>
+    <P Name="Src">303#rconn:1</P>
+    <P Name="Dst">315#rconn:1</P>
+  </Line>
+  <Line LineType="Connection">
+    <P Name="ZOrder">16</P>
+    <P Name="Src">304#rconn:1</P>
+    <P Name="Dst">314#rconn:1</P>
+  </Line>
+  <Line LineType="Connection">
+    <P Name="ZOrder">17</P>
+    <P Name="Src">305#rconn:1</P>
+    <P Name="Dst">313#rconn:1</P>
+  </Line>
+  <Line LineType="Connection">
+    <P Name="ZOrder">18</P>
+    <P Name="Src">306#rconn:1</P>
+    <P Name="Dst">310#rconn:1</P>
+  </Line>
+  <Line LineType="Connection">
+    <P Name="ZOrder">19</P>
+    <P Name="Src">307#rconn:1</P>
+    <P Name="Dst">312#rconn:1</P>
+  </Line>
+  <Line LineType="Connection">
+    <P Name="ZOrder">20</P>
+    <P Name="Src">308#rconn:1</P>
+    <P Name="Dst">311#rconn:1</P>
+  </Line>
+  <Line LineType="Connection">
+    <P Name="ZOrder">31</P>
+    <P Name="Src">725#rconn:1</P>
+    <P Name="Dst">299#lconn:1</P>
+  </Line>
+</System>

@@ -1,0 +1,519 @@
+<?xml version="1.0" encoding="utf-8"?>
+<System>
+  <P Name="Location">[1919, -7, 3841, 1033]</P>
+  <P Name="ZoomFactor">106</P>
+  <Block BlockType="Reference" Name="Spatial&#xA;Contact Force" SID="718">
+    <PortCounts lconn="1" rconn="1"/>
+    <P Name="Position">[175, 2865, 215, 2905]</P>
+    <P Name="ZOrder">1214</P>
+    <P Name="LibraryVersion">25.21</P>
+    <P Name="SourceBlock">sm_lib/Forces and
+Torques/Spatial
+Contact Force</P>
+    <P Name="SourceType">Spatial
+Contact Force</P>
+    <InstanceData>
+      <P Name="LogSimulationData">off</P>
+      <P Name="SimscapeInstrumentationLogging">off</P>
+      <P Name="SimscapeInstrumentationVariables" Ref="bdmxdata:SimscapeInstrumentationVariables_718"/>
+      <P Name="SenseSeparationDistance">off</P>
+      <P Name="NormalForceType">SmoothSpringDamper</P>
+      <P Name="NormalStiffness">1e6</P>
+      <P Name="NormalStiffness_conf">compiletime</P>
+      <P Name="NormalStiffnessUnits">N/m</P>
+      <P Name="NormalDamping">1e3</P>
+      <P Name="NormalDamping_conf">compiletime</P>
+      <P Name="NormalDampingUnits">N/(m/s)</P>
+      <P Name="NormalTransitionRegionWidth">1e-4</P>
+      <P Name="NormalTransitionRegionWidth_conf">compiletime</P>
+      <P Name="NormalTransitionRegionWidthUnits">m</P>
+      <P Name="FrictionType">SmoothStickSlip</P>
+      <P Name="CoefficientOfStaticFriction">0.5</P>
+      <P Name="CoefficientOfStaticFriction_conf">compiletime</P>
+      <P Name="CoefficientOfDynamicFriction">0.3</P>
+      <P Name="CoefficientOfDynamicFriction_conf">compiletime</P>
+      <P Name="FrictionalCriticalVelocity">1e-3</P>
+      <P Name="FrictionalCriticalVelocity_conf">compiletime</P>
+      <P Name="FrictionalCriticalVelocityUnits">m/s</P>
+      <P Name="SenseContactSignal">off</P>
+      <P Name="SensePenetrationDepth">off</P>
+      <P Name="SenseNormalVelocity">off</P>
+      <P Name="SenseTangentialVelocity">off</P>
+      <P Name="SensingForceTorqueDirection">BaseOnFollower</P>
+      <P Name="SensingForceTorqueResolutionFrame">ContactFrame</P>
+      <P Name="SenseNormalForce">off</P>
+      <P Name="SenseNormalForceMagnitude">off</P>
+      <P Name="SenseNormalTorque">off</P>
+      <P Name="SenseFrictionalForce">off</P>
+      <P Name="SenseFrictionalForceMagnitude">off</P>
+      <P Name="SenseFrictionalTorque">off</P>
+      <P Name="SenseTotalForce">off</P>
+      <P Name="SenseTotalTorque">off</P>
+      <P Name="SenseContactBaseRotation">off</P>
+      <P Name="SenseContactBaseTranslation">off</P>
+      <P Name="SenseContactFollowerRotation">off</P>
+      <P Name="SenseContactFollowerTranslation">off</P>
+      <P Name="ZeroCrossDetectContactStartAndEnd">off</P>
+    </InstanceData>
+  </Block>
+  <Block BlockType="Reference" Name="Spatial&#xA;Contact Force1" SID="720">
+    <PortCounts lconn="1" rconn="1"/>
+    <P Name="Position">[175, 2710, 215, 2750]</P>
+    <P Name="ZOrder">1215</P>
+    <P Name="LibraryVersion">25.21</P>
+    <P Name="SourceBlock">sm_lib/Forces and
+Torques/Spatial
+Contact Force</P>
+    <P Name="SourceType">Spatial
+Contact Force</P>
+    <InstanceData>
+      <P Name="LogSimulationData">off</P>
+      <P Name="SimscapeInstrumentationLogging">off</P>
+      <P Name="SimscapeInstrumentationVariables" Ref="bdmxdata:SimscapeInstrumentationVariables_720"/>
+      <P Name="SenseSeparationDistance">off</P>
+      <P Name="NormalForceType">SmoothSpringDamper</P>
+      <P Name="NormalStiffness">1e6</P>
+      <P Name="NormalStiffness_conf">compiletime</P>
+      <P Name="NormalStiffnessUnits">N/m</P>
+      <P Name="NormalDamping">1e3</P>
+      <P Name="NormalDamping_conf">compiletime</P>
+      <P Name="NormalDampingUnits">N/(m/s)</P>
+      <P Name="NormalTransitionRegionWidth">1e-4</P>
+      <P Name="NormalTransitionRegionWidth_conf">compiletime</P>
+      <P Name="NormalTransitionRegionWidthUnits">m</P>
+      <P Name="FrictionType">SmoothStickSlip</P>
+      <P Name="CoefficientOfStaticFriction">0.5</P>
+      <P Name="CoefficientOfStaticFriction_conf">compiletime</P>
+      <P Name="CoefficientOfDynamicFriction">0.3</P>
+      <P Name="CoefficientOfDynamicFriction_conf">compiletime</P>
+      <P Name="FrictionalCriticalVelocity">1e-3</P>
+      <P Name="FrictionalCriticalVelocity_conf">compiletime</P>
+      <P Name="FrictionalCriticalVelocityUnits">m/s</P>
+      <P Name="SenseContactSignal">off</P>
+      <P Name="SensePenetrationDepth">off</P>
+      <P Name="SenseNormalVelocity">off</P>
+      <P Name="SenseTangentialVelocity">off</P>
+      <P Name="SensingForceTorqueDirection">BaseOnFollower</P>
+      <P Name="SensingForceTorqueResolutionFrame">ContactFrame</P>
+      <P Name="SenseNormalForce">off</P>
+      <P Name="SenseNormalForceMagnitude">off</P>
+      <P Name="SenseNormalTorque">off</P>
+      <P Name="SenseFrictionalForce">off</P>
+      <P Name="SenseFrictionalForceMagnitude">off</P>
+      <P Name="SenseFrictionalTorque">off</P>
+      <P Name="SenseTotalForce">off</P>
+      <P Name="SenseTotalTorque">off</P>
+      <P Name="SenseContactBaseRotation">off</P>
+      <P Name="SenseContactBaseTranslation">off</P>
+      <P Name="SenseContactFollowerRotation">off</P>
+      <P Name="SenseContactFollowerTranslation">off</P>
+      <P Name="ZeroCrossDetectContactStartAndEnd">off</P>
+    </InstanceData>
+  </Block>
+  <Block BlockType="Reference" Name="Spatial&#xA;Contact Force2" SID="722">
+    <PortCounts lconn="1" rconn="1"/>
+    <P Name="Position">[175, 2780, 215, 2820]</P>
+    <P Name="ZOrder">1216</P>
+    <P Name="LibraryVersion">25.21</P>
+    <P Name="SourceBlock">sm_lib/Forces and
+Torques/Spatial
+Contact Force</P>
+    <P Name="SourceType">Spatial
+Contact Force</P>
+    <InstanceData>
+      <P Name="LogSimulationData">off</P>
+      <P Name="SimscapeInstrumentationLogging">off</P>
+      <P Name="SimscapeInstrumentationVariables" Ref="bdmxdata:SimscapeInstrumentationVariables_722"/>
+      <P Name="SenseSeparationDistance">off</P>
+      <P Name="NormalForceType">SmoothSpringDamper</P>
+      <P Name="NormalStiffness">1e6</P>
+      <P Name="NormalStiffness_conf">compiletime</P>
+      <P Name="NormalStiffnessUnits">N/m</P>
+      <P Name="NormalDamping">1e3</P>
+      <P Name="NormalDamping_conf">compiletime</P>
+      <P Name="NormalDampingUnits">N/(m/s)</P>
+      <P Name="NormalTransitionRegionWidth">1e-4</P>
+      <P Name="NormalTransitionRegionWidth_conf">compiletime</P>
+      <P Name="NormalTransitionRegionWidthUnits">m</P>
+      <P Name="FrictionType">SmoothStickSlip</P>
+      <P Name="CoefficientOfStaticFriction">1</P>
+      <P Name="CoefficientOfStaticFriction_conf">compiletime</P>
+      <P Name="CoefficientOfDynamicFriction">0.7</P>
+      <P Name="CoefficientOfDynamicFriction_conf">compiletime</P>
+      <P Name="FrictionalCriticalVelocity">0.01</P>
+      <P Name="FrictionalCriticalVelocity_conf">compiletime</P>
+      <P Name="FrictionalCriticalVelocityUnits">m/s</P>
+      <P Name="SenseContactSignal">off</P>
+      <P Name="SensePenetrationDepth">off</P>
+      <P Name="SenseNormalVelocity">off</P>
+      <P Name="SenseTangentialVelocity">off</P>
+      <P Name="SensingForceTorqueDirection">BaseOnFollower</P>
+      <P Name="SensingForceTorqueResolutionFrame">ContactFrame</P>
+      <P Name="SenseNormalForce">off</P>
+      <P Name="SenseNormalForceMagnitude">off</P>
+      <P Name="SenseNormalTorque">off</P>
+      <P Name="SenseFrictionalForce">off</P>
+      <P Name="SenseFrictionalForceMagnitude">off</P>
+      <P Name="SenseFrictionalTorque">off</P>
+      <P Name="SenseTotalForce">off</P>
+      <P Name="SenseTotalTorque">off</P>
+      <P Name="SenseContactBaseRotation">off</P>
+      <P Name="SenseContactBaseTranslation">off</P>
+      <P Name="SenseContactFollowerRotation">off</P>
+      <P Name="SenseContactFollowerTranslation">off</P>
+      <P Name="ZeroCrossDetectContactStartAndEnd">off</P>
+    </InstanceData>
+  </Block>
+  <Block BlockType="Reference" Name="Spatial&#xA;Contact Force3" SID="724">
+    <PortCounts lconn="1" rconn="1"/>
+    <P Name="Position">[175, 2625, 215, 2665]</P>
+    <P Name="ZOrder">1217</P>
+    <P Name="LibraryVersion">25.21</P>
+    <P Name="SourceBlock">sm_lib/Forces and
+Torques/Spatial
+Contact Force</P>
+    <P Name="SourceType">Spatial
+Contact Force</P>
+    <InstanceData>
+      <P Name="LogSimulationData">off</P>
+      <P Name="SimscapeInstrumentationLogging">off</P>
+      <P Name="SimscapeInstrumentationVariables" Ref="bdmxdata:SimscapeInstrumentationVariables_724"/>
+      <P Name="SenseSeparationDistance">off</P>
+      <P Name="NormalForceType">SmoothSpringDamper</P>
+      <P Name="NormalStiffness">1e6</P>
+      <P Name="NormalStiffness_conf">compiletime</P>
+      <P Name="NormalStiffnessUnits">N/m</P>
+      <P Name="NormalDamping">1e3</P>
+      <P Name="NormalDamping_conf">compiletime</P>
+      <P Name="NormalDampingUnits">N/(m/s)</P>
+      <P Name="NormalTransitionRegionWidth">1e-4</P>
+      <P Name="NormalTransitionRegionWidth_conf">compiletime</P>
+      <P Name="NormalTransitionRegionWidthUnits">m</P>
+      <P Name="FrictionType">SmoothStickSlip</P>
+      <P Name="CoefficientOfStaticFriction">1</P>
+      <P Name="CoefficientOfStaticFriction_conf">compiletime</P>
+      <P Name="CoefficientOfDynamicFriction">0.7</P>
+      <P Name="CoefficientOfDynamicFriction_conf">compiletime</P>
+      <P Name="FrictionalCriticalVelocity">0.01</P>
+      <P Name="FrictionalCriticalVelocity_conf">compiletime</P>
+      <P Name="FrictionalCriticalVelocityUnits">m/s</P>
+      <P Name="SenseContactSignal">off</P>
+      <P Name="SensePenetrationDepth">off</P>
+      <P Name="SenseNormalVelocity">off</P>
+      <P Name="SenseTangentialVelocity">off</P>
+      <P Name="SensingForceTorqueDirection">BaseOnFollower</P>
+      <P Name="SensingForceTorqueResolutionFrame">ContactFrame</P>
+      <P Name="SenseNormalForce">off</P>
+      <P Name="SenseNormalForceMagnitude">off</P>
+      <P Name="SenseNormalTorque">off</P>
+      <P Name="SenseFrictionalForce">off</P>
+      <P Name="SenseFrictionalForceMagnitude">off</P>
+      <P Name="SenseFrictionalTorque">off</P>
+      <P Name="SenseTotalForce">off</P>
+      <P Name="SenseTotalTorque">off</P>
+      <P Name="SenseContactBaseRotation">off</P>
+      <P Name="SenseContactBaseTranslation">off</P>
+      <P Name="SenseContactFollowerRotation">off</P>
+      <P Name="SenseContactFollowerTranslation">off</P>
+      <P Name="ZeroCrossDetectContactStartAndEnd">off</P>
+    </InstanceData>
+  </Block>
+  <Block BlockType="Reference" Name="Spatial&#xA;Contact Force4" SID="726">
+    <PortCounts lconn="1" rconn="1"/>
+    <P Name="Position">[175, 2560, 215, 2600]</P>
+    <P Name="ZOrder">1218</P>
+    <P Name="LibraryVersion">25.21</P>
+    <P Name="SourceBlock">sm_lib/Forces and
+Torques/Spatial
+Contact Force</P>
+    <P Name="SourceType">Spatial
+Contact Force</P>
+    <InstanceData>
+      <P Name="LogSimulationData">off</P>
+      <P Name="SimscapeInstrumentationLogging">off</P>
+      <P Name="SimscapeInstrumentationVariables" Ref="bdmxdata:SimscapeInstrumentationVariables_726"/>
+      <P Name="SenseSeparationDistance">off</P>
+      <P Name="NormalForceType">SmoothSpringDamper</P>
+      <P Name="NormalStiffness">1e6</P>
+      <P Name="NormalStiffness_conf">compiletime</P>
+      <P Name="NormalStiffnessUnits">N/m</P>
+      <P Name="NormalDamping">1e3</P>
+      <P Name="NormalDamping_conf">compiletime</P>
+      <P Name="NormalDampingUnits">N/(m/s)</P>
+      <P Name="NormalTransitionRegionWidth">1e-4</P>
+      <P Name="NormalTransitionRegionWidth_conf">compiletime</P>
+      <P Name="NormalTransitionRegionWidthUnits">m</P>
+      <P Name="FrictionType">SmoothStickSlip</P>
+      <P Name="CoefficientOfStaticFriction">0.5</P>
+      <P Name="CoefficientOfStaticFriction_conf">compiletime</P>
+      <P Name="CoefficientOfDynamicFriction">0.3</P>
+      <P Name="CoefficientOfDynamicFriction_conf">compiletime</P>
+      <P Name="FrictionalCriticalVelocity">1e-3</P>
+      <P Name="FrictionalCriticalVelocity_conf">compiletime</P>
+      <P Name="FrictionalCriticalVelocityUnits">m/s</P>
+      <P Name="SenseContactSignal">off</P>
+      <P Name="SensePenetrationDepth">off</P>
+      <P Name="SenseNormalVelocity">off</P>
+      <P Name="SenseTangentialVelocity">off</P>
+      <P Name="SensingForceTorqueDirection">BaseOnFollower</P>
+      <P Name="SensingForceTorqueResolutionFrame">ContactFrame</P>
+      <P Name="SenseNormalForce">off</P>
+      <P Name="SenseNormalForceMagnitude">off</P>
+      <P Name="SenseNormalTorque">off</P>
+      <P Name="SenseFrictionalForce">off</P>
+      <P Name="SenseFrictionalForceMagnitude">off</P>
+      <P Name="SenseFrictionalTorque">off</P>
+      <P Name="SenseTotalForce">off</P>
+      <P Name="SenseTotalTorque">off</P>
+      <P Name="SenseContactBaseRotation">off</P>
+      <P Name="SenseContactBaseTranslation">off</P>
+      <P Name="SenseContactFollowerRotation">off</P>
+      <P Name="SenseContactFollowerTranslation">off</P>
+      <P Name="ZeroCrossDetectContactStartAndEnd">off</P>
+    </InstanceData>
+  </Block>
+  <Block BlockType="Reference" Name="Spatial&#xA;Contact Force5" SID="728">
+    <PortCounts lconn="1" rconn="1"/>
+    <P Name="Position">[175, 2485, 215, 2525]</P>
+    <P Name="ZOrder">1219</P>
+    <P Name="LibraryVersion">25.21</P>
+    <P Name="SourceBlock">sm_lib/Forces and
+Torques/Spatial
+Contact Force</P>
+    <P Name="SourceType">Spatial
+Contact Force</P>
+    <InstanceData>
+      <P Name="LogSimulationData">off</P>
+      <P Name="SimscapeInstrumentationLogging">off</P>
+      <P Name="SimscapeInstrumentationVariables" Ref="bdmxdata:SimscapeInstrumentationVariables_728"/>
+      <P Name="SenseSeparationDistance">off</P>
+      <P Name="NormalForceType">SmoothSpringDamper</P>
+      <P Name="NormalStiffness">1e6</P>
+      <P Name="NormalStiffness_conf">compiletime</P>
+      <P Name="NormalStiffnessUnits">N/m</P>
+      <P Name="NormalDamping">1e3</P>
+      <P Name="NormalDamping_conf">compiletime</P>
+      <P Name="NormalDampingUnits">N/(m/s)</P>
+      <P Name="NormalTransitionRegionWidth">1e-4</P>
+      <P Name="NormalTransitionRegionWidth_conf">compiletime</P>
+      <P Name="NormalTransitionRegionWidthUnits">m</P>
+      <P Name="FrictionType">SmoothStickSlip</P>
+      <P Name="CoefficientOfStaticFriction">0.5</P>
+      <P Name="CoefficientOfStaticFriction_conf">compiletime</P>
+      <P Name="CoefficientOfDynamicFriction">0.3</P>
+      <P Name="CoefficientOfDynamicFriction_conf">compiletime</P>
+      <P Name="FrictionalCriticalVelocity">1e-3</P>
+      <P Name="FrictionalCriticalVelocity_conf">compiletime</P>
+      <P Name="FrictionalCriticalVelocityUnits">m/s</P>
+      <P Name="SenseContactSignal">off</P>
+      <P Name="SensePenetrationDepth">off</P>
+      <P Name="SenseNormalVelocity">off</P>
+      <P Name="SenseTangentialVelocity">off</P>
+      <P Name="SensingForceTorqueDirection">BaseOnFollower</P>
+      <P Name="SensingForceTorqueResolutionFrame">ContactFrame</P>
+      <P Name="SenseNormalForce">off</P>
+      <P Name="SenseNormalForceMagnitude">off</P>
+      <P Name="SenseNormalTorque">off</P>
+      <P Name="SenseFrictionalForce">off</P>
+      <P Name="SenseFrictionalForceMagnitude">off</P>
+      <P Name="SenseFrictionalTorque">off</P>
+      <P Name="SenseTotalForce">off</P>
+      <P Name="SenseTotalTorque">off</P>
+      <P Name="SenseContactBaseRotation">off</P>
+      <P Name="SenseContactBaseTranslation">off</P>
+      <P Name="SenseContactFollowerRotation">off</P>
+      <P Name="SenseContactFollowerTranslation">off</P>
+      <P Name="ZeroCrossDetectContactStartAndEnd">off</P>
+    </InstanceData>
+  </Block>
+  <Block BlockType="Reference" Name="Spatial&#xA;Contact Force6" SID="730">
+    <PortCounts lconn="1" rconn="1"/>
+    <P Name="Position">[175, 2935, 215, 2975]</P>
+    <P Name="ZOrder">1220</P>
+    <P Name="LibraryVersion">25.21</P>
+    <P Name="SourceBlock">sm_lib/Forces and
+Torques/Spatial
+Contact Force</P>
+    <P Name="SourceType">Spatial
+Contact Force</P>
+    <InstanceData>
+      <P Name="LogSimulationData">off</P>
+      <P Name="SimscapeInstrumentationLogging">off</P>
+      <P Name="SimscapeInstrumentationVariables" Ref="bdmxdata:SimscapeInstrumentationVariables_730"/>
+      <P Name="SenseSeparationDistance">off</P>
+      <P Name="NormalForceType">SmoothSpringDamper</P>
+      <P Name="NormalStiffness">1e6</P>
+      <P Name="NormalStiffness_conf">compiletime</P>
+      <P Name="NormalStiffnessUnits">N/m</P>
+      <P Name="NormalDamping">1e3</P>
+      <P Name="NormalDamping_conf">compiletime</P>
+      <P Name="NormalDampingUnits">N/(m/s)</P>
+      <P Name="NormalTransitionRegionWidth">1e-4</P>
+      <P Name="NormalTransitionRegionWidth_conf">compiletime</P>
+      <P Name="NormalTransitionRegionWidthUnits">m</P>
+      <P Name="FrictionType">SmoothStickSlip</P>
+      <P Name="CoefficientOfStaticFriction">0.5</P>
+      <P Name="CoefficientOfStaticFriction_conf">compiletime</P>
+      <P Name="CoefficientOfDynamicFriction">0.3</P>
+      <P Name="CoefficientOfDynamicFriction_conf">compiletime</P>
+      <P Name="FrictionalCriticalVelocity">1e-3</P>
+      <P Name="FrictionalCriticalVelocity_conf">compiletime</P>
+      <P Name="FrictionalCriticalVelocityUnits">m/s</P>
+      <P Name="SenseContactSignal">off</P>
+      <P Name="SensePenetrationDepth">off</P>
+      <P Name="SenseNormalVelocity">off</P>
+      <P Name="SenseTangentialVelocity">off</P>
+      <P Name="SensingForceTorqueDirection">BaseOnFollower</P>
+      <P Name="SensingForceTorqueResolutionFrame">ContactFrame</P>
+      <P Name="SenseNormalForce">off</P>
+      <P Name="SenseNormalForceMagnitude">off</P>
+      <P Name="SenseNormalTorque">off</P>
+      <P Name="SenseFrictionalForce">off</P>
+      <P Name="SenseFrictionalForceMagnitude">off</P>
+      <P Name="SenseFrictionalTorque">off</P>
+      <P Name="SenseTotalForce">off</P>
+      <P Name="SenseTotalTorque">off</P>
+      <P Name="SenseContactBaseRotation">off</P>
+      <P Name="SenseContactBaseTranslation">off</P>
+      <P Name="SenseContactFollowerRotation">off</P>
+      <P Name="SenseContactFollowerTranslation">off</P>
+      <P Name="ZeroCrossDetectContactStartAndEnd">off</P>
+    </InstanceData>
+  </Block>
+  <Block BlockType="PMIOPort" Name="Ground" SID="738">
+    <P Name="Position">[20, 2688, 50, 2702]</P>
+    <P Name="ZOrder">1227</P>
+    <P Name="Side">Left</P>
+  </Block>
+  <Block BlockType="PMIOPort" Name="Right_Wheel" SID="737">
+    <P Name="Position">[345, 2793, 375, 2807]</P>
+    <P Name="ZOrder">1226</P>
+    <P Name="BlockMirror">on</P>
+    <P Name="Port">2</P>
+    <P Name="Side">Right</P>
+  </Block>
+  <Block BlockType="PMIOPort" Name="Right_knee" SID="736">
+    <P Name="Position">[345, 2878, 375, 2892]</P>
+    <P Name="ZOrder">1225</P>
+    <P Name="BlockMirror">on</P>
+    <P Name="Port">3</P>
+    <P Name="Side">Right</P>
+  </Block>
+  <Block BlockType="PMIOPort" Name="Right_shoulder" SID="735">
+    <P Name="Position">[340, 2723, 370, 2737]</P>
+    <P Name="ZOrder">1224</P>
+    <P Name="BlockMirror">on</P>
+    <P Name="Port">4</P>
+    <P Name="Side">Right</P>
+  </Block>
+  <Block BlockType="PMIOPort" Name="Head" SID="739">
+    <P Name="Position">[345, 2948, 375, 2962]</P>
+    <P Name="ZOrder">1228</P>
+    <P Name="BlockMirror">on</P>
+    <P Name="Port">5</P>
+    <P Name="Side">Right</P>
+  </Block>
+  <Block BlockType="PMIOPort" Name="Left_shoulder" SID="734">
+    <P Name="Position">[340, 2498, 370, 2512]</P>
+    <P Name="ZOrder">1223</P>
+    <P Name="BlockMirror">on</P>
+    <P Name="Port">6</P>
+    <P Name="Side">Right</P>
+  </Block>
+  <Block BlockType="PMIOPort" Name="Left_knee" SID="733">
+    <P Name="Position">[340, 2573, 370, 2587]</P>
+    <P Name="ZOrder">1222</P>
+    <P Name="BlockMirror">on</P>
+    <P Name="Port">7</P>
+    <P Name="Side">Right</P>
+  </Block>
+  <Block BlockType="PMIOPort" Name="Left_Wheel" SID="732">
+    <P Name="Position">[340, 2638, 370, 2652]</P>
+    <P Name="ZOrder">1221</P>
+    <P Name="BlockMirror">on</P>
+    <P Name="Port">8</P>
+    <P Name="Side">Right</P>
+  </Block>
+  <Line LineType="Connection">
+    <P Name="ZOrder">200</P>
+    <P Name="Src">718#lconn:1</P>
+    <P Name="Points">[-14, 0]</P>
+    <Branch ConnectType="DEST_SRC">
+      <P Name="Points">[0, -85]</P>
+      <Branch ConnectType="DEST_DEST">
+        <P Name="Src">722#lconn:1</P>
+        <P Name="Points">[-14, 0]</P>
+      </Branch>
+      <Branch ConnectType="DEST_SRC">
+        <P Name="Points">[0, -70]</P>
+        <Branch ConnectType="DEST_DEST">
+          <P Name="Src">720#lconn:1</P>
+          <P Name="Points">[-14, 0]</P>
+        </Branch>
+        <Branch ConnectType="DEST_SRC">
+          <P Name="Points">[0, -35]</P>
+          <Branch ConnectType="DEST_SRC">
+            <P Name="Dst">738#rconn:1</P>
+          </Branch>
+          <Branch ConnectType="DEST_DEST">
+            <P Name="Points">[146, 2645; 0, 50]</P>
+            <Branch ConnectType="SRC_DEST">
+              <P Name="Points">[146, 2580; 0, 65]</P>
+              <Branch ConnectType="SRC_DEST">
+                <P Name="Src">726#lconn:1</P>
+                <P Name="Points">[-14, 0]</P>
+              </Branch>
+              <Branch ConnectType="SRC_DEST">
+                <P Name="Src">728#lconn:1</P>
+                <P Name="Points">[-14, 0; 0, 75]</P>
+              </Branch>
+            </Branch>
+            <Branch ConnectType="SRC_DEST">
+              <P Name="Src">724#lconn:1</P>
+              <P Name="Points">[-14, 0]</P>
+            </Branch>
+          </Branch>
+        </Branch>
+      </Branch>
+    </Branch>
+    <Branch ConnectType="DEST_DEST">
+      <P Name="Src">730#lconn:1</P>
+      <P Name="Points">[-14, 0; 0, -70]</P>
+    </Branch>
+  </Line>
+  <Line LineType="Connection">
+    <P Name="ZOrder">235</P>
+    <P Name="Src">734#rconn:1</P>
+    <P Name="Dst">728#rconn:1</P>
+  </Line>
+  <Line LineType="Connection">
+    <P Name="ZOrder">238</P>
+    <P Name="Src">722#rconn:1</P>
+    <P Name="Dst">737#rconn:1</P>
+  </Line>
+  <Line LineType="Connection">
+    <P Name="ZOrder">240</P>
+    <P Name="Src">730#rconn:1</P>
+    <P Name="Dst">739#rconn:1</P>
+  </Line>
+  <Line LineType="Connection">
+    <P Name="ZOrder">233</P>
+    <P Name="Src">732#rconn:1</P>
+    <P Name="Dst">724#rconn:1</P>
+  </Line>
+  <Line LineType="Connection">
+    <P Name="ZOrder">234</P>
+    <P Name="Src">733#rconn:1</P>
+    <P Name="Dst">726#rconn:1</P>
+  </Line>
+  <Line LineType="Connection">
+    <P Name="ZOrder">237</P>
+    <P Name="Src">718#rconn:1</P>
+    <P Name="Dst">736#rconn:1</P>
+  </Line>
+  <Line LineType="Connection">
+    <P Name="ZOrder">236</P>
+    <P Name="Src">720#rconn:1</P>
+    <P Name="Dst">735#rconn:1</P>
+  </Line>
+</System>

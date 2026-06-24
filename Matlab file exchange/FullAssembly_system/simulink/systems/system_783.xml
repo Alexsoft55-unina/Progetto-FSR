@@ -1,0 +1,1993 @@
+<?xml version="1.0" encoding="utf-8"?>
+<System>
+  <P Name="Location">[-8, -8, 1928, 1048]</P>
+  <P Name="ZoomFactor">150</P>
+  <Block BlockType="Reference" Name="Cylindrical1" SID="10">
+    <PortCounts lconn="1" rconn="1"/>
+    <P Name="Position">[1660, 910, 1700, 950]</P>
+    <P Name="ZOrder">10</P>
+    <P Name="LibraryVersion">25.21</P>
+    <P Name="SourceBlock">sm_lib/Joints/Cylindrical
+Joint</P>
+    <P Name="SourceType">Cylindrical
+Joint</P>
+    <InstanceData>
+      <P Name="LogSimulationData">off</P>
+      <P Name="SimscapeInstrumentationLogging">off</P>
+      <P Name="SimscapeInstrumentationVariables" Ref="bdmxdata:SimscapeInstrumentationVariables_10"/>
+      <P Name="JointMode">Normal</P>
+      <P Name="CompositeWrenchDir">FollowerOnBase</P>
+      <P Name="CompositeWrenchFrame">BaseFrame</P>
+      <P Name="SenseConstraintForce">off</P>
+      <P Name="SenseConstraintTorque">off</P>
+      <P Name="SenseTotalForce">off</P>
+      <P Name="SenseTotalTorque">off</P>
+      <P Name="RzPositionTargetSpecify">on</P>
+      <P Name="RzPositionTargetPriority">Low</P>
+      <P Name="RzPositionTargetValue">smiData.CylindricalJoint(2).Rz.Pos</P>
+      <P Name="RzPositionTargetValue_conf">compiletime</P>
+      <P Name="RzPositionTargetValueUnits">deg</P>
+      <P Name="RzVelocityTargetSpecify">off</P>
+      <P Name="RzVelocityTargetPriority">High</P>
+      <P Name="RzVelocityTargetValue">0</P>
+      <P Name="RzVelocityTargetValue_conf">compiletime</P>
+      <P Name="RzVelocityTargetValueUnits">deg/s</P>
+      <P Name="RzEquilibriumPosition">0</P>
+      <P Name="RzEquilibriumPosition_conf">compiletime</P>
+      <P Name="RzEquilibriumPositionUnits">deg</P>
+      <P Name="RzSpringStiffness">0</P>
+      <P Name="RzSpringStiffness_conf">compiletime</P>
+      <P Name="RzSpringStiffnessUnits">N*m/deg</P>
+      <P Name="RzDampingCoefficient">0</P>
+      <P Name="RzDampingCoefficient_conf">compiletime</P>
+      <P Name="RzDampingCoefficientUnits">N*m/(deg/s)</P>
+      <P Name="RzLowerLimitSpecify">off</P>
+      <P Name="RzLowerLimitBound">-90</P>
+      <P Name="RzLowerLimitBound_conf">compiletime</P>
+      <P Name="RzLowerLimitBoundUnits">deg</P>
+      <P Name="RzLowerLimitStiffness">1e4</P>
+      <P Name="RzLowerLimitStiffness_conf">compiletime</P>
+      <P Name="RzLowerLimitStiffnessUnits">N*m/deg</P>
+      <P Name="RzLowerLimitDamping">10</P>
+      <P Name="RzLowerLimitDamping_conf">compiletime</P>
+      <P Name="RzLowerLimitDampingUnits">N*m/(deg/s)</P>
+      <P Name="RzLowerLimitTransitionRegionWidth">0.1</P>
+      <P Name="RzLowerLimitTransitionRegionWidth_conf">compiletime</P>
+      <P Name="RzLowerLimitTransitionRegionWidthUnits">deg</P>
+      <P Name="RzUpperLimitSpecify">off</P>
+      <P Name="RzUpperLimitBound">90</P>
+      <P Name="RzUpperLimitBound_conf">compiletime</P>
+      <P Name="RzUpperLimitBoundUnits">deg</P>
+      <P Name="RzUpperLimitStiffness">1e4</P>
+      <P Name="RzUpperLimitStiffness_conf">compiletime</P>
+      <P Name="RzUpperLimitStiffnessUnits">N*m/deg</P>
+      <P Name="RzUpperLimitDamping">10</P>
+      <P Name="RzUpperLimitDamping_conf">compiletime</P>
+      <P Name="RzUpperLimitDampingUnits">N*m/(deg/s)</P>
+      <P Name="RzUpperLimitTransitionRegionWidth">0.1</P>
+      <P Name="RzUpperLimitTransitionRegionWidth_conf">compiletime</P>
+      <P Name="RzUpperLimitTransitionRegionWidthUnits">deg</P>
+      <P Name="RzTorqueActuationMode">NoTorque</P>
+      <P Name="RzMotionActuationMode">ComputedMotion</P>
+      <P Name="RzSensePosition">off</P>
+      <P Name="RzSenseVelocity">off</P>
+      <P Name="RzSenseAcceleration">off</P>
+      <P Name="RzSenseTorqueForce">off</P>
+      <P Name="RzSenseLowerLimitTorqueForce">off</P>
+      <P Name="RzSenseUpperLimitTorqueForce">off</P>
+      <P Name="PzPositionTargetSpecify">on</P>
+      <P Name="PzPositionTargetPriority">Low</P>
+      <P Name="PzPositionTargetValue">smiData.CylindricalJoint(2).Pz.Pos</P>
+      <P Name="PzPositionTargetValue_conf">compiletime</P>
+      <P Name="PzPositionTargetValueUnits">mm</P>
+      <P Name="PzVelocityTargetSpecify">off</P>
+      <P Name="PzVelocityTargetPriority">High</P>
+      <P Name="PzVelocityTargetValue">0</P>
+      <P Name="PzVelocityTargetValue_conf">compiletime</P>
+      <P Name="PzVelocityTargetValueUnits">m/s</P>
+      <P Name="PzEquilibriumPosition">0</P>
+      <P Name="PzEquilibriumPosition_conf">compiletime</P>
+      <P Name="PzEquilibriumPositionUnits">m</P>
+      <P Name="PzSpringStiffness">0</P>
+      <P Name="PzSpringStiffness_conf">compiletime</P>
+      <P Name="PzSpringStiffnessUnits">N/m</P>
+      <P Name="PzDampingCoefficient">0</P>
+      <P Name="PzDampingCoefficient_conf">compiletime</P>
+      <P Name="PzDampingCoefficientUnits">N/(m/s)</P>
+      <P Name="PzLowerLimitSpecify">off</P>
+      <P Name="PzLowerLimitBound">-1</P>
+      <P Name="PzLowerLimitBound_conf">compiletime</P>
+      <P Name="PzLowerLimitBoundUnits">m</P>
+      <P Name="PzLowerLimitStiffness">1e6</P>
+      <P Name="PzLowerLimitStiffness_conf">compiletime</P>
+      <P Name="PzLowerLimitStiffnessUnits">N/m</P>
+      <P Name="PzLowerLimitDamping">1e3</P>
+      <P Name="PzLowerLimitDamping_conf">compiletime</P>
+      <P Name="PzLowerLimitDampingUnits">N/(m/s)</P>
+      <P Name="PzLowerLimitTransitionRegionWidth">1e-4</P>
+      <P Name="PzLowerLimitTransitionRegionWidth_conf">compiletime</P>
+      <P Name="PzLowerLimitTransitionRegionWidthUnits">m</P>
+      <P Name="PzUpperLimitSpecify">off</P>
+      <P Name="PzUpperLimitBound">1</P>
+      <P Name="PzUpperLimitBound_conf">compiletime</P>
+      <P Name="PzUpperLimitBoundUnits">m</P>
+      <P Name="PzUpperLimitStiffness">1e6</P>
+      <P Name="PzUpperLimitStiffness_conf">compiletime</P>
+      <P Name="PzUpperLimitStiffnessUnits">N/m</P>
+      <P Name="PzUpperLimitDamping">1e3</P>
+      <P Name="PzUpperLimitDamping_conf">compiletime</P>
+      <P Name="PzUpperLimitDampingUnits">N/(m/s)</P>
+      <P Name="PzUpperLimitTransitionRegionWidth">1e-4</P>
+      <P Name="PzUpperLimitTransitionRegionWidth_conf">compiletime</P>
+      <P Name="PzUpperLimitTransitionRegionWidthUnits">m</P>
+      <P Name="PzTorqueActuationMode">NoTorque</P>
+      <P Name="PzMotionActuationMode">ComputedMotion</P>
+      <P Name="PzSensePosition">off</P>
+      <P Name="PzSenseVelocity">off</P>
+      <P Name="PzSenseAcceleration">off</P>
+      <P Name="PzSenseTorqueForce">off</P>
+      <P Name="PzSenseLowerLimitTorqueForce">off</P>
+      <P Name="PzSenseUpperLimitTorqueForce">off</P>
+    </InstanceData>
+  </Block>
+  <Block BlockType="Reference" Name="Cylindrical7" SID="26">
+    <PortCounts lconn="1" rconn="1"/>
+    <P Name="Position">[1890, 795, 1930, 835]</P>
+    <P Name="ZOrder">26</P>
+    <P Name="LibraryVersion">25.21</P>
+    <P Name="SourceBlock">sm_lib/Joints/Cylindrical
+Joint</P>
+    <P Name="SourceType">Cylindrical
+Joint</P>
+    <InstanceData>
+      <P Name="LogSimulationData">off</P>
+      <P Name="SimscapeInstrumentationLogging">off</P>
+      <P Name="SimscapeInstrumentationVariables" Ref="bdmxdata:SimscapeInstrumentationVariables_26"/>
+      <P Name="JointMode">Normal</P>
+      <P Name="CompositeWrenchDir">FollowerOnBase</P>
+      <P Name="CompositeWrenchFrame">BaseFrame</P>
+      <P Name="SenseConstraintForce">off</P>
+      <P Name="SenseConstraintTorque">off</P>
+      <P Name="SenseTotalForce">off</P>
+      <P Name="SenseTotalTorque">off</P>
+      <P Name="RzPositionTargetSpecify">on</P>
+      <P Name="RzPositionTargetPriority">Low</P>
+      <P Name="RzPositionTargetValue">smiData.CylindricalJoint(8).Rz.Pos</P>
+      <P Name="RzPositionTargetValue_conf">compiletime</P>
+      <P Name="RzPositionTargetValueUnits">deg</P>
+      <P Name="RzVelocityTargetSpecify">off</P>
+      <P Name="RzVelocityTargetPriority">High</P>
+      <P Name="RzVelocityTargetValue">0</P>
+      <P Name="RzVelocityTargetValue_conf">compiletime</P>
+      <P Name="RzVelocityTargetValueUnits">deg/s</P>
+      <P Name="RzEquilibriumPosition">0</P>
+      <P Name="RzEquilibriumPosition_conf">compiletime</P>
+      <P Name="RzEquilibriumPositionUnits">deg</P>
+      <P Name="RzSpringStiffness">0</P>
+      <P Name="RzSpringStiffness_conf">compiletime</P>
+      <P Name="RzSpringStiffnessUnits">N*m/deg</P>
+      <P Name="RzDampingCoefficient">0</P>
+      <P Name="RzDampingCoefficient_conf">compiletime</P>
+      <P Name="RzDampingCoefficientUnits">N*m/(deg/s)</P>
+      <P Name="RzLowerLimitSpecify">off</P>
+      <P Name="RzLowerLimitBound">-90</P>
+      <P Name="RzLowerLimitBound_conf">compiletime</P>
+      <P Name="RzLowerLimitBoundUnits">deg</P>
+      <P Name="RzLowerLimitStiffness">1e4</P>
+      <P Name="RzLowerLimitStiffness_conf">compiletime</P>
+      <P Name="RzLowerLimitStiffnessUnits">N*m/deg</P>
+      <P Name="RzLowerLimitDamping">10</P>
+      <P Name="RzLowerLimitDamping_conf">compiletime</P>
+      <P Name="RzLowerLimitDampingUnits">N*m/(deg/s)</P>
+      <P Name="RzLowerLimitTransitionRegionWidth">0.1</P>
+      <P Name="RzLowerLimitTransitionRegionWidth_conf">compiletime</P>
+      <P Name="RzLowerLimitTransitionRegionWidthUnits">deg</P>
+      <P Name="RzUpperLimitSpecify">off</P>
+      <P Name="RzUpperLimitBound">90</P>
+      <P Name="RzUpperLimitBound_conf">compiletime</P>
+      <P Name="RzUpperLimitBoundUnits">deg</P>
+      <P Name="RzUpperLimitStiffness">1e4</P>
+      <P Name="RzUpperLimitStiffness_conf">compiletime</P>
+      <P Name="RzUpperLimitStiffnessUnits">N*m/deg</P>
+      <P Name="RzUpperLimitDamping">10</P>
+      <P Name="RzUpperLimitDamping_conf">compiletime</P>
+      <P Name="RzUpperLimitDampingUnits">N*m/(deg/s)</P>
+      <P Name="RzUpperLimitTransitionRegionWidth">0.1</P>
+      <P Name="RzUpperLimitTransitionRegionWidth_conf">compiletime</P>
+      <P Name="RzUpperLimitTransitionRegionWidthUnits">deg</P>
+      <P Name="RzTorqueActuationMode">NoTorque</P>
+      <P Name="RzMotionActuationMode">ComputedMotion</P>
+      <P Name="RzSensePosition">off</P>
+      <P Name="RzSenseVelocity">off</P>
+      <P Name="RzSenseAcceleration">off</P>
+      <P Name="RzSenseTorqueForce">off</P>
+      <P Name="RzSenseLowerLimitTorqueForce">off</P>
+      <P Name="RzSenseUpperLimitTorqueForce">off</P>
+      <P Name="PzPositionTargetSpecify">on</P>
+      <P Name="PzPositionTargetPriority">Low</P>
+      <P Name="PzPositionTargetValue">smiData.CylindricalJoint(8).Pz.Pos</P>
+      <P Name="PzPositionTargetValue_conf">compiletime</P>
+      <P Name="PzPositionTargetValueUnits">mm</P>
+      <P Name="PzVelocityTargetSpecify">off</P>
+      <P Name="PzVelocityTargetPriority">High</P>
+      <P Name="PzVelocityTargetValue">0</P>
+      <P Name="PzVelocityTargetValue_conf">compiletime</P>
+      <P Name="PzVelocityTargetValueUnits">m/s</P>
+      <P Name="PzEquilibriumPosition">0</P>
+      <P Name="PzEquilibriumPosition_conf">compiletime</P>
+      <P Name="PzEquilibriumPositionUnits">m</P>
+      <P Name="PzSpringStiffness">0</P>
+      <P Name="PzSpringStiffness_conf">compiletime</P>
+      <P Name="PzSpringStiffnessUnits">N/m</P>
+      <P Name="PzDampingCoefficient">0</P>
+      <P Name="PzDampingCoefficient_conf">compiletime</P>
+      <P Name="PzDampingCoefficientUnits">N/(m/s)</P>
+      <P Name="PzLowerLimitSpecify">off</P>
+      <P Name="PzLowerLimitBound">-1</P>
+      <P Name="PzLowerLimitBound_conf">compiletime</P>
+      <P Name="PzLowerLimitBoundUnits">m</P>
+      <P Name="PzLowerLimitStiffness">1e6</P>
+      <P Name="PzLowerLimitStiffness_conf">compiletime</P>
+      <P Name="PzLowerLimitStiffnessUnits">N/m</P>
+      <P Name="PzLowerLimitDamping">1e3</P>
+      <P Name="PzLowerLimitDamping_conf">compiletime</P>
+      <P Name="PzLowerLimitDampingUnits">N/(m/s)</P>
+      <P Name="PzLowerLimitTransitionRegionWidth">1e-4</P>
+      <P Name="PzLowerLimitTransitionRegionWidth_conf">compiletime</P>
+      <P Name="PzLowerLimitTransitionRegionWidthUnits">m</P>
+      <P Name="PzUpperLimitSpecify">off</P>
+      <P Name="PzUpperLimitBound">1</P>
+      <P Name="PzUpperLimitBound_conf">compiletime</P>
+      <P Name="PzUpperLimitBoundUnits">m</P>
+      <P Name="PzUpperLimitStiffness">1e6</P>
+      <P Name="PzUpperLimitStiffness_conf">compiletime</P>
+      <P Name="PzUpperLimitStiffnessUnits">N/m</P>
+      <P Name="PzUpperLimitDamping">1e3</P>
+      <P Name="PzUpperLimitDamping_conf">compiletime</P>
+      <P Name="PzUpperLimitDampingUnits">N/(m/s)</P>
+      <P Name="PzUpperLimitTransitionRegionWidth">1e-4</P>
+      <P Name="PzUpperLimitTransitionRegionWidth_conf">compiletime</P>
+      <P Name="PzUpperLimitTransitionRegionWidthUnits">m</P>
+      <P Name="PzTorqueActuationMode">NoTorque</P>
+      <P Name="PzMotionActuationMode">ComputedMotion</P>
+      <P Name="PzSensePosition">off</P>
+      <P Name="PzSenseVelocity">off</P>
+      <P Name="PzSenseAcceleration">off</P>
+      <P Name="PzSenseTorqueForce">off</P>
+      <P Name="PzSenseLowerLimitTorqueForce">off</P>
+      <P Name="PzSenseUpperLimitTorqueForce">off</P>
+    </InstanceData>
+  </Block>
+  <Block BlockType="Goto" Name="Goto" SID="896">
+    <P Name="Position">[1530, 1002, 1600, 1058]</P>
+    <P Name="ZOrder">1243</P>
+    <P Name="GotoTag">L_Knee</P>
+    <P Name="TagVisibility">global</P>
+  </Block>
+  <Block BlockType="Reference" Name="L_knee_motor" SID="120">
+    <PortCounts lconn="2" rconn="2"/>
+    <P Name="Position">[1215, 725, 1255, 765]</P>
+    <P Name="ZOrder">120</P>
+    <P Name="LibraryVersion">25.21</P>
+    <P Name="SourceBlock">sm_lib/Joints/Revolute Joint</P>
+    <P Name="SourceType">Revolute Joint</P>
+    <InstanceData>
+      <P Name="LogSimulationData">off</P>
+      <P Name="SimscapeInstrumentationLogging">off</P>
+      <P Name="SimscapeInstrumentationVariables" Ref="bdmxdata:SimscapeInstrumentationVariables_120"/>
+      <P Name="JointMode">Normal</P>
+      <P Name="CompositeWrenchDir">FollowerOnBase</P>
+      <P Name="CompositeWrenchFrame">BaseFrame</P>
+      <P Name="SenseConstraintForce">off</P>
+      <P Name="SenseConstraintTorque">off</P>
+      <P Name="SenseTotalForce">off</P>
+      <P Name="SenseTotalTorque">off</P>
+      <P Name="PositionTargetSpecify">on</P>
+      <P Name="PositionTargetPriority">Low</P>
+      <P Name="PositionTargetValue">smiData.RevoluteJoint(3).Rz.Pos</P>
+      <P Name="PositionTargetValue_conf">compiletime</P>
+      <P Name="PositionTargetValueUnits">deg</P>
+      <P Name="VelocityTargetSpecify">off</P>
+      <P Name="VelocityTargetPriority">High</P>
+      <P Name="VelocityTargetValue">0</P>
+      <P Name="VelocityTargetValue_conf">compiletime</P>
+      <P Name="VelocityTargetValueUnits">deg/s</P>
+      <P Name="EquilibriumPosition">0</P>
+      <P Name="EquilibriumPosition_conf">compiletime</P>
+      <P Name="EquilibriumPositionUnits">deg</P>
+      <P Name="SpringStiffness">0</P>
+      <P Name="SpringStiffness_conf">compiletime</P>
+      <P Name="SpringStiffnessUnits">N*m/deg</P>
+      <P Name="DampingCoefficient">0.0001</P>
+      <P Name="DampingCoefficient_conf">compiletime</P>
+      <P Name="DampingCoefficientUnits">N*m/(deg/s)</P>
+      <P Name="LowerLimitSpecify">off</P>
+      <P Name="LowerLimitBound">-90</P>
+      <P Name="LowerLimitBound_conf">compiletime</P>
+      <P Name="LowerLimitBoundUnits">deg</P>
+      <P Name="LowerLimitStiffness">1e4</P>
+      <P Name="LowerLimitStiffness_conf">compiletime</P>
+      <P Name="LowerLimitStiffnessUnits">N*m/deg</P>
+      <P Name="LowerLimitDamping">10</P>
+      <P Name="LowerLimitDamping_conf">compiletime</P>
+      <P Name="LowerLimitDampingUnits">N*m/(deg/s)</P>
+      <P Name="LowerLimitTransitionRegionWidth">0.1</P>
+      <P Name="LowerLimitTransitionRegionWidth_conf">compiletime</P>
+      <P Name="LowerLimitTransitionRegionWidthUnits">deg</P>
+      <P Name="UpperLimitSpecify">off</P>
+      <P Name="UpperLimitBound">90</P>
+      <P Name="UpperLimitBound_conf">compiletime</P>
+      <P Name="UpperLimitBoundUnits">deg</P>
+      <P Name="UpperLimitStiffness">1e4</P>
+      <P Name="UpperLimitStiffness_conf">compiletime</P>
+      <P Name="UpperLimitStiffnessUnits">N*m/deg</P>
+      <P Name="UpperLimitDamping">10</P>
+      <P Name="UpperLimitDamping_conf">compiletime</P>
+      <P Name="UpperLimitDampingUnits">N*m/(deg/s)</P>
+      <P Name="UpperLimitTransitionRegionWidth">0.1</P>
+      <P Name="UpperLimitTransitionRegionWidth_conf">compiletime</P>
+      <P Name="UpperLimitTransitionRegionWidthUnits">deg</P>
+      <P Name="TorqueActuationMode">InputTorque</P>
+      <P Name="MotionActuationMode">ComputedMotion</P>
+      <P Name="SensePosition">on</P>
+      <P Name="SenseVelocity">off</P>
+      <P Name="SenseAcceleration">off</P>
+      <P Name="SenseTorqueForce">off</P>
+      <P Name="SenseLowerLimitTorqueForce">off</P>
+      <P Name="SenseUpperLimitTorqueForce">off</P>
+    </InstanceData>
+  </Block>
+  <Block BlockType="SubSystem" Name="Left_joint_connect_1_RIGID" SID="33">
+    <PortCounts lconn="3" rconn="1"/>
+    <P Name="Position">[1780, 770, 1820, 810]</P>
+    <P Name="ZOrder">33</P>
+    <P Name="ContentPreviewEnabled">on</P>
+    <Mask>
+      <Display/>
+    </Mask>
+    <System Ref="system_33"/>
+  </Block>
+  <Block BlockType="SubSystem" Name="Left_knee_bone_1_RIGID" SID="34">
+    <PortCounts lconn="3" rconn="7"/>
+    <P Name="Position">[1490, 379, 1570, 461]</P>
+    <P Name="ZOrder">34</P>
+    <P Name="ContentPreviewEnabled">on</P>
+    <Mask>
+      <Display/>
+    </Mask>
+    <System Ref="system_34"/>
+  </Block>
+  <Block BlockType="SubSystem" Name="M2dot5_Screw_DC_3_RIGID" SID="42">
+    <PortCounts lconn="1"/>
+    <P Name="Position">[1735, 195, 1775, 235]</P>
+    <P Name="ZOrder">42</P>
+    <P Name="ContentPreviewEnabled">on</P>
+    <Mask>
+      <Display/>
+    </Mask>
+    <System Ref="system_42"/>
+  </Block>
+  <Block BlockType="SubSystem" Name="M2dot5_Screw_DC_4_RIGID" SID="43">
+    <PortCounts lconn="1"/>
+    <P Name="Position">[1735, 95, 1775, 135]</P>
+    <P Name="ZOrder">43</P>
+    <P Name="ContentPreviewEnabled">on</P>
+    <Mask>
+      <Display/>
+    </Mask>
+    <System Ref="system_43"/>
+  </Block>
+  <Block BlockType="SubSystem" Name="M2dot5_Screw_withBolt_5_RIGID" SID="63">
+    <PortCounts lconn="1"/>
+    <P Name="Position">[1735, 595, 1775, 635]</P>
+    <P Name="ZOrder">63</P>
+    <P Name="ContentPreviewEnabled">on</P>
+    <Mask>
+      <Display/>
+    </Mask>
+    <System Ref="system_63"/>
+  </Block>
+  <Block BlockType="SubSystem" Name="M2dot5_Screw_withBolt_6_RIGID" SID="64">
+    <PortCounts lconn="1"/>
+    <P Name="Position">[1735, 495, 1775, 535]</P>
+    <P Name="ZOrder">64</P>
+    <P Name="ContentPreviewEnabled">on</P>
+    <Mask>
+      <Display/>
+    </Mask>
+    <System Ref="system_64"/>
+  </Block>
+  <Block BlockType="SubSystem" Name="M2dot5_Screw_withBolt_7_RIGID" SID="65">
+    <PortCounts lconn="1"/>
+    <P Name="Position">[1735, 395, 1775, 435]</P>
+    <P Name="ZOrder">65</P>
+    <P Name="ContentPreviewEnabled">on</P>
+    <Mask>
+      <Display/>
+    </Mask>
+    <System Ref="system_65"/>
+  </Block>
+  <Block BlockType="SubSystem" Name="M2dot5_Screw_withBolt_8_RIGID" SID="66">
+    <PortCounts lconn="1"/>
+    <P Name="Position">[1735, 295, 1775, 335]</P>
+    <P Name="ZOrder">66</P>
+    <P Name="ContentPreviewEnabled">on</P>
+    <Mask>
+      <Display/>
+    </Mask>
+    <System Ref="system_66"/>
+  </Block>
+  <Block BlockType="SubSystem" Name="M3_shaft_screw_8_RIGID" SID="81">
+    <PortCounts lconn="2"/>
+    <P Name="Position">[2000, 805, 2040, 845]</P>
+    <P Name="ZOrder">81</P>
+    <P Name="ContentPreviewEnabled">on</P>
+    <Mask>
+      <Display/>
+    </Mask>
+    <System Ref="system_81"/>
+  </Block>
+  <Block BlockType="Reference" Name="PID Controller" SID="844">
+    <PortCounts in="1" out="1"/>
+    <P Name="Position">[1060, 1012, 1100, 1048]</P>
+    <P Name="ZOrder">1238</P>
+    <P Name="LibraryVersion">11.0</P>
+    <P Name="SourceBlock">slpidlib/PID Controller</P>
+    <P Name="SourceType">PID 1dof</P>
+    <InstanceData>
+      <P Name="RTWMemSecFuncInitTerm">Inherit from model</P>
+      <P Name="RTWMemSecFuncExecute">Inherit from model</P>
+      <P Name="RTWMemSecDataConstants">Inherit from model</P>
+      <P Name="RTWMemSecDataInternal">Inherit from model</P>
+      <P Name="RTWMemSecDataParameters">Inherit from model</P>
+      <P Name="ContentPreviewEnabled">on</P>
+      <P Name="Controller">PID</P>
+      <P Name="Form">Parallel</P>
+      <P Name="TimeDomain">Continuous-time</P>
+      <P Name="UseExternalTs">off</P>
+      <P Name="SampleTime">-1</P>
+      <P Name="IntegratorMethod">Forward Euler</P>
+      <P Name="FilterMethod">Forward Euler</P>
+      <P Name="ControllerParametersSource">internal</P>
+      <P Name="P">30</P>
+      <P Name="I">80</P>
+      <P Name="UseKiTs">off</P>
+      <P Name="D">0.8</P>
+      <P Name="UseExternalDerivativeSource">off</P>
+      <P Name="N">100</P>
+      <P Name="UseFilter">on</P>
+      <P Name="TunerSelectOption">Transfer Function Based (PID Tuner App)</P>
+      <P Name="ZeroCross">on</P>
+      <P Name="InitialConditionSource">internal</P>
+      <P Name="InitialConditionForIntegrator">0</P>
+      <P Name="InitialConditionForFilter">0</P>
+      <P Name="DifferentiatorICPrevScaledInput">0</P>
+      <P Name="ExternalReset">none</P>
+      <P Name="IgnoreLimit">off</P>
+      <P Name="TrackingMode">off</P>
+      <P Name="Kt">1</P>
+      <P Name="LimitOutput">off</P>
+      <P Name="SatLimitsSource">internal</P>
+      <P Name="UpperSaturationLimit">inf</P>
+      <P Name="LowerSaturationLimit">-inf</P>
+      <P Name="LinearizeAsGain">on</P>
+      <P Name="AntiWindupMode">none</P>
+      <P Name="Kb">1</P>
+      <P Name="LimitIntegrator">off</P>
+      <P Name="UpperIntegratorSaturationLimit">inf</P>
+      <P Name="LowerIntegratorSaturationLimit">-inf</P>
+      <P Name="RndMeth">Floor</P>
+      <P Name="SaturateOnIntegerOverflow">off</P>
+      <P Name="LockScale">off</P>
+      <P Name="PGainOutDataTypeStr">Inherit: Inherit via internal rule</P>
+      <P Name="PProdOutDataTypeStr">Inherit: Inherit via internal rule</P>
+      <P Name="POutMin">[]</P>
+      <P Name="POutMax">[]</P>
+      <P Name="IGainOutDataTypeStr">Inherit: Inherit via internal rule</P>
+      <P Name="IProdOutDataTypeStr">Inherit: Inherit via internal rule</P>
+      <P Name="IOutMin">[]</P>
+      <P Name="IOutMax">[]</P>
+      <P Name="DGainOutDataTypeStr">Inherit: Inherit via internal rule</P>
+      <P Name="DProdOutDataTypeStr">Inherit: Inherit via internal rule</P>
+      <P Name="DOutMin">[]</P>
+      <P Name="DOutMax">[]</P>
+      <P Name="NGainOutDataTypeStr">Inherit: Inherit via internal rule</P>
+      <P Name="NProdOutDataTypeStr">Inherit: Inherit via internal rule</P>
+      <P Name="NOutMin">[]</P>
+      <P Name="NOutMax">[]</P>
+      <P Name="SumOutDataTypeStr">Inherit: Inherit via internal rule</P>
+      <P Name="SumOutMin">[]</P>
+      <P Name="SumOutMax">[]</P>
+      <P Name="SaturationOutDataTypeStr">Inherit: Same as input</P>
+      <P Name="SaturationOutMin">[]</P>
+      <P Name="SaturationOutMax">[]</P>
+      <P Name="PParamDataTypeStr">Inherit: Inherit via internal rule</P>
+      <P Name="PParamMin">[]</P>
+      <P Name="PParamMax">[]</P>
+      <P Name="IParamDataTypeStr">Inherit: Inherit via internal rule</P>
+      <P Name="IParamMin">[]</P>
+      <P Name="IParamMax">[]</P>
+      <P Name="DParamDataTypeStr">Inherit: Inherit via internal rule</P>
+      <P Name="DParamMin">[]</P>
+      <P Name="DParamMax">[]</P>
+      <P Name="NParamDataTypeStr">Inherit: Inherit via internal rule</P>
+      <P Name="NParamMin">[]</P>
+      <P Name="NParamMax">[]</P>
+      <P Name="KbParamDataTypeStr">Inherit: Inherit via internal rule</P>
+      <P Name="KbParamMin">[]</P>
+      <P Name="KbParamMax">[]</P>
+      <P Name="KtParamDataTypeStr">Inherit: Inherit via internal rule</P>
+      <P Name="KtParamMin">[]</P>
+      <P Name="KtParamMax">[]</P>
+      <P Name="KbOutDataTypeStr">Inherit: Inherit via internal rule</P>
+      <P Name="KbOutMin">[]</P>
+      <P Name="KbOutMax">[]</P>
+      <P Name="KtOutDataTypeStr">Inherit: Inherit via internal rule</P>
+      <P Name="KtOutMin">[]</P>
+      <P Name="KtOutMax">[]</P>
+      <P Name="IntegratorOutDataTypeStr">Inherit: Inherit via internal rule</P>
+      <P Name="IntegratorOutMin">[]</P>
+      <P Name="IntegratorOutMax">[]</P>
+      <P Name="FilterOutDataTypeStr">Inherit: Inherit via internal rule</P>
+      <P Name="FilterOutMin">[]</P>
+      <P Name="FilterOutMax">[]</P>
+      <P Name="SumI1OutDataTypeStr">Inherit: Inherit via internal rule</P>
+      <P Name="SumI1OutMin">[]</P>
+      <P Name="SumI1OutMax">[]</P>
+      <P Name="SumI2OutDataTypeStr">Inherit: Inherit via internal rule</P>
+      <P Name="SumI2OutMin">[]</P>
+      <P Name="SumI2OutMax">[]</P>
+      <P Name="SumI3OutDataTypeStr">Inherit: Inherit via internal rule</P>
+      <P Name="SumI3OutMin">[]</P>
+      <P Name="SumI3OutMax">[]</P>
+      <P Name="SumI4OutDataTypeStr">Inherit: Inherit via internal rule</P>
+      <P Name="SumI4OutMin">[]</P>
+      <P Name="SumI4OutMax">[]</P>
+      <P Name="SumDOutDataTypeStr">Inherit: Inherit via internal rule</P>
+      <P Name="SumDOutMin">[]</P>
+      <P Name="SumDOutMax">[]</P>
+      <P Name="SumAccumDataTypeStr">Inherit: Inherit via internal rule</P>
+      <P Name="SumI1AccumDataTypeStr">Inherit: Inherit via internal rule</P>
+      <P Name="SumI2AccumDataTypeStr">Inherit: Inherit via internal rule</P>
+      <P Name="SumI3AccumDataTypeStr">Inherit: Inherit via internal rule</P>
+      <P Name="SumI4AccumDataTypeStr">Inherit: Inherit via internal rule</P>
+      <P Name="SumDAccumDataTypeStr">Inherit: Inherit via internal rule</P>
+      <P Name="DifferentiatorOutDataTypeStr">Inherit: Inherit via internal rule</P>
+      <P Name="DifferentiatorOutMin">[]</P>
+      <P Name="DifferentiatorOutMax">[]</P>
+      <P Name="FilterDiffNumProductOutputDataTypeStr">Inherit: Inherit via internal rule</P>
+      <P Name="FilterDiffDenProductOutputDataTypeStr">Inherit: Inherit via internal rule</P>
+      <P Name="FilterDiffNumAccumDataTypeStr">Inherit: Inherit via internal rule</P>
+      <P Name="FilterDiffDenAccumDataTypeStr">Inherit: Inherit via internal rule</P>
+      <P Name="FilterDiffOutCoefDataTypeStr">Inherit: Inherit via internal rule</P>
+      <P Name="FilterDiffOutCoefMin">[]</P>
+      <P Name="FilterDiffOutCoefMax">[]</P>
+      <P Name="ReciprocalOutDataTypeStr">Inherit: Inherit via internal rule</P>
+      <P Name="ReciprocalOutMin">[]</P>
+      <P Name="ReciprocalOutMax">[]</P>
+      <P Name="SumDenOutDataTypeStr">Inherit: Inherit via internal rule</P>
+      <P Name="SumDenOutMin">[]</P>
+      <P Name="SumDenOutMax">[]</P>
+      <P Name="SumNumOutDataTypeStr">Inherit: Inherit via internal rule</P>
+      <P Name="SumNumOutMin">[]</P>
+      <P Name="SumNumOutMax">[]</P>
+      <P Name="SumDenAccumDataTypeStr">Inherit: Inherit via internal rule</P>
+      <P Name="SumNumAccumDataTypeStr">Inherit: Inherit via internal rule</P>
+      <P Name="DivideOutDataTypeStr">Inherit: Inherit via internal rule</P>
+      <P Name="DivideOutMin">[]</P>
+      <P Name="DivideOutMax">[]</P>
+      <P Name="UdiffTsProdOutDataTypeStr">Inherit: Inherit via internal rule</P>
+      <P Name="UdiffTsProdOutMin">[]</P>
+      <P Name="UdiffTsProdOutMax">[]</P>
+      <P Name="NTsProdOutDataTypeStr">Inherit: Inherit via internal rule</P>
+      <P Name="NTsProdOutMin">[]</P>
+      <P Name="NTsProdOutMax">[]</P>
+      <P Name="UintegralTsProdOutDataTypeStr">Inherit: Inherit via internal rule</P>
+      <P Name="UintegralTsProdOutMin">[]</P>
+      <P Name="UintegralTsProdOutMax">[]</P>
+      <P Name="UngainTsProdOutDataTypeStr">Inherit: Inherit via internal rule</P>
+      <P Name="UngainTsProdOutMin">[]</P>
+      <P Name="UngainTsProdOutMax">[]</P>
+      <P Name="ClampingZeroOutDataTypeStr">Inherit: Inherit via back propagation</P>
+      <P Name="ClampingZeroOutMin">[]</P>
+      <P Name="ClampingZeroOutMax">[]</P>
+      <P Name="FilterDenConstantOutDataTypeStr">Inherit: Inherit via back propagation</P>
+      <P Name="FilterDenConstantOutMin">[]</P>
+      <P Name="FilterDenConstantOutMax">[]</P>
+      <P Name="PCopyOutDataTypeStr">Inherit: Inherit via back propagation</P>
+      <P Name="PCopyOutMin">[]</P>
+      <P Name="PCopyOutMax">[]</P>
+      <P Name="NCopyOutDataTypeStr">Inherit: Inherit via back propagation</P>
+      <P Name="NCopyOutMin">[]</P>
+      <P Name="NCopyOutMax">[]</P>
+      <P Name="IntegratorContinuousStateAttributes">&apos;&apos;</P>
+      <P Name="IntegratorStateMustResolveToSignalObject">off</P>
+      <P Name="IntegratorRTWStateStorageClass">Auto</P>
+      <P Name="FilterContinuousStateAttributes">&apos;&apos;</P>
+      <P Name="FilterStateMustResolveToSignalObject">off</P>
+      <P Name="FilterRTWStateStorageClass">Auto</P>
+      <P Name="ParallelPVariant">InternalParameters</P>
+      <P Name="IdealPVariant">Disabled</P>
+      <P Name="IVariant">InternalParameters</P>
+      <P Name="DVariant">InternalParameters</P>
+      <P Name="IntegratorVariant">Continuous</P>
+      <P Name="SatVariant">Disabled</P>
+      <P Name="AWVariant">Passthrough</P>
+      <P Name="PCopyVariant">Disabled</P>
+      <P Name="TRVariant">Disabled</P>
+      <P Name="FdbkBlocksVariant">Forward</P>
+      <P Name="IdealPFdbkVariant">Disabled</P>
+      <P Name="SatFdbkVariant">Disabled</P>
+      <P Name="DerivativeFilterVariant">ContFilter</P>
+      <P Name="NVariant">InternalParameters</P>
+      <P Name="NCopyVariant">Disabled</P>
+      <P Name="FilterICVariant">InternalICsFilter</P>
+      <P Name="IntegratorICVariant">InternalICs</P>
+      <P Name="ExternalResetVariant">Disabled</P>
+      <P Name="TRSumVariant">Passthrough</P>
+      <P Name="SumFdbkVariant">Disabled</P>
+      <P Name="SumVariant">Sum_PID</P>
+      <P Name="TsampFilterVariant">InternalTs</P>
+      <P Name="TsampNgainVariant">Passthrough</P>
+      <P Name="TsampIntegralVariant">Disabled_SignalSpec</P>
+      <P Name="ExternalSaturationOutDataTypeStr">Inherit: Same as second input</P>
+      <P Name="DerivativeSourceVariant">ErrorSignal</P>
+      <P Name="InitialConditionSetting">Auto</P>
+      <P Name="PreIntVariant">InternalPreInt</P>
+    </InstanceData>
+  </Block>
+  <Block BlockType="Reference" Name="PS-Simulink&#xA;Converter" SID="845">
+    <PortCounts out="1" lconn="1"/>
+    <P Name="Position">[1360, 1022, 1375, 1038]</P>
+    <P Name="ZOrder">1237</P>
+    <P Name="BackgroundColor">automatic</P>
+    <P Name="LibraryVersion">8.0</P>
+    <P Name="SourceBlock">nesl_utility/PS-Simulink
+Converter</P>
+    <P Name="SourceType">PS-Simulink
+Converter</P>
+    <InstanceData>
+      <P Name="RTWMemSecFuncInitTerm">Inherit from model</P>
+      <P Name="RTWMemSecFuncExecute">Inherit from model</P>
+      <P Name="RTWMemSecDataConstants">Inherit from model</P>
+      <P Name="RTWMemSecDataInternal">Inherit from model</P>
+      <P Name="RTWMemSecDataParameters">Inherit from model</P>
+      <P Name="ContentPreviewEnabled">on</P>
+      <P Name="PhysicalDomain">network_engine_domain</P>
+      <P Name="SubClassName">ps_output</P>
+      <P Name="LeftPortType">input</P>
+      <P Name="RightPortType">output</P>
+      <P Name="PseudoPeriodic">off</P>
+      <P Name="Frequencies">[]</P>
+      <P Name="VectorFormat">1-D array</P>
+      <P Name="Unit">inherit</P>
+      <P Name="AffineConversion">off</P>
+    </InstanceData>
+  </Block>
+  <Block BlockType="Reference" Name="Planar5" SID="102">
+    <PortCounts lconn="1" rconn="1"/>
+    <P Name="Position">[1635, 695, 1675, 735]</P>
+    <P Name="ZOrder">102</P>
+    <P Name="LibraryVersion">25.21</P>
+    <P Name="SourceBlock">sm_lib/Joints/Planar Joint</P>
+    <P Name="SourceType">Planar Joint</P>
+    <InstanceData>
+      <P Name="LogSimulationData">off</P>
+      <P Name="SimscapeInstrumentationLogging">off</P>
+      <P Name="SimscapeInstrumentationVariables" Ref="bdmxdata:SimscapeInstrumentationVariables_102"/>
+      <P Name="JointMode">Normal</P>
+      <P Name="CompositeWrenchDir">FollowerOnBase</P>
+      <P Name="CompositeWrenchFrame">BaseFrame</P>
+      <P Name="SenseConstraintForce">off</P>
+      <P Name="SenseConstraintTorque">off</P>
+      <P Name="SenseTotalForce">off</P>
+      <P Name="SenseTotalTorque">off</P>
+      <P Name="PxPositionTargetSpecify">off</P>
+      <P Name="PxPositionTargetPriority">High</P>
+      <P Name="PxPositionTargetValue">0</P>
+      <P Name="PxPositionTargetValue_conf">compiletime</P>
+      <P Name="PxPositionTargetValueUnits">m</P>
+      <P Name="PxVelocityTargetSpecify">off</P>
+      <P Name="PxVelocityTargetPriority">High</P>
+      <P Name="PxVelocityTargetValue">0</P>
+      <P Name="PxVelocityTargetValue_conf">compiletime</P>
+      <P Name="PxVelocityTargetValueUnits">m/s</P>
+      <P Name="PxEquilibriumPosition">0</P>
+      <P Name="PxEquilibriumPosition_conf">compiletime</P>
+      <P Name="PxEquilibriumPositionUnits">m</P>
+      <P Name="PxSpringStiffness">0</P>
+      <P Name="PxSpringStiffness_conf">compiletime</P>
+      <P Name="PxSpringStiffnessUnits">N/m</P>
+      <P Name="PxDampingCoefficient">0</P>
+      <P Name="PxDampingCoefficient_conf">compiletime</P>
+      <P Name="PxDampingCoefficientUnits">N/(m/s)</P>
+      <P Name="PxLowerLimitSpecify">off</P>
+      <P Name="PxLowerLimitBound">-1</P>
+      <P Name="PxLowerLimitBound_conf">compiletime</P>
+      <P Name="PxLowerLimitBoundUnits">m</P>
+      <P Name="PxLowerLimitStiffness">1e6</P>
+      <P Name="PxLowerLimitStiffness_conf">compiletime</P>
+      <P Name="PxLowerLimitStiffnessUnits">N/m</P>
+      <P Name="PxLowerLimitDamping">1e3</P>
+      <P Name="PxLowerLimitDamping_conf">compiletime</P>
+      <P Name="PxLowerLimitDampingUnits">N/(m/s)</P>
+      <P Name="PxLowerLimitTransitionRegionWidth">1e-4</P>
+      <P Name="PxLowerLimitTransitionRegionWidth_conf">compiletime</P>
+      <P Name="PxLowerLimitTransitionRegionWidthUnits">m</P>
+      <P Name="PxUpperLimitSpecify">off</P>
+      <P Name="PxUpperLimitBound">1</P>
+      <P Name="PxUpperLimitBound_conf">compiletime</P>
+      <P Name="PxUpperLimitBoundUnits">m</P>
+      <P Name="PxUpperLimitStiffness">1e6</P>
+      <P Name="PxUpperLimitStiffness_conf">compiletime</P>
+      <P Name="PxUpperLimitStiffnessUnits">N/m</P>
+      <P Name="PxUpperLimitDamping">1e3</P>
+      <P Name="PxUpperLimitDamping_conf">compiletime</P>
+      <P Name="PxUpperLimitDampingUnits">N/(m/s)</P>
+      <P Name="PxUpperLimitTransitionRegionWidth">1e-4</P>
+      <P Name="PxUpperLimitTransitionRegionWidth_conf">compiletime</P>
+      <P Name="PxUpperLimitTransitionRegionWidthUnits">m</P>
+      <P Name="PxTorqueActuationMode">NoTorque</P>
+      <P Name="PxMotionActuationMode">ComputedMotion</P>
+      <P Name="PxSensePosition">off</P>
+      <P Name="PxSenseVelocity">off</P>
+      <P Name="PxSenseAcceleration">off</P>
+      <P Name="PxSenseTorqueForce">off</P>
+      <P Name="PxSenseLowerLimitTorqueForce">off</P>
+      <P Name="PxSenseUpperLimitTorqueForce">off</P>
+      <P Name="PyPositionTargetSpecify">off</P>
+      <P Name="PyPositionTargetPriority">High</P>
+      <P Name="PyPositionTargetValue">0</P>
+      <P Name="PyPositionTargetValue_conf">compiletime</P>
+      <P Name="PyPositionTargetValueUnits">m</P>
+      <P Name="PyVelocityTargetSpecify">off</P>
+      <P Name="PyVelocityTargetPriority">High</P>
+      <P Name="PyVelocityTargetValue">0</P>
+      <P Name="PyVelocityTargetValue_conf">compiletime</P>
+      <P Name="PyVelocityTargetValueUnits">m/s</P>
+      <P Name="PyEquilibriumPosition">0</P>
+      <P Name="PyEquilibriumPosition_conf">compiletime</P>
+      <P Name="PyEquilibriumPositionUnits">m</P>
+      <P Name="PySpringStiffness">0</P>
+      <P Name="PySpringStiffness_conf">compiletime</P>
+      <P Name="PySpringStiffnessUnits">N/m</P>
+      <P Name="PyDampingCoefficient">0</P>
+      <P Name="PyDampingCoefficient_conf">compiletime</P>
+      <P Name="PyDampingCoefficientUnits">N/(m/s)</P>
+      <P Name="PyLowerLimitSpecify">off</P>
+      <P Name="PyLowerLimitBound">-1</P>
+      <P Name="PyLowerLimitBound_conf">compiletime</P>
+      <P Name="PyLowerLimitBoundUnits">m</P>
+      <P Name="PyLowerLimitStiffness">1e6</P>
+      <P Name="PyLowerLimitStiffness_conf">compiletime</P>
+      <P Name="PyLowerLimitStiffnessUnits">N/m</P>
+      <P Name="PyLowerLimitDamping">1e3</P>
+      <P Name="PyLowerLimitDamping_conf">compiletime</P>
+      <P Name="PyLowerLimitDampingUnits">N/(m/s)</P>
+      <P Name="PyLowerLimitTransitionRegionWidth">1e-4</P>
+      <P Name="PyLowerLimitTransitionRegionWidth_conf">compiletime</P>
+      <P Name="PyLowerLimitTransitionRegionWidthUnits">m</P>
+      <P Name="PyUpperLimitSpecify">off</P>
+      <P Name="PyUpperLimitBound">1</P>
+      <P Name="PyUpperLimitBound_conf">compiletime</P>
+      <P Name="PyUpperLimitBoundUnits">m</P>
+      <P Name="PyUpperLimitStiffness">1e6</P>
+      <P Name="PyUpperLimitStiffness_conf">compiletime</P>
+      <P Name="PyUpperLimitStiffnessUnits">N/m</P>
+      <P Name="PyUpperLimitDamping">1e3</P>
+      <P Name="PyUpperLimitDamping_conf">compiletime</P>
+      <P Name="PyUpperLimitDampingUnits">N/(m/s)</P>
+      <P Name="PyUpperLimitTransitionRegionWidth">1e-4</P>
+      <P Name="PyUpperLimitTransitionRegionWidth_conf">compiletime</P>
+      <P Name="PyUpperLimitTransitionRegionWidthUnits">m</P>
+      <P Name="PyTorqueActuationMode">NoTorque</P>
+      <P Name="PyMotionActuationMode">ComputedMotion</P>
+      <P Name="PySensePosition">off</P>
+      <P Name="PySenseVelocity">off</P>
+      <P Name="PySenseAcceleration">off</P>
+      <P Name="PySenseTorqueForce">off</P>
+      <P Name="PySenseLowerLimitTorqueForce">off</P>
+      <P Name="PySenseUpperLimitTorqueForce">off</P>
+      <P Name="RzPositionTargetSpecify">off</P>
+      <P Name="RzPositionTargetPriority">High</P>
+      <P Name="RzPositionTargetValue">0</P>
+      <P Name="RzPositionTargetValue_conf">compiletime</P>
+      <P Name="RzPositionTargetValueUnits">deg</P>
+      <P Name="RzVelocityTargetSpecify">off</P>
+      <P Name="RzVelocityTargetPriority">High</P>
+      <P Name="RzVelocityTargetValue">0</P>
+      <P Name="RzVelocityTargetValue_conf">compiletime</P>
+      <P Name="RzVelocityTargetValueUnits">deg/s</P>
+      <P Name="RzEquilibriumPosition">0</P>
+      <P Name="RzEquilibriumPosition_conf">compiletime</P>
+      <P Name="RzEquilibriumPositionUnits">deg</P>
+      <P Name="RzSpringStiffness">0</P>
+      <P Name="RzSpringStiffness_conf">compiletime</P>
+      <P Name="RzSpringStiffnessUnits">N*m/deg</P>
+      <P Name="RzDampingCoefficient">0</P>
+      <P Name="RzDampingCoefficient_conf">compiletime</P>
+      <P Name="RzDampingCoefficientUnits">N*m/(deg/s)</P>
+      <P Name="RzLowerLimitSpecify">off</P>
+      <P Name="RzLowerLimitBound">-90</P>
+      <P Name="RzLowerLimitBound_conf">compiletime</P>
+      <P Name="RzLowerLimitBoundUnits">deg</P>
+      <P Name="RzLowerLimitStiffness">1e4</P>
+      <P Name="RzLowerLimitStiffness_conf">compiletime</P>
+      <P Name="RzLowerLimitStiffnessUnits">N*m/deg</P>
+      <P Name="RzLowerLimitDamping">10</P>
+      <P Name="RzLowerLimitDamping_conf">compiletime</P>
+      <P Name="RzLowerLimitDampingUnits">N*m/(deg/s)</P>
+      <P Name="RzLowerLimitTransitionRegionWidth">0.1</P>
+      <P Name="RzLowerLimitTransitionRegionWidth_conf">compiletime</P>
+      <P Name="RzLowerLimitTransitionRegionWidthUnits">deg</P>
+      <P Name="RzUpperLimitSpecify">off</P>
+      <P Name="RzUpperLimitBound">90</P>
+      <P Name="RzUpperLimitBound_conf">compiletime</P>
+      <P Name="RzUpperLimitBoundUnits">deg</P>
+      <P Name="RzUpperLimitStiffness">1e4</P>
+      <P Name="RzUpperLimitStiffness_conf">compiletime</P>
+      <P Name="RzUpperLimitStiffnessUnits">N*m/deg</P>
+      <P Name="RzUpperLimitDamping">10</P>
+      <P Name="RzUpperLimitDamping_conf">compiletime</P>
+      <P Name="RzUpperLimitDampingUnits">N*m/(deg/s)</P>
+      <P Name="RzUpperLimitTransitionRegionWidth">0.1</P>
+      <P Name="RzUpperLimitTransitionRegionWidth_conf">compiletime</P>
+      <P Name="RzUpperLimitTransitionRegionWidthUnits">deg</P>
+      <P Name="RzTorqueActuationMode">NoTorque</P>
+      <P Name="RzMotionActuationMode">ComputedMotion</P>
+      <P Name="RzSensePosition">off</P>
+      <P Name="RzSenseVelocity">off</P>
+      <P Name="RzSenseAcceleration">off</P>
+      <P Name="RzSenseTorqueForce">off</P>
+      <P Name="RzSenseLowerLimitTorqueForce">off</P>
+      <P Name="RzSenseUpperLimitTorqueForce">off</P>
+    </InstanceData>
+  </Block>
+  <Block BlockType="Reference" Name="Planar6" SID="103">
+    <PortCounts lconn="1" rconn="1"/>
+    <P Name="Position">[1825, 855, 1865, 895]</P>
+    <P Name="ZOrder">103</P>
+    <P Name="LibraryVersion">25.21</P>
+    <P Name="SourceBlock">sm_lib/Joints/Planar Joint</P>
+    <P Name="SourceType">Planar Joint</P>
+    <InstanceData>
+      <P Name="LogSimulationData">off</P>
+      <P Name="SimscapeInstrumentationLogging">off</P>
+      <P Name="SimscapeInstrumentationVariables" Ref="bdmxdata:SimscapeInstrumentationVariables_103"/>
+      <P Name="JointMode">Normal</P>
+      <P Name="CompositeWrenchDir">FollowerOnBase</P>
+      <P Name="CompositeWrenchFrame">BaseFrame</P>
+      <P Name="SenseConstraintForce">off</P>
+      <P Name="SenseConstraintTorque">off</P>
+      <P Name="SenseTotalForce">off</P>
+      <P Name="SenseTotalTorque">off</P>
+      <P Name="PxPositionTargetSpecify">off</P>
+      <P Name="PxPositionTargetPriority">High</P>
+      <P Name="PxPositionTargetValue">0</P>
+      <P Name="PxPositionTargetValue_conf">compiletime</P>
+      <P Name="PxPositionTargetValueUnits">m</P>
+      <P Name="PxVelocityTargetSpecify">off</P>
+      <P Name="PxVelocityTargetPriority">High</P>
+      <P Name="PxVelocityTargetValue">0</P>
+      <P Name="PxVelocityTargetValue_conf">compiletime</P>
+      <P Name="PxVelocityTargetValueUnits">m/s</P>
+      <P Name="PxEquilibriumPosition">0</P>
+      <P Name="PxEquilibriumPosition_conf">compiletime</P>
+      <P Name="PxEquilibriumPositionUnits">m</P>
+      <P Name="PxSpringStiffness">0</P>
+      <P Name="PxSpringStiffness_conf">compiletime</P>
+      <P Name="PxSpringStiffnessUnits">N/m</P>
+      <P Name="PxDampingCoefficient">0</P>
+      <P Name="PxDampingCoefficient_conf">compiletime</P>
+      <P Name="PxDampingCoefficientUnits">N/(m/s)</P>
+      <P Name="PxLowerLimitSpecify">off</P>
+      <P Name="PxLowerLimitBound">-1</P>
+      <P Name="PxLowerLimitBound_conf">compiletime</P>
+      <P Name="PxLowerLimitBoundUnits">m</P>
+      <P Name="PxLowerLimitStiffness">1e6</P>
+      <P Name="PxLowerLimitStiffness_conf">compiletime</P>
+      <P Name="PxLowerLimitStiffnessUnits">N/m</P>
+      <P Name="PxLowerLimitDamping">1e3</P>
+      <P Name="PxLowerLimitDamping_conf">compiletime</P>
+      <P Name="PxLowerLimitDampingUnits">N/(m/s)</P>
+      <P Name="PxLowerLimitTransitionRegionWidth">1e-4</P>
+      <P Name="PxLowerLimitTransitionRegionWidth_conf">compiletime</P>
+      <P Name="PxLowerLimitTransitionRegionWidthUnits">m</P>
+      <P Name="PxUpperLimitSpecify">off</P>
+      <P Name="PxUpperLimitBound">1</P>
+      <P Name="PxUpperLimitBound_conf">compiletime</P>
+      <P Name="PxUpperLimitBoundUnits">m</P>
+      <P Name="PxUpperLimitStiffness">1e6</P>
+      <P Name="PxUpperLimitStiffness_conf">compiletime</P>
+      <P Name="PxUpperLimitStiffnessUnits">N/m</P>
+      <P Name="PxUpperLimitDamping">1e3</P>
+      <P Name="PxUpperLimitDamping_conf">compiletime</P>
+      <P Name="PxUpperLimitDampingUnits">N/(m/s)</P>
+      <P Name="PxUpperLimitTransitionRegionWidth">1e-4</P>
+      <P Name="PxUpperLimitTransitionRegionWidth_conf">compiletime</P>
+      <P Name="PxUpperLimitTransitionRegionWidthUnits">m</P>
+      <P Name="PxTorqueActuationMode">NoTorque</P>
+      <P Name="PxMotionActuationMode">ComputedMotion</P>
+      <P Name="PxSensePosition">off</P>
+      <P Name="PxSenseVelocity">off</P>
+      <P Name="PxSenseAcceleration">off</P>
+      <P Name="PxSenseTorqueForce">off</P>
+      <P Name="PxSenseLowerLimitTorqueForce">off</P>
+      <P Name="PxSenseUpperLimitTorqueForce">off</P>
+      <P Name="PyPositionTargetSpecify">off</P>
+      <P Name="PyPositionTargetPriority">High</P>
+      <P Name="PyPositionTargetValue">0</P>
+      <P Name="PyPositionTargetValue_conf">compiletime</P>
+      <P Name="PyPositionTargetValueUnits">m</P>
+      <P Name="PyVelocityTargetSpecify">off</P>
+      <P Name="PyVelocityTargetPriority">High</P>
+      <P Name="PyVelocityTargetValue">0</P>
+      <P Name="PyVelocityTargetValue_conf">compiletime</P>
+      <P Name="PyVelocityTargetValueUnits">m/s</P>
+      <P Name="PyEquilibriumPosition">0</P>
+      <P Name="PyEquilibriumPosition_conf">compiletime</P>
+      <P Name="PyEquilibriumPositionUnits">m</P>
+      <P Name="PySpringStiffness">0</P>
+      <P Name="PySpringStiffness_conf">compiletime</P>
+      <P Name="PySpringStiffnessUnits">N/m</P>
+      <P Name="PyDampingCoefficient">0</P>
+      <P Name="PyDampingCoefficient_conf">compiletime</P>
+      <P Name="PyDampingCoefficientUnits">N/(m/s)</P>
+      <P Name="PyLowerLimitSpecify">off</P>
+      <P Name="PyLowerLimitBound">-1</P>
+      <P Name="PyLowerLimitBound_conf">compiletime</P>
+      <P Name="PyLowerLimitBoundUnits">m</P>
+      <P Name="PyLowerLimitStiffness">1e6</P>
+      <P Name="PyLowerLimitStiffness_conf">compiletime</P>
+      <P Name="PyLowerLimitStiffnessUnits">N/m</P>
+      <P Name="PyLowerLimitDamping">1e3</P>
+      <P Name="PyLowerLimitDamping_conf">compiletime</P>
+      <P Name="PyLowerLimitDampingUnits">N/(m/s)</P>
+      <P Name="PyLowerLimitTransitionRegionWidth">1e-4</P>
+      <P Name="PyLowerLimitTransitionRegionWidth_conf">compiletime</P>
+      <P Name="PyLowerLimitTransitionRegionWidthUnits">m</P>
+      <P Name="PyUpperLimitSpecify">off</P>
+      <P Name="PyUpperLimitBound">1</P>
+      <P Name="PyUpperLimitBound_conf">compiletime</P>
+      <P Name="PyUpperLimitBoundUnits">m</P>
+      <P Name="PyUpperLimitStiffness">1e6</P>
+      <P Name="PyUpperLimitStiffness_conf">compiletime</P>
+      <P Name="PyUpperLimitStiffnessUnits">N/m</P>
+      <P Name="PyUpperLimitDamping">1e3</P>
+      <P Name="PyUpperLimitDamping_conf">compiletime</P>
+      <P Name="PyUpperLimitDampingUnits">N/(m/s)</P>
+      <P Name="PyUpperLimitTransitionRegionWidth">1e-4</P>
+      <P Name="PyUpperLimitTransitionRegionWidth_conf">compiletime</P>
+      <P Name="PyUpperLimitTransitionRegionWidthUnits">m</P>
+      <P Name="PyTorqueActuationMode">NoTorque</P>
+      <P Name="PyMotionActuationMode">ComputedMotion</P>
+      <P Name="PySensePosition">off</P>
+      <P Name="PySenseVelocity">off</P>
+      <P Name="PySenseAcceleration">off</P>
+      <P Name="PySenseTorqueForce">off</P>
+      <P Name="PySenseLowerLimitTorqueForce">off</P>
+      <P Name="PySenseUpperLimitTorqueForce">off</P>
+      <P Name="RzPositionTargetSpecify">off</P>
+      <P Name="RzPositionTargetPriority">High</P>
+      <P Name="RzPositionTargetValue">0</P>
+      <P Name="RzPositionTargetValue_conf">compiletime</P>
+      <P Name="RzPositionTargetValueUnits">deg</P>
+      <P Name="RzVelocityTargetSpecify">off</P>
+      <P Name="RzVelocityTargetPriority">High</P>
+      <P Name="RzVelocityTargetValue">0</P>
+      <P Name="RzVelocityTargetValue_conf">compiletime</P>
+      <P Name="RzVelocityTargetValueUnits">deg/s</P>
+      <P Name="RzEquilibriumPosition">0</P>
+      <P Name="RzEquilibriumPosition_conf">compiletime</P>
+      <P Name="RzEquilibriumPositionUnits">deg</P>
+      <P Name="RzSpringStiffness">0</P>
+      <P Name="RzSpringStiffness_conf">compiletime</P>
+      <P Name="RzSpringStiffnessUnits">N*m/deg</P>
+      <P Name="RzDampingCoefficient">0</P>
+      <P Name="RzDampingCoefficient_conf">compiletime</P>
+      <P Name="RzDampingCoefficientUnits">N*m/(deg/s)</P>
+      <P Name="RzLowerLimitSpecify">off</P>
+      <P Name="RzLowerLimitBound">-90</P>
+      <P Name="RzLowerLimitBound_conf">compiletime</P>
+      <P Name="RzLowerLimitBoundUnits">deg</P>
+      <P Name="RzLowerLimitStiffness">1e4</P>
+      <P Name="RzLowerLimitStiffness_conf">compiletime</P>
+      <P Name="RzLowerLimitStiffnessUnits">N*m/deg</P>
+      <P Name="RzLowerLimitDamping">10</P>
+      <P Name="RzLowerLimitDamping_conf">compiletime</P>
+      <P Name="RzLowerLimitDampingUnits">N*m/(deg/s)</P>
+      <P Name="RzLowerLimitTransitionRegionWidth">0.1</P>
+      <P Name="RzLowerLimitTransitionRegionWidth_conf">compiletime</P>
+      <P Name="RzLowerLimitTransitionRegionWidthUnits">deg</P>
+      <P Name="RzUpperLimitSpecify">off</P>
+      <P Name="RzUpperLimitBound">90</P>
+      <P Name="RzUpperLimitBound_conf">compiletime</P>
+      <P Name="RzUpperLimitBoundUnits">deg</P>
+      <P Name="RzUpperLimitStiffness">1e4</P>
+      <P Name="RzUpperLimitStiffness_conf">compiletime</P>
+      <P Name="RzUpperLimitStiffnessUnits">N*m/deg</P>
+      <P Name="RzUpperLimitDamping">10</P>
+      <P Name="RzUpperLimitDamping_conf">compiletime</P>
+      <P Name="RzUpperLimitDampingUnits">N*m/(deg/s)</P>
+      <P Name="RzUpperLimitTransitionRegionWidth">0.1</P>
+      <P Name="RzUpperLimitTransitionRegionWidth_conf">compiletime</P>
+      <P Name="RzUpperLimitTransitionRegionWidthUnits">deg</P>
+      <P Name="RzTorqueActuationMode">NoTorque</P>
+      <P Name="RzMotionActuationMode">ComputedMotion</P>
+      <P Name="RzSensePosition">off</P>
+      <P Name="RzSenseVelocity">off</P>
+      <P Name="RzSenseAcceleration">off</P>
+      <P Name="RzSenseTorqueForce">off</P>
+      <P Name="RzSenseLowerLimitTorqueForce">off</P>
+      <P Name="RzSenseUpperLimitTorqueForce">off</P>
+    </InstanceData>
+  </Block>
+  <Block BlockType="Reference" Name="Planar9" SID="106">
+    <PortCounts lconn="1" rconn="1"/>
+    <P Name="Position">[1580, 795, 1620, 835]</P>
+    <P Name="ZOrder">106</P>
+    <P Name="LibraryVersion">25.21</P>
+    <P Name="SourceBlock">sm_lib/Joints/Planar Joint</P>
+    <P Name="SourceType">Planar Joint</P>
+    <InstanceData>
+      <P Name="LogSimulationData">off</P>
+      <P Name="SimscapeInstrumentationLogging">off</P>
+      <P Name="SimscapeInstrumentationVariables" Ref="bdmxdata:SimscapeInstrumentationVariables_106"/>
+      <P Name="JointMode">Normal</P>
+      <P Name="CompositeWrenchDir">FollowerOnBase</P>
+      <P Name="CompositeWrenchFrame">BaseFrame</P>
+      <P Name="SenseConstraintForce">off</P>
+      <P Name="SenseConstraintTorque">off</P>
+      <P Name="SenseTotalForce">off</P>
+      <P Name="SenseTotalTorque">off</P>
+      <P Name="PxPositionTargetSpecify">off</P>
+      <P Name="PxPositionTargetPriority">High</P>
+      <P Name="PxPositionTargetValue">0</P>
+      <P Name="PxPositionTargetValue_conf">compiletime</P>
+      <P Name="PxPositionTargetValueUnits">m</P>
+      <P Name="PxVelocityTargetSpecify">off</P>
+      <P Name="PxVelocityTargetPriority">High</P>
+      <P Name="PxVelocityTargetValue">0</P>
+      <P Name="PxVelocityTargetValue_conf">compiletime</P>
+      <P Name="PxVelocityTargetValueUnits">m/s</P>
+      <P Name="PxEquilibriumPosition">0</P>
+      <P Name="PxEquilibriumPosition_conf">compiletime</P>
+      <P Name="PxEquilibriumPositionUnits">m</P>
+      <P Name="PxSpringStiffness">0</P>
+      <P Name="PxSpringStiffness_conf">compiletime</P>
+      <P Name="PxSpringStiffnessUnits">N/m</P>
+      <P Name="PxDampingCoefficient">0</P>
+      <P Name="PxDampingCoefficient_conf">compiletime</P>
+      <P Name="PxDampingCoefficientUnits">N/(m/s)</P>
+      <P Name="PxLowerLimitSpecify">off</P>
+      <P Name="PxLowerLimitBound">-1</P>
+      <P Name="PxLowerLimitBound_conf">compiletime</P>
+      <P Name="PxLowerLimitBoundUnits">m</P>
+      <P Name="PxLowerLimitStiffness">1e6</P>
+      <P Name="PxLowerLimitStiffness_conf">compiletime</P>
+      <P Name="PxLowerLimitStiffnessUnits">N/m</P>
+      <P Name="PxLowerLimitDamping">1e3</P>
+      <P Name="PxLowerLimitDamping_conf">compiletime</P>
+      <P Name="PxLowerLimitDampingUnits">N/(m/s)</P>
+      <P Name="PxLowerLimitTransitionRegionWidth">1e-4</P>
+      <P Name="PxLowerLimitTransitionRegionWidth_conf">compiletime</P>
+      <P Name="PxLowerLimitTransitionRegionWidthUnits">m</P>
+      <P Name="PxUpperLimitSpecify">off</P>
+      <P Name="PxUpperLimitBound">1</P>
+      <P Name="PxUpperLimitBound_conf">compiletime</P>
+      <P Name="PxUpperLimitBoundUnits">m</P>
+      <P Name="PxUpperLimitStiffness">1e6</P>
+      <P Name="PxUpperLimitStiffness_conf">compiletime</P>
+      <P Name="PxUpperLimitStiffnessUnits">N/m</P>
+      <P Name="PxUpperLimitDamping">1e3</P>
+      <P Name="PxUpperLimitDamping_conf">compiletime</P>
+      <P Name="PxUpperLimitDampingUnits">N/(m/s)</P>
+      <P Name="PxUpperLimitTransitionRegionWidth">1e-4</P>
+      <P Name="PxUpperLimitTransitionRegionWidth_conf">compiletime</P>
+      <P Name="PxUpperLimitTransitionRegionWidthUnits">m</P>
+      <P Name="PxTorqueActuationMode">NoTorque</P>
+      <P Name="PxMotionActuationMode">ComputedMotion</P>
+      <P Name="PxSensePosition">off</P>
+      <P Name="PxSenseVelocity">off</P>
+      <P Name="PxSenseAcceleration">off</P>
+      <P Name="PxSenseTorqueForce">off</P>
+      <P Name="PxSenseLowerLimitTorqueForce">off</P>
+      <P Name="PxSenseUpperLimitTorqueForce">off</P>
+      <P Name="PyPositionTargetSpecify">off</P>
+      <P Name="PyPositionTargetPriority">High</P>
+      <P Name="PyPositionTargetValue">0</P>
+      <P Name="PyPositionTargetValue_conf">compiletime</P>
+      <P Name="PyPositionTargetValueUnits">m</P>
+      <P Name="PyVelocityTargetSpecify">off</P>
+      <P Name="PyVelocityTargetPriority">High</P>
+      <P Name="PyVelocityTargetValue">0</P>
+      <P Name="PyVelocityTargetValue_conf">compiletime</P>
+      <P Name="PyVelocityTargetValueUnits">m/s</P>
+      <P Name="PyEquilibriumPosition">0</P>
+      <P Name="PyEquilibriumPosition_conf">compiletime</P>
+      <P Name="PyEquilibriumPositionUnits">m</P>
+      <P Name="PySpringStiffness">0</P>
+      <P Name="PySpringStiffness_conf">compiletime</P>
+      <P Name="PySpringStiffnessUnits">N/m</P>
+      <P Name="PyDampingCoefficient">0</P>
+      <P Name="PyDampingCoefficient_conf">compiletime</P>
+      <P Name="PyDampingCoefficientUnits">N/(m/s)</P>
+      <P Name="PyLowerLimitSpecify">off</P>
+      <P Name="PyLowerLimitBound">-1</P>
+      <P Name="PyLowerLimitBound_conf">compiletime</P>
+      <P Name="PyLowerLimitBoundUnits">m</P>
+      <P Name="PyLowerLimitStiffness">1e6</P>
+      <P Name="PyLowerLimitStiffness_conf">compiletime</P>
+      <P Name="PyLowerLimitStiffnessUnits">N/m</P>
+      <P Name="PyLowerLimitDamping">1e3</P>
+      <P Name="PyLowerLimitDamping_conf">compiletime</P>
+      <P Name="PyLowerLimitDampingUnits">N/(m/s)</P>
+      <P Name="PyLowerLimitTransitionRegionWidth">1e-4</P>
+      <P Name="PyLowerLimitTransitionRegionWidth_conf">compiletime</P>
+      <P Name="PyLowerLimitTransitionRegionWidthUnits">m</P>
+      <P Name="PyUpperLimitSpecify">off</P>
+      <P Name="PyUpperLimitBound">1</P>
+      <P Name="PyUpperLimitBound_conf">compiletime</P>
+      <P Name="PyUpperLimitBoundUnits">m</P>
+      <P Name="PyUpperLimitStiffness">1e6</P>
+      <P Name="PyUpperLimitStiffness_conf">compiletime</P>
+      <P Name="PyUpperLimitStiffnessUnits">N/m</P>
+      <P Name="PyUpperLimitDamping">1e3</P>
+      <P Name="PyUpperLimitDamping_conf">compiletime</P>
+      <P Name="PyUpperLimitDampingUnits">N/(m/s)</P>
+      <P Name="PyUpperLimitTransitionRegionWidth">1e-4</P>
+      <P Name="PyUpperLimitTransitionRegionWidth_conf">compiletime</P>
+      <P Name="PyUpperLimitTransitionRegionWidthUnits">m</P>
+      <P Name="PyTorqueActuationMode">NoTorque</P>
+      <P Name="PyMotionActuationMode">ComputedMotion</P>
+      <P Name="PySensePosition">off</P>
+      <P Name="PySenseVelocity">off</P>
+      <P Name="PySenseAcceleration">off</P>
+      <P Name="PySenseTorqueForce">off</P>
+      <P Name="PySenseLowerLimitTorqueForce">off</P>
+      <P Name="PySenseUpperLimitTorqueForce">off</P>
+      <P Name="RzPositionTargetSpecify">off</P>
+      <P Name="RzPositionTargetPriority">High</P>
+      <P Name="RzPositionTargetValue">0</P>
+      <P Name="RzPositionTargetValue_conf">compiletime</P>
+      <P Name="RzPositionTargetValueUnits">deg</P>
+      <P Name="RzVelocityTargetSpecify">off</P>
+      <P Name="RzVelocityTargetPriority">High</P>
+      <P Name="RzVelocityTargetValue">0</P>
+      <P Name="RzVelocityTargetValue_conf">compiletime</P>
+      <P Name="RzVelocityTargetValueUnits">deg/s</P>
+      <P Name="RzEquilibriumPosition">0</P>
+      <P Name="RzEquilibriumPosition_conf">compiletime</P>
+      <P Name="RzEquilibriumPositionUnits">deg</P>
+      <P Name="RzSpringStiffness">0</P>
+      <P Name="RzSpringStiffness_conf">compiletime</P>
+      <P Name="RzSpringStiffnessUnits">N*m/deg</P>
+      <P Name="RzDampingCoefficient">0</P>
+      <P Name="RzDampingCoefficient_conf">compiletime</P>
+      <P Name="RzDampingCoefficientUnits">N*m/(deg/s)</P>
+      <P Name="RzLowerLimitSpecify">off</P>
+      <P Name="RzLowerLimitBound">-90</P>
+      <P Name="RzLowerLimitBound_conf">compiletime</P>
+      <P Name="RzLowerLimitBoundUnits">deg</P>
+      <P Name="RzLowerLimitStiffness">1e4</P>
+      <P Name="RzLowerLimitStiffness_conf">compiletime</P>
+      <P Name="RzLowerLimitStiffnessUnits">N*m/deg</P>
+      <P Name="RzLowerLimitDamping">10</P>
+      <P Name="RzLowerLimitDamping_conf">compiletime</P>
+      <P Name="RzLowerLimitDampingUnits">N*m/(deg/s)</P>
+      <P Name="RzLowerLimitTransitionRegionWidth">0.1</P>
+      <P Name="RzLowerLimitTransitionRegionWidth_conf">compiletime</P>
+      <P Name="RzLowerLimitTransitionRegionWidthUnits">deg</P>
+      <P Name="RzUpperLimitSpecify">off</P>
+      <P Name="RzUpperLimitBound">90</P>
+      <P Name="RzUpperLimitBound_conf">compiletime</P>
+      <P Name="RzUpperLimitBoundUnits">deg</P>
+      <P Name="RzUpperLimitStiffness">1e4</P>
+      <P Name="RzUpperLimitStiffness_conf">compiletime</P>
+      <P Name="RzUpperLimitStiffnessUnits">N*m/deg</P>
+      <P Name="RzUpperLimitDamping">10</P>
+      <P Name="RzUpperLimitDamping_conf">compiletime</P>
+      <P Name="RzUpperLimitDampingUnits">N*m/(deg/s)</P>
+      <P Name="RzUpperLimitTransitionRegionWidth">0.1</P>
+      <P Name="RzUpperLimitTransitionRegionWidth_conf">compiletime</P>
+      <P Name="RzUpperLimitTransitionRegionWidthUnits">deg</P>
+      <P Name="RzTorqueActuationMode">NoTorque</P>
+      <P Name="RzMotionActuationMode">ComputedMotion</P>
+      <P Name="RzSensePosition">off</P>
+      <P Name="RzSenseVelocity">off</P>
+      <P Name="RzSenseAcceleration">off</P>
+      <P Name="RzSenseTorqueForce">off</P>
+      <P Name="RzSenseLowerLimitTorqueForce">off</P>
+      <P Name="RzSenseUpperLimitTorqueForce">off</P>
+    </InstanceData>
+  </Block>
+  <Block BlockType="Reference" Name="Revolute18" SID="118">
+    <PortCounts lconn="1" rconn="1"/>
+    <P Name="Position">[1635, 595, 1675, 635]</P>
+    <P Name="ZOrder">118</P>
+    <P Name="LibraryVersion">25.21</P>
+    <P Name="SourceBlock">sm_lib/Joints/Revolute Joint</P>
+    <P Name="SourceType">Revolute Joint</P>
+    <InstanceData>
+      <P Name="LogSimulationData">off</P>
+      <P Name="SimscapeInstrumentationLogging">off</P>
+      <P Name="SimscapeInstrumentationVariables" Ref="bdmxdata:SimscapeInstrumentationVariables_118"/>
+      <P Name="JointMode">Normal</P>
+      <P Name="CompositeWrenchDir">FollowerOnBase</P>
+      <P Name="CompositeWrenchFrame">BaseFrame</P>
+      <P Name="SenseConstraintForce">off</P>
+      <P Name="SenseConstraintTorque">off</P>
+      <P Name="SenseTotalForce">off</P>
+      <P Name="SenseTotalTorque">off</P>
+      <P Name="PositionTargetSpecify">on</P>
+      <P Name="PositionTargetPriority">Low</P>
+      <P Name="PositionTargetValue">smiData.RevoluteJoint(19).Rz.Pos</P>
+      <P Name="PositionTargetValue_conf">compiletime</P>
+      <P Name="PositionTargetValueUnits">deg</P>
+      <P Name="VelocityTargetSpecify">off</P>
+      <P Name="VelocityTargetPriority">High</P>
+      <P Name="VelocityTargetValue">0</P>
+      <P Name="VelocityTargetValue_conf">compiletime</P>
+      <P Name="VelocityTargetValueUnits">deg/s</P>
+      <P Name="EquilibriumPosition">0</P>
+      <P Name="EquilibriumPosition_conf">compiletime</P>
+      <P Name="EquilibriumPositionUnits">deg</P>
+      <P Name="SpringStiffness">0</P>
+      <P Name="SpringStiffness_conf">compiletime</P>
+      <P Name="SpringStiffnessUnits">N*m/deg</P>
+      <P Name="DampingCoefficient">0</P>
+      <P Name="DampingCoefficient_conf">compiletime</P>
+      <P Name="DampingCoefficientUnits">N*m/(deg/s)</P>
+      <P Name="LowerLimitSpecify">off</P>
+      <P Name="LowerLimitBound">-90</P>
+      <P Name="LowerLimitBound_conf">compiletime</P>
+      <P Name="LowerLimitBoundUnits">deg</P>
+      <P Name="LowerLimitStiffness">1e4</P>
+      <P Name="LowerLimitStiffness_conf">compiletime</P>
+      <P Name="LowerLimitStiffnessUnits">N*m/deg</P>
+      <P Name="LowerLimitDamping">10</P>
+      <P Name="LowerLimitDamping_conf">compiletime</P>
+      <P Name="LowerLimitDampingUnits">N*m/(deg/s)</P>
+      <P Name="LowerLimitTransitionRegionWidth">0.1</P>
+      <P Name="LowerLimitTransitionRegionWidth_conf">compiletime</P>
+      <P Name="LowerLimitTransitionRegionWidthUnits">deg</P>
+      <P Name="UpperLimitSpecify">off</P>
+      <P Name="UpperLimitBound">90</P>
+      <P Name="UpperLimitBound_conf">compiletime</P>
+      <P Name="UpperLimitBoundUnits">deg</P>
+      <P Name="UpperLimitStiffness">1e4</P>
+      <P Name="UpperLimitStiffness_conf">compiletime</P>
+      <P Name="UpperLimitStiffnessUnits">N*m/deg</P>
+      <P Name="UpperLimitDamping">10</P>
+      <P Name="UpperLimitDamping_conf">compiletime</P>
+      <P Name="UpperLimitDampingUnits">N*m/(deg/s)</P>
+      <P Name="UpperLimitTransitionRegionWidth">0.1</P>
+      <P Name="UpperLimitTransitionRegionWidth_conf">compiletime</P>
+      <P Name="UpperLimitTransitionRegionWidthUnits">deg</P>
+      <P Name="TorqueActuationMode">NoTorque</P>
+      <P Name="MotionActuationMode">ComputedMotion</P>
+      <P Name="SensePosition">off</P>
+      <P Name="SenseVelocity">off</P>
+      <P Name="SenseAcceleration">off</P>
+      <P Name="SenseTorqueForce">off</P>
+      <P Name="SenseLowerLimitTorqueForce">off</P>
+      <P Name="SenseUpperLimitTorqueForce">off</P>
+    </InstanceData>
+  </Block>
+  <Block BlockType="Reference" Name="Revolute19" SID="119">
+    <PortCounts lconn="1" rconn="1"/>
+    <P Name="Position">[1635, 495, 1675, 535]</P>
+    <P Name="ZOrder">119</P>
+    <P Name="LibraryVersion">25.21</P>
+    <P Name="SourceBlock">sm_lib/Joints/Revolute Joint</P>
+    <P Name="SourceType">Revolute Joint</P>
+    <InstanceData>
+      <P Name="LogSimulationData">off</P>
+      <P Name="SimscapeInstrumentationLogging">off</P>
+      <P Name="SimscapeInstrumentationVariables" Ref="bdmxdata:SimscapeInstrumentationVariables_119"/>
+      <P Name="JointMode">Normal</P>
+      <P Name="CompositeWrenchDir">FollowerOnBase</P>
+      <P Name="CompositeWrenchFrame">BaseFrame</P>
+      <P Name="SenseConstraintForce">off</P>
+      <P Name="SenseConstraintTorque">off</P>
+      <P Name="SenseTotalForce">off</P>
+      <P Name="SenseTotalTorque">off</P>
+      <P Name="PositionTargetSpecify">on</P>
+      <P Name="PositionTargetPriority">Low</P>
+      <P Name="PositionTargetValue">smiData.RevoluteJoint(20).Rz.Pos</P>
+      <P Name="PositionTargetValue_conf">compiletime</P>
+      <P Name="PositionTargetValueUnits">deg</P>
+      <P Name="VelocityTargetSpecify">off</P>
+      <P Name="VelocityTargetPriority">High</P>
+      <P Name="VelocityTargetValue">0</P>
+      <P Name="VelocityTargetValue_conf">compiletime</P>
+      <P Name="VelocityTargetValueUnits">deg/s</P>
+      <P Name="EquilibriumPosition">0</P>
+      <P Name="EquilibriumPosition_conf">compiletime</P>
+      <P Name="EquilibriumPositionUnits">deg</P>
+      <P Name="SpringStiffness">0</P>
+      <P Name="SpringStiffness_conf">compiletime</P>
+      <P Name="SpringStiffnessUnits">N*m/deg</P>
+      <P Name="DampingCoefficient">0</P>
+      <P Name="DampingCoefficient_conf">compiletime</P>
+      <P Name="DampingCoefficientUnits">N*m/(deg/s)</P>
+      <P Name="LowerLimitSpecify">off</P>
+      <P Name="LowerLimitBound">-90</P>
+      <P Name="LowerLimitBound_conf">compiletime</P>
+      <P Name="LowerLimitBoundUnits">deg</P>
+      <P Name="LowerLimitStiffness">1e4</P>
+      <P Name="LowerLimitStiffness_conf">compiletime</P>
+      <P Name="LowerLimitStiffnessUnits">N*m/deg</P>
+      <P Name="LowerLimitDamping">10</P>
+      <P Name="LowerLimitDamping_conf">compiletime</P>
+      <P Name="LowerLimitDampingUnits">N*m/(deg/s)</P>
+      <P Name="LowerLimitTransitionRegionWidth">0.1</P>
+      <P Name="LowerLimitTransitionRegionWidth_conf">compiletime</P>
+      <P Name="LowerLimitTransitionRegionWidthUnits">deg</P>
+      <P Name="UpperLimitSpecify">off</P>
+      <P Name="UpperLimitBound">90</P>
+      <P Name="UpperLimitBound_conf">compiletime</P>
+      <P Name="UpperLimitBoundUnits">deg</P>
+      <P Name="UpperLimitStiffness">1e4</P>
+      <P Name="UpperLimitStiffness_conf">compiletime</P>
+      <P Name="UpperLimitStiffnessUnits">N*m/deg</P>
+      <P Name="UpperLimitDamping">10</P>
+      <P Name="UpperLimitDamping_conf">compiletime</P>
+      <P Name="UpperLimitDampingUnits">N*m/(deg/s)</P>
+      <P Name="UpperLimitTransitionRegionWidth">0.1</P>
+      <P Name="UpperLimitTransitionRegionWidth_conf">compiletime</P>
+      <P Name="UpperLimitTransitionRegionWidthUnits">deg</P>
+      <P Name="TorqueActuationMode">NoTorque</P>
+      <P Name="MotionActuationMode">ComputedMotion</P>
+      <P Name="SensePosition">off</P>
+      <P Name="SenseVelocity">off</P>
+      <P Name="SenseAcceleration">off</P>
+      <P Name="SenseTorqueForce">off</P>
+      <P Name="SenseLowerLimitTorqueForce">off</P>
+      <P Name="SenseUpperLimitTorqueForce">off</P>
+    </InstanceData>
+  </Block>
+  <Block BlockType="Reference" Name="Revolute20" SID="121">
+    <PortCounts lconn="1" rconn="1"/>
+    <P Name="Position">[1635, 395, 1675, 435]</P>
+    <P Name="ZOrder">121</P>
+    <P Name="LibraryVersion">25.21</P>
+    <P Name="SourceBlock">sm_lib/Joints/Revolute Joint</P>
+    <P Name="SourceType">Revolute Joint</P>
+    <InstanceData>
+      <P Name="LogSimulationData">off</P>
+      <P Name="SimscapeInstrumentationLogging">off</P>
+      <P Name="SimscapeInstrumentationVariables" Ref="bdmxdata:SimscapeInstrumentationVariables_121"/>
+      <P Name="JointMode">Normal</P>
+      <P Name="CompositeWrenchDir">FollowerOnBase</P>
+      <P Name="CompositeWrenchFrame">BaseFrame</P>
+      <P Name="SenseConstraintForce">off</P>
+      <P Name="SenseConstraintTorque">off</P>
+      <P Name="SenseTotalForce">off</P>
+      <P Name="SenseTotalTorque">off</P>
+      <P Name="PositionTargetSpecify">on</P>
+      <P Name="PositionTargetPriority">Low</P>
+      <P Name="PositionTargetValue">smiData.RevoluteJoint(21).Rz.Pos</P>
+      <P Name="PositionTargetValue_conf">compiletime</P>
+      <P Name="PositionTargetValueUnits">deg</P>
+      <P Name="VelocityTargetSpecify">off</P>
+      <P Name="VelocityTargetPriority">High</P>
+      <P Name="VelocityTargetValue">0</P>
+      <P Name="VelocityTargetValue_conf">compiletime</P>
+      <P Name="VelocityTargetValueUnits">deg/s</P>
+      <P Name="EquilibriumPosition">0</P>
+      <P Name="EquilibriumPosition_conf">compiletime</P>
+      <P Name="EquilibriumPositionUnits">deg</P>
+      <P Name="SpringStiffness">0</P>
+      <P Name="SpringStiffness_conf">compiletime</P>
+      <P Name="SpringStiffnessUnits">N*m/deg</P>
+      <P Name="DampingCoefficient">0</P>
+      <P Name="DampingCoefficient_conf">compiletime</P>
+      <P Name="DampingCoefficientUnits">N*m/(deg/s)</P>
+      <P Name="LowerLimitSpecify">off</P>
+      <P Name="LowerLimitBound">-90</P>
+      <P Name="LowerLimitBound_conf">compiletime</P>
+      <P Name="LowerLimitBoundUnits">deg</P>
+      <P Name="LowerLimitStiffness">1e4</P>
+      <P Name="LowerLimitStiffness_conf">compiletime</P>
+      <P Name="LowerLimitStiffnessUnits">N*m/deg</P>
+      <P Name="LowerLimitDamping">10</P>
+      <P Name="LowerLimitDamping_conf">compiletime</P>
+      <P Name="LowerLimitDampingUnits">N*m/(deg/s)</P>
+      <P Name="LowerLimitTransitionRegionWidth">0.1</P>
+      <P Name="LowerLimitTransitionRegionWidth_conf">compiletime</P>
+      <P Name="LowerLimitTransitionRegionWidthUnits">deg</P>
+      <P Name="UpperLimitSpecify">off</P>
+      <P Name="UpperLimitBound">90</P>
+      <P Name="UpperLimitBound_conf">compiletime</P>
+      <P Name="UpperLimitBoundUnits">deg</P>
+      <P Name="UpperLimitStiffness">1e4</P>
+      <P Name="UpperLimitStiffness_conf">compiletime</P>
+      <P Name="UpperLimitStiffnessUnits">N*m/deg</P>
+      <P Name="UpperLimitDamping">10</P>
+      <P Name="UpperLimitDamping_conf">compiletime</P>
+      <P Name="UpperLimitDampingUnits">N*m/(deg/s)</P>
+      <P Name="UpperLimitTransitionRegionWidth">0.1</P>
+      <P Name="UpperLimitTransitionRegionWidth_conf">compiletime</P>
+      <P Name="UpperLimitTransitionRegionWidthUnits">deg</P>
+      <P Name="TorqueActuationMode">NoTorque</P>
+      <P Name="MotionActuationMode">ComputedMotion</P>
+      <P Name="SensePosition">off</P>
+      <P Name="SenseVelocity">off</P>
+      <P Name="SenseAcceleration">off</P>
+      <P Name="SenseTorqueForce">off</P>
+      <P Name="SenseLowerLimitTorqueForce">off</P>
+      <P Name="SenseUpperLimitTorqueForce">off</P>
+    </InstanceData>
+  </Block>
+  <Block BlockType="Reference" Name="Revolute21" SID="122">
+    <PortCounts lconn="1" rconn="1"/>
+    <P Name="Position">[1635, 295, 1675, 335]</P>
+    <P Name="ZOrder">122</P>
+    <P Name="LibraryVersion">25.21</P>
+    <P Name="SourceBlock">sm_lib/Joints/Revolute Joint</P>
+    <P Name="SourceType">Revolute Joint</P>
+    <InstanceData>
+      <P Name="LogSimulationData">off</P>
+      <P Name="SimscapeInstrumentationLogging">off</P>
+      <P Name="SimscapeInstrumentationVariables" Ref="bdmxdata:SimscapeInstrumentationVariables_122"/>
+      <P Name="JointMode">Normal</P>
+      <P Name="CompositeWrenchDir">FollowerOnBase</P>
+      <P Name="CompositeWrenchFrame">BaseFrame</P>
+      <P Name="SenseConstraintForce">off</P>
+      <P Name="SenseConstraintTorque">off</P>
+      <P Name="SenseTotalForce">off</P>
+      <P Name="SenseTotalTorque">off</P>
+      <P Name="PositionTargetSpecify">on</P>
+      <P Name="PositionTargetPriority">Low</P>
+      <P Name="PositionTargetValue">smiData.RevoluteJoint(22).Rz.Pos</P>
+      <P Name="PositionTargetValue_conf">compiletime</P>
+      <P Name="PositionTargetValueUnits">deg</P>
+      <P Name="VelocityTargetSpecify">off</P>
+      <P Name="VelocityTargetPriority">High</P>
+      <P Name="VelocityTargetValue">0</P>
+      <P Name="VelocityTargetValue_conf">compiletime</P>
+      <P Name="VelocityTargetValueUnits">deg/s</P>
+      <P Name="EquilibriumPosition">0</P>
+      <P Name="EquilibriumPosition_conf">compiletime</P>
+      <P Name="EquilibriumPositionUnits">deg</P>
+      <P Name="SpringStiffness">0</P>
+      <P Name="SpringStiffness_conf">compiletime</P>
+      <P Name="SpringStiffnessUnits">N*m/deg</P>
+      <P Name="DampingCoefficient">0</P>
+      <P Name="DampingCoefficient_conf">compiletime</P>
+      <P Name="DampingCoefficientUnits">N*m/(deg/s)</P>
+      <P Name="LowerLimitSpecify">off</P>
+      <P Name="LowerLimitBound">-90</P>
+      <P Name="LowerLimitBound_conf">compiletime</P>
+      <P Name="LowerLimitBoundUnits">deg</P>
+      <P Name="LowerLimitStiffness">1e4</P>
+      <P Name="LowerLimitStiffness_conf">compiletime</P>
+      <P Name="LowerLimitStiffnessUnits">N*m/deg</P>
+      <P Name="LowerLimitDamping">10</P>
+      <P Name="LowerLimitDamping_conf">compiletime</P>
+      <P Name="LowerLimitDampingUnits">N*m/(deg/s)</P>
+      <P Name="LowerLimitTransitionRegionWidth">0.1</P>
+      <P Name="LowerLimitTransitionRegionWidth_conf">compiletime</P>
+      <P Name="LowerLimitTransitionRegionWidthUnits">deg</P>
+      <P Name="UpperLimitSpecify">off</P>
+      <P Name="UpperLimitBound">90</P>
+      <P Name="UpperLimitBound_conf">compiletime</P>
+      <P Name="UpperLimitBoundUnits">deg</P>
+      <P Name="UpperLimitStiffness">1e4</P>
+      <P Name="UpperLimitStiffness_conf">compiletime</P>
+      <P Name="UpperLimitStiffnessUnits">N*m/deg</P>
+      <P Name="UpperLimitDamping">10</P>
+      <P Name="UpperLimitDamping_conf">compiletime</P>
+      <P Name="UpperLimitDampingUnits">N*m/(deg/s)</P>
+      <P Name="UpperLimitTransitionRegionWidth">0.1</P>
+      <P Name="UpperLimitTransitionRegionWidth_conf">compiletime</P>
+      <P Name="UpperLimitTransitionRegionWidthUnits">deg</P>
+      <P Name="TorqueActuationMode">NoTorque</P>
+      <P Name="MotionActuationMode">ComputedMotion</P>
+      <P Name="SensePosition">off</P>
+      <P Name="SenseVelocity">off</P>
+      <P Name="SenseAcceleration">off</P>
+      <P Name="SenseTorqueForce">off</P>
+      <P Name="SenseLowerLimitTorqueForce">off</P>
+      <P Name="SenseUpperLimitTorqueForce">off</P>
+    </InstanceData>
+  </Block>
+  <Block BlockType="Reference" Name="Revolute22" SID="123">
+    <PortCounts lconn="1" rconn="1"/>
+    <P Name="Position">[1635, 195, 1675, 235]</P>
+    <P Name="ZOrder">123</P>
+    <P Name="LibraryVersion">25.21</P>
+    <P Name="SourceBlock">sm_lib/Joints/Revolute Joint</P>
+    <P Name="SourceType">Revolute Joint</P>
+    <InstanceData>
+      <P Name="LogSimulationData">off</P>
+      <P Name="SimscapeInstrumentationLogging">off</P>
+      <P Name="SimscapeInstrumentationVariables" Ref="bdmxdata:SimscapeInstrumentationVariables_123"/>
+      <P Name="JointMode">Normal</P>
+      <P Name="CompositeWrenchDir">FollowerOnBase</P>
+      <P Name="CompositeWrenchFrame">BaseFrame</P>
+      <P Name="SenseConstraintForce">off</P>
+      <P Name="SenseConstraintTorque">off</P>
+      <P Name="SenseTotalForce">off</P>
+      <P Name="SenseTotalTorque">off</P>
+      <P Name="PositionTargetSpecify">on</P>
+      <P Name="PositionTargetPriority">Low</P>
+      <P Name="PositionTargetValue">smiData.RevoluteJoint(23).Rz.Pos</P>
+      <P Name="PositionTargetValue_conf">compiletime</P>
+      <P Name="PositionTargetValueUnits">deg</P>
+      <P Name="VelocityTargetSpecify">off</P>
+      <P Name="VelocityTargetPriority">High</P>
+      <P Name="VelocityTargetValue">0</P>
+      <P Name="VelocityTargetValue_conf">compiletime</P>
+      <P Name="VelocityTargetValueUnits">deg/s</P>
+      <P Name="EquilibriumPosition">0</P>
+      <P Name="EquilibriumPosition_conf">compiletime</P>
+      <P Name="EquilibriumPositionUnits">deg</P>
+      <P Name="SpringStiffness">0</P>
+      <P Name="SpringStiffness_conf">compiletime</P>
+      <P Name="SpringStiffnessUnits">N*m/deg</P>
+      <P Name="DampingCoefficient">0</P>
+      <P Name="DampingCoefficient_conf">compiletime</P>
+      <P Name="DampingCoefficientUnits">N*m/(deg/s)</P>
+      <P Name="LowerLimitSpecify">off</P>
+      <P Name="LowerLimitBound">-90</P>
+      <P Name="LowerLimitBound_conf">compiletime</P>
+      <P Name="LowerLimitBoundUnits">deg</P>
+      <P Name="LowerLimitStiffness">1e4</P>
+      <P Name="LowerLimitStiffness_conf">compiletime</P>
+      <P Name="LowerLimitStiffnessUnits">N*m/deg</P>
+      <P Name="LowerLimitDamping">10</P>
+      <P Name="LowerLimitDamping_conf">compiletime</P>
+      <P Name="LowerLimitDampingUnits">N*m/(deg/s)</P>
+      <P Name="LowerLimitTransitionRegionWidth">0.1</P>
+      <P Name="LowerLimitTransitionRegionWidth_conf">compiletime</P>
+      <P Name="LowerLimitTransitionRegionWidthUnits">deg</P>
+      <P Name="UpperLimitSpecify">off</P>
+      <P Name="UpperLimitBound">90</P>
+      <P Name="UpperLimitBound_conf">compiletime</P>
+      <P Name="UpperLimitBoundUnits">deg</P>
+      <P Name="UpperLimitStiffness">1e4</P>
+      <P Name="UpperLimitStiffness_conf">compiletime</P>
+      <P Name="UpperLimitStiffnessUnits">N*m/deg</P>
+      <P Name="UpperLimitDamping">10</P>
+      <P Name="UpperLimitDamping_conf">compiletime</P>
+      <P Name="UpperLimitDampingUnits">N*m/(deg/s)</P>
+      <P Name="UpperLimitTransitionRegionWidth">0.1</P>
+      <P Name="UpperLimitTransitionRegionWidth_conf">compiletime</P>
+      <P Name="UpperLimitTransitionRegionWidthUnits">deg</P>
+      <P Name="TorqueActuationMode">NoTorque</P>
+      <P Name="MotionActuationMode">ComputedMotion</P>
+      <P Name="SensePosition">off</P>
+      <P Name="SenseVelocity">off</P>
+      <P Name="SenseAcceleration">off</P>
+      <P Name="SenseTorqueForce">off</P>
+      <P Name="SenseLowerLimitTorqueForce">off</P>
+      <P Name="SenseUpperLimitTorqueForce">off</P>
+    </InstanceData>
+  </Block>
+  <Block BlockType="Reference" Name="Revolute23" SID="124">
+    <PortCounts lconn="1" rconn="1"/>
+    <P Name="Position">[1635, 95, 1675, 135]</P>
+    <P Name="ZOrder">124</P>
+    <P Name="LibraryVersion">25.21</P>
+    <P Name="SourceBlock">sm_lib/Joints/Revolute Joint</P>
+    <P Name="SourceType">Revolute Joint</P>
+    <InstanceData>
+      <P Name="LogSimulationData">off</P>
+      <P Name="SimscapeInstrumentationLogging">off</P>
+      <P Name="SimscapeInstrumentationVariables" Ref="bdmxdata:SimscapeInstrumentationVariables_124"/>
+      <P Name="JointMode">Normal</P>
+      <P Name="CompositeWrenchDir">FollowerOnBase</P>
+      <P Name="CompositeWrenchFrame">BaseFrame</P>
+      <P Name="SenseConstraintForce">off</P>
+      <P Name="SenseConstraintTorque">off</P>
+      <P Name="SenseTotalForce">off</P>
+      <P Name="SenseTotalTorque">off</P>
+      <P Name="PositionTargetSpecify">on</P>
+      <P Name="PositionTargetPriority">Low</P>
+      <P Name="PositionTargetValue">smiData.RevoluteJoint(24).Rz.Pos</P>
+      <P Name="PositionTargetValue_conf">compiletime</P>
+      <P Name="PositionTargetValueUnits">deg</P>
+      <P Name="VelocityTargetSpecify">off</P>
+      <P Name="VelocityTargetPriority">High</P>
+      <P Name="VelocityTargetValue">0</P>
+      <P Name="VelocityTargetValue_conf">compiletime</P>
+      <P Name="VelocityTargetValueUnits">deg/s</P>
+      <P Name="EquilibriumPosition">0</P>
+      <P Name="EquilibriumPosition_conf">compiletime</P>
+      <P Name="EquilibriumPositionUnits">deg</P>
+      <P Name="SpringStiffness">0</P>
+      <P Name="SpringStiffness_conf">compiletime</P>
+      <P Name="SpringStiffnessUnits">N*m/deg</P>
+      <P Name="DampingCoefficient">0</P>
+      <P Name="DampingCoefficient_conf">compiletime</P>
+      <P Name="DampingCoefficientUnits">N*m/(deg/s)</P>
+      <P Name="LowerLimitSpecify">off</P>
+      <P Name="LowerLimitBound">-90</P>
+      <P Name="LowerLimitBound_conf">compiletime</P>
+      <P Name="LowerLimitBoundUnits">deg</P>
+      <P Name="LowerLimitStiffness">1e4</P>
+      <P Name="LowerLimitStiffness_conf">compiletime</P>
+      <P Name="LowerLimitStiffnessUnits">N*m/deg</P>
+      <P Name="LowerLimitDamping">10</P>
+      <P Name="LowerLimitDamping_conf">compiletime</P>
+      <P Name="LowerLimitDampingUnits">N*m/(deg/s)</P>
+      <P Name="LowerLimitTransitionRegionWidth">0.1</P>
+      <P Name="LowerLimitTransitionRegionWidth_conf">compiletime</P>
+      <P Name="LowerLimitTransitionRegionWidthUnits">deg</P>
+      <P Name="UpperLimitSpecify">off</P>
+      <P Name="UpperLimitBound">90</P>
+      <P Name="UpperLimitBound_conf">compiletime</P>
+      <P Name="UpperLimitBoundUnits">deg</P>
+      <P Name="UpperLimitStiffness">1e4</P>
+      <P Name="UpperLimitStiffness_conf">compiletime</P>
+      <P Name="UpperLimitStiffnessUnits">N*m/deg</P>
+      <P Name="UpperLimitDamping">10</P>
+      <P Name="UpperLimitDamping_conf">compiletime</P>
+      <P Name="UpperLimitDampingUnits">N*m/(deg/s)</P>
+      <P Name="UpperLimitTransitionRegionWidth">0.1</P>
+      <P Name="UpperLimitTransitionRegionWidth_conf">compiletime</P>
+      <P Name="UpperLimitTransitionRegionWidthUnits">deg</P>
+      <P Name="TorqueActuationMode">NoTorque</P>
+      <P Name="MotionActuationMode">ComputedMotion</P>
+      <P Name="SensePosition">off</P>
+      <P Name="SenseVelocity">off</P>
+      <P Name="SenseAcceleration">off</P>
+      <P Name="SenseTorqueForce">off</P>
+      <P Name="SenseLowerLimitTorqueForce">off</P>
+      <P Name="SenseUpperLimitTorqueForce">off</P>
+    </InstanceData>
+  </Block>
+  <Block BlockType="Reference" Name="Simulink-PS&#xA;Converter" SID="846">
+    <PortCounts in="1" rconn="1"/>
+    <P Name="Position">[1145, 1022, 1160, 1038]</P>
+    <P Name="ZOrder">1239</P>
+    <P Name="BackgroundColor">automatic</P>
+    <P Name="LibraryVersion">8.0</P>
+    <P Name="SourceBlock">nesl_utility/Simulink-PS
+Converter</P>
+    <P Name="SourceType">Simulink-PS
+Converter</P>
+    <InstanceData>
+      <P Name="RTWMemSecFuncInitTerm">Inherit from model</P>
+      <P Name="RTWMemSecFuncExecute">Inherit from model</P>
+      <P Name="RTWMemSecDataConstants">Inherit from model</P>
+      <P Name="RTWMemSecDataInternal">Inherit from model</P>
+      <P Name="RTWMemSecDataParameters">Inherit from model</P>
+      <P Name="ContentPreviewEnabled">on</P>
+      <P Name="PhysicalDomain">network_engine_domain</P>
+      <P Name="SubClassName">ps_input</P>
+      <P Name="LeftPortType">input</P>
+      <P Name="RightPortType">output</P>
+      <P Name="PseudoPeriodic">off</P>
+      <P Name="Frequencies">[]</P>
+      <P Name="NoiseDistribution">none</P>
+      <P Name="NoiseParameters">[]</P>
+      <P Name="Unit">1</P>
+      <P Name="AffineConversion">off</P>
+      <P Name="FilteringAndDerivatives">provide</P>
+      <P Name="SimscapeFilterOrder">1</P>
+      <P Name="InputFilterTimeConstant">0.001</P>
+      <P Name="UdotUserProvided">0</P>
+    </InstanceData>
+  </Block>
+  <Block BlockType="Reference" Name="Spatial&#xA;Contact Force1" SID="759">
+    <PortCounts lconn="1" rconn="1"/>
+    <P Name="Position">[1330, 450, 1370, 490]</P>
+    <P Name="ZOrder">1226</P>
+    <P Name="LibraryVersion">25.21</P>
+    <P Name="SourceBlock">sm_lib/Forces and
+Torques/Spatial
+Contact Force</P>
+    <P Name="SourceType">Spatial
+Contact Force</P>
+    <InstanceData>
+      <P Name="LogSimulationData">off</P>
+      <P Name="SimscapeInstrumentationLogging">off</P>
+      <P Name="SimscapeInstrumentationVariables" Ref="bdmxdata:SimscapeInstrumentationVariables_759"/>
+      <P Name="SenseSeparationDistance">off</P>
+      <P Name="NormalForceType">SmoothSpringDamper</P>
+      <P Name="NormalStiffness">1e6</P>
+      <P Name="NormalStiffness_conf">compiletime</P>
+      <P Name="NormalStiffnessUnits">N/m</P>
+      <P Name="NormalDamping">1e3</P>
+      <P Name="NormalDamping_conf">compiletime</P>
+      <P Name="NormalDampingUnits">N/(m/s)</P>
+      <P Name="NormalTransitionRegionWidth">1e-4</P>
+      <P Name="NormalTransitionRegionWidth_conf">compiletime</P>
+      <P Name="NormalTransitionRegionWidthUnits">m</P>
+      <P Name="FrictionType">SmoothStickSlip</P>
+      <P Name="CoefficientOfStaticFriction">0.5</P>
+      <P Name="CoefficientOfStaticFriction_conf">compiletime</P>
+      <P Name="CoefficientOfDynamicFriction">0.3</P>
+      <P Name="CoefficientOfDynamicFriction_conf">compiletime</P>
+      <P Name="FrictionalCriticalVelocity">1e-3</P>
+      <P Name="FrictionalCriticalVelocity_conf">compiletime</P>
+      <P Name="FrictionalCriticalVelocityUnits">m/s</P>
+      <P Name="SenseContactSignal">off</P>
+      <P Name="SensePenetrationDepth">off</P>
+      <P Name="SenseNormalVelocity">off</P>
+      <P Name="SenseTangentialVelocity">off</P>
+      <P Name="SensingForceTorqueDirection">BaseOnFollower</P>
+      <P Name="SensingForceTorqueResolutionFrame">ContactFrame</P>
+      <P Name="SenseNormalForce">off</P>
+      <P Name="SenseNormalForceMagnitude">off</P>
+      <P Name="SenseNormalTorque">off</P>
+      <P Name="SenseFrictionalForce">off</P>
+      <P Name="SenseFrictionalForceMagnitude">off</P>
+      <P Name="SenseFrictionalTorque">off</P>
+      <P Name="SenseTotalForce">off</P>
+      <P Name="SenseTotalTorque">off</P>
+      <P Name="SenseContactBaseRotation">off</P>
+      <P Name="SenseContactBaseTranslation">off</P>
+      <P Name="SenseContactFollowerRotation">off</P>
+      <P Name="SenseContactFollowerTranslation">off</P>
+      <P Name="ZeroCrossDetectContactStartAndEnd">off</P>
+    </InstanceData>
+  </Block>
+  <Block BlockType="Step" Name="Step" SID="910">
+    <P Name="Position">[890, 1015, 920, 1045]</P>
+    <P Name="ZOrder">1247</P>
+    <P Name="Before">-0.209</P>
+    <P Name="After">-0.209</P>
+    <P Name="SampleTime">0</P>
+  </Block>
+  <Block BlockType="SubSystem" Name="Step_Left_motor_shaft1_1_RIGID" SID="156">
+    <PortCounts lconn="1" rconn="2"/>
+    <P Name="Position">[1530, 865, 1570, 905]</P>
+    <P Name="ZOrder">156</P>
+    <P Name="ContentPreviewEnabled">on</P>
+    <Mask>
+      <Display/>
+    </Mask>
+    <System Ref="system_156"/>
+  </Block>
+  <Block BlockType="Sum" Name="Sum" SID="848">
+    <PortCounts in="2" out="1"/>
+    <P Name="Position">[995, 1020, 1015, 1040]</P>
+    <P Name="ZOrder">1240</P>
+    <P Name="Inputs">|+-</P>
+  </Block>
+  <Block BlockType="PMIOPort" Name="Conn6" SID="789">
+    <P Name="Position">[1250, 463, 1280, 477]</P>
+    <P Name="ZOrder">1232</P>
+    <P Name="Side">Left</P>
+  </Block>
+  <Block BlockType="PMIOPort" Name="Conn7" SID="790">
+    <P Name="Position">[1260, 358, 1290, 372]</P>
+    <P Name="ZOrder">1233</P>
+    <P Name="Port">2</P>
+    <P Name="Side">Left</P>
+  </Block>
+  <Block BlockType="PMIOPort" Name="Conn4" SID="787">
+    <P Name="Position">[925, 728, 955, 742]</P>
+    <P Name="ZOrder">1230</P>
+    <P Name="Port">3</P>
+    <P Name="Side">Right</P>
+  </Block>
+  <Block BlockType="PMIOPort" Name="Conn5" SID="788">
+    <P Name="Position">[1490, 808, 1520, 822]</P>
+    <P Name="ZOrder">1231</P>
+    <P Name="Port">4</P>
+    <P Name="Side">Right</P>
+  </Block>
+  <Block BlockType="PMIOPort" Name="Conn2" SID="785">
+    <P Name="Position">[1740, 708, 1770, 722]</P>
+    <P Name="ZOrder">1228</P>
+    <P Name="BlockMirror">on</P>
+    <P Name="Port">5</P>
+    <P Name="Side">Right</P>
+  </Block>
+  <Block BlockType="PMIOPort" Name="F" SID="784">
+    <P Name="Position">[1420, 358, 1450, 372]</P>
+    <P Name="ZOrder">1227</P>
+    <P Name="NameLocation">top</P>
+    <P Name="Port">6</P>
+    <P Name="Side">Right</P>
+  </Block>
+  <Line LineType="Connection">
+    <P Name="ZOrder">141</P>
+    <P Name="Src">34#rconn:5</P>
+    <P Name="Points">[25, 0; 0, 85]</P>
+    <P Name="Dst">119#lconn:1</P>
+  </Line>
+  <Line LineType="Connection">
+    <P Name="ZOrder">5</P>
+    <P Name="Src">120#rconn:1</P>
+    <P Name="Points">[30, 0; 0, 150]</P>
+    <P Name="Dst">156#lconn:1</P>
+  </Line>
+  <Line LineType="Connection">
+    <P Name="ZOrder">140</P>
+    <P Name="Src">63#lconn:1</P>
+    <P Name="Dst">118#rconn:1</P>
+  </Line>
+  <Line LineType="Connection">
+    <P Name="ZOrder">139</P>
+    <P Name="Src">34#rconn:6</P>
+    <P Name="Points">[19, 0; 0, 175]</P>
+    <P Name="Dst">118#lconn:1</P>
+  </Line>
+  <Line LineType="Connection">
+    <P Name="ZOrder">171</P>
+    <P Name="Src">81#lconn:2</P>
+    <P Name="Points">[-36, 0; 0, 40]</P>
+    <P Name="Dst">103#rconn:1</P>
+  </Line>
+  <Line LineType="Connection">
+    <P Name="ZOrder">152</P>
+    <P Name="Src">43#lconn:1</P>
+    <P Name="Dst">124#rconn:1</P>
+  </Line>
+  <Line LineType="Connection">
+    <P Name="ZOrder">142</P>
+    <P Name="Src">64#lconn:1</P>
+    <P Name="Dst">119#rconn:1</P>
+  </Line>
+  <Line LineType="Connection">
+    <P Name="ZOrder">15</P>
+    <P Name="Src">26#lconn:1</P>
+    <P Name="Points">[0, -25]</P>
+    <P Name="Dst">33#rconn:1</P>
+  </Line>
+  <Line LineType="Connection">
+    <P Name="ZOrder">17</P>
+    <P Name="Src">26#rconn:1</P>
+    <P Name="Dst">81#lconn:1</P>
+  </Line>
+  <Line LineType="Connection">
+    <P Name="ZOrder">137</P>
+    <P Name="Src">34#rconn:7</P>
+    <P Name="Points">[9, 0; 0, 265]</P>
+    <P Name="Dst">102#lconn:1</P>
+  </Line>
+  <Line LineType="Connection">
+    <P Name="ZOrder">151</P>
+    <P Name="Src">34#rconn:1</P>
+    <P Name="Points">[35, 0]</P>
+    <P Name="Dst">124#lconn:1</P>
+  </Line>
+  <Line LineType="Connection">
+    <P Name="ZOrder">150</P>
+    <P Name="Src">42#lconn:1</P>
+    <P Name="Dst">123#rconn:1</P>
+  </Line>
+  <Line LineType="Connection">
+    <P Name="ZOrder">143</P>
+    <P Name="Src">34#rconn:4</P>
+    <P Name="Points">[27, 0; 0, -5]</P>
+    <P Name="Dst">121#lconn:1</P>
+  </Line>
+  <Line LineType="Connection">
+    <P Name="ZOrder">148</P>
+    <P Name="Src">33#lconn:1</P>
+    <P Name="Points">[-314, 0; 0, -330]</P>
+    <P Name="Dst">34#lconn:3</P>
+  </Line>
+  <Line LineType="Connection">
+    <P Name="ZOrder">146</P>
+    <P Name="Src">34#rconn:3</P>
+    <P Name="Points">[22, 0; 0, -95]</P>
+    <P Name="Dst">122#lconn:1</P>
+  </Line>
+  <Line LineType="Connection">
+    <P Name="ZOrder">147</P>
+    <P Name="Src">66#lconn:1</P>
+    <P Name="Dst">122#rconn:1</P>
+  </Line>
+  <Line LineType="Connection">
+    <P Name="ZOrder">168</P>
+    <P Name="Src">10#lconn:1</P>
+    <P Name="Points">[-12, 0; 0, -35]</P>
+    <P Name="Dst">156#rconn:2</P>
+  </Line>
+  <Line LineType="Connection">
+    <P Name="ZOrder">149</P>
+    <P Name="Src">34#rconn:2</P>
+    <P Name="Points">[5, 0; 0, -185]</P>
+    <P Name="Dst">123#lconn:1</P>
+  </Line>
+  <Line LineType="Connection">
+    <P Name="ZOrder">169</P>
+    <P Name="Src">10#rconn:1</P>
+    <P Name="Points">[5, 0; 0, -125]</P>
+    <P Name="Dst">33#lconn:3</P>
+  </Line>
+  <Line LineType="Connection">
+    <P Name="ZOrder">145</P>
+    <P Name="Src">65#lconn:1</P>
+    <P Name="Dst">121#rconn:1</P>
+  </Line>
+  <Line LineType="Connection">
+    <P Name="ZOrder">352</P>
+    <P Name="Src">785#rconn:1</P>
+    <P Name="Dst">102#rconn:1</P>
+  </Line>
+  <Line LineType="Connection">
+    <P Name="ZOrder">351</P>
+    <P Name="Src">34#lconn:1</P>
+    <P Name="Points">[-5, 0; 0, -30]</P>
+    <P Name="Dst">784#rconn:1</P>
+  </Line>
+  <Line LineType="Connection">
+    <P Name="ZOrder">19</P>
+    <P Name="Src">33#lconn:2</P>
+    <P Name="Points">[-95, 0; 0, 25]</P>
+    <P Name="Dst">106#rconn:1</P>
+  </Line>
+  <Line LineType="Connection">
+    <P Name="ZOrder">236</P>
+    <P Name="Src">34#lconn:2</P>
+    <P Name="Points">[-81, 0]</P>
+    <Branch ConnectType="DEST_SRC">
+      <P Name="Points">[0, -55]</P>
+      <P Name="Dst">790#rconn:1</P>
+    </Branch>
+    <Branch ConnectType="DEST_DEST">
+      <P Name="Src">759#rconn:1</P>
+      <P Name="Points">[9, 0; 0, -50]</P>
+    </Branch>
+  </Line>
+  <Line LineType="Connection">
+    <P Name="ZOrder">170</P>
+    <P Name="Src">103#lconn:1</P>
+    <P Name="Dst">156#rconn:1</P>
+  </Line>
+  <Line LineType="Connection">
+    <P Name="ZOrder">355</P>
+    <P Name="Src">788#rconn:1</P>
+    <P Name="Dst">106#lconn:1</P>
+  </Line>
+  <Line LineType="Connection">
+    <P Name="ZOrder">354</P>
+    <P Name="Src">120#lconn:1</P>
+    <P Name="Dst">787#rconn:1</P>
+  </Line>
+  <Line LineType="Connection">
+    <P Name="ZOrder">356</P>
+    <P Name="Src">759#lconn:1</P>
+    <P Name="Dst">789#rconn:1</P>
+  </Line>
+  <Line LineType="Connection">
+    <P Name="ZOrder">367</P>
+    <P Name="Src">120#rconn:2</P>
+    <P Name="Points">[2, 0; 0, 275]</P>
+    <P Name="Dst">845#lconn:1</P>
+  </Line>
+  <Line LineType="Connection">
+    <P Name="ZOrder">365</P>
+    <P Name="Src">846#rconn:1</P>
+    <P Name="Points">[8, 0; 0, -275]</P>
+    <P Name="Dst">120#lconn:2</P>
+  </Line>
+  <Line>
+    <P Name="ZOrder">361</P>
+    <P Name="Src">848#out:1</P>
+    <P Name="Dst">844#in:1</P>
+  </Line>
+  <Line>
+    <P Name="ZOrder">362</P>
+    <P Name="Src">844#out:1</P>
+    <P Name="Dst">846#in:1</P>
+  </Line>
+  <Line>
+    <P Name="ZOrder">363</P>
+    <P Name="Src">845#out:1</P>
+    <P Name="Points">[36, 0]</P>
+    <Branch>
+      <P Name="ZOrder">384</P>
+      <P Name="Points">[0, 46; -411, 0]</P>
+      <P Name="Dst">848#in:2</P>
+    </Branch>
+    <Branch>
+      <P Name="ZOrder">378</P>
+      <P Name="Dst">896#in:1</P>
+    </Branch>
+  </Line>
+  <Line>
+    <P Name="ZOrder">382</P>
+    <P Name="Src">910#out:1</P>
+    <P Name="Dst">848#in:1</P>
+  </Line>
+</System>
