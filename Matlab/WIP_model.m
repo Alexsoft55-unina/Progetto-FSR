@@ -1,9 +1,9 @@
-%% Simulazione Completa VL-WIP con Traiettoria a Minimum Jerk (5° Ordine)
+%% Simulazione Completa VL-WIP con TV-LQR e Traiettoria a Minimum Jerk
 % Basato su: "Modeling and Control of a Wheeled Biped Robot" (MDPI)
 
 clear; close all; clc;
 
-%% 1. Parametri Fisici Costanti e Linearizzazione
+%% 1. Parametri Fisici Costanti e Linearizzazione Simbolica
 % --- Parametri Fisici Costanti ---
 m_w = 3.5;      % Mass of the wheel [kg]
 I_w = 0.1;      % Moment of inertia of the wheel [kg*m^2]
@@ -13,60 +13,57 @@ m_b = 73;       % Mass of the upper body [kg]
 I_z = 3.3;      % Moment of inertia about the z-axis [kg*m^2]
 g = 9.81;       % Accelerazione di gravità [m/s^2]
 
-% Variabile simbolica per la lunghezza (permetterà il calcolo del TV-LQR in futuro)
-syms l real
-I_y = (1/3) * m_b * l^2;  % Moment of inertia about the y-axis
+% Variabile simbolica per la lunghezza
+syms l_sym real
+I_y_sym = (1/3) * m_b * l_sym^2;  % Moment of inertia about the y-axis
 
 % --- Calcolo dei Coefficienti Matrici (simbolici in funzione di l) ---
-den_comune = 2*I_w*(I_y + m_b*l^2) + (2*l^2*m_b*m_w + I_y*(m_b + 2*m_w)*r^2);
+den_comune = 2*I_w*(I_y_sym + m_b*l_sym^2) + (2*l_sym^2*m_b*m_w + I_y_sym*(m_b + 2*m_w)*r^2);
 
-a_1 = - (g * l^2 * m_b^2 * r^2) / den_comune;
-a_2 = (g * l * m_b * (2*I_w + (m_b + 2*m_w)*r^2)) / den_comune;
-b_1 = (r * (I_y + l*m_b*(l + r))) / den_comune;
-b_2 = - (2*I_w + r*(l*m_b + (m_b + 2*m_w)*r)) / den_comune;
+a_1 = - (g * l_sym^2 * m_b^2 * r^2) / den_comune;
+a_2 = (g * l_sym * m_b * (2*I_w + (m_b + 2*m_w)*r^2)) / den_comune;
+b_1 = (r * (I_y_sym + l_sym*m_b*(l_sym + r))) / den_comune;
+b_2 = - (2*I_w + r*(l_sym*m_b + (m_b + 2*m_w)*r)) / den_comune;
 b_3 = (d * r) / (2*I_z*r^2 + d^2*(I_w + m_w*r^2));
 
 % Matrici di stato e ingresso simboliche
-A = [0,   0,   0,   1,   0,   0;
-     0,   0,   0,   0,   1,   0;
-     0,   0,   0,   0,   0,   1;
-     0, a_1,   0,   0,   0,   0;
-     0, a_2,   0,   0,   0,   0;
-     0,   0,   0,   0,   0,   0];
+A_sym = [0,   0,   0,   1,   0,   0;
+         0,   0,   0,   0,   1,   0;
+         0,   0,   0,   0,   0,   1;
+         0, a_1,   0,   0,   0,   0;
+         0, a_2,   0,   0,   0,   0;
+         0,   0,   0,   0,   0,   0];
 
-B = [  0,    0;
-       0,    0;
-       0,    0;
-     b_1,  b_1;
-     b_2,  b_2;
-     b_3, -b_3];
+B_sym = [  0,    0;
+           0,    0;
+           0,    0;
+         b_1,  b_1;
+         b_2,  b_2;
+         b_3, -b_3];
 
-% Punto Operativo Nominale (altezza fissa per ora)
-l_nom = 0.5; % [m] 
+%% 2. Generazione della Look-Up Table (LUT) per il TV-LQR
+disp('Generazione della Look-Up Table (LUT) in corso...');
 
-% Struttura parametri per la simulazione non lineare
-params.m_b = m_b; params.m_w = m_w; params.I_w = I_w;
-params.l = l_nom; params.r = r;     params.d = d; 
-params.I_z = I_z; params.I_y = double(subs(I_y, l, l_nom));
-
-% Valutazione numerica delle matrici A e B
-A_num = double(subs(A, l, l_nom));
-B_num = double(subs(B, l, l_nom));
-
-%% 2. Analisi di Controllabilità e Sintesi LQR
-Co = ctrb(A_num, B_num);
-if rank(Co) < size(A_num, 1)
-    error('Il sistema linearizzato non è completamente controllabile.');
-end
+% Definiamo un range operativo per la lunghezza del pendolo
+l_range = linspace(0.3, 0.8, 50); % 50 punti tra 0.3m e 0.8m
+K_LUT = zeros(length(l_range), 2, 6); % Matrice 3D per salvare i guadagni K
 
 % Pesi sugli stati: X = [s; theta; phi; s_dot; theta_dot; phi_dot]
 Q = diag([10, 1000, 10, 1, 100, 1]); 
 R = diag([0.1, 0.1]); 
 
-% Matrice dei guadagni K
-[K, ~, ~] = lqr(A_num, B_num, Q, R);
-disp('Matrice dei guadagni K calcolata con successo.');
-Bv = K; % Precompensazione per il tracking
+for i = 1:length(l_range)
+    l_val = l_range(i);
+    
+    % Valutazione numerica delle matrici A e B per il valore corrente di l
+    A_num = double(subs(A_sym, l_sym, l_val));
+    B_num = double(subs(B_sym, l_sym, l_val));
+    
+    % Calcolo del guadagno K e salvataggio nella LUT
+    [K_val, ~, ~] = lqr(A_num, B_num, Q, R);
+    K_LUT(i, :, :) = K_val;
+end
+disp('LUT generata con successo.');
 
 %% 3. Setup Traiettoria e Simulazione Non Lineare
 X0 = [0; 0; 0; 0; 0; 0]; % Condizioni iniziali
@@ -75,37 +72,45 @@ X0 = [0; 0; 0; 0; 0; 0]; % Condizioni iniziali
 s_target = 1.0;           % Spostamento desiderato [m]
 phi_target = deg2rad(10); % Imbardata desiderata [rad]
 
-% Limiti fisici (dal paper)
-v_max_lim = 0.8;          % m/s
-omega_max_lim = 0.5;      % rad/s
+T_totale = 5.0; % [secondi] Tempo di manovra rilassato
+t_span = [0, 10]; 
 
-% Il tempo totale 
-T_totale = 5; 
-disp(['Tempo totale della manovra impostato: ', num2str(T_totale), ' secondi']);
+% Struttura parametri fisici base (l e I_y verranno aggiornati dinamicamente)
+params_base.m_b = m_b; params_base.m_w = m_w; params_base.I_w = I_w;
+params_base.r = r;     params_base.d = d;     params_base.I_z = I_z;
 
-% Allunghiamo la simulazione di 5 secondi oltre la fine del movimento per vedere l'assestamento
-t_span = [0, T_totale + 5]; 
+% Funzione per la lunghezza variabile nel tempo (es. movimento sinusoidale)
+% l(t) = l_nom + ampiezza * sin(omega * t)
+l_nom = 0.5;
+ampiezza_l = 0.15;
+omega_l = 2 * pi / 3; % Frequenza del movimento (es. 3 secondi per ciclo)
+funzione_l = @(t) l_nom + ampiezza_l * sin(omega_l * t);
 
-% Wrapper aggiornato
-dinamica_chiusa = @(t, X) dinamica_non_lineare_wrapper(t, X, s_target, phi_target, T_totale, K, Bv, params);
+% Wrapper aggiornato per includere la LUT e la lunghezza variabile
+dinamica_chiusa = @(t, X) dinamica_non_lineare_wrapper_tv(t, X, s_target, phi_target, T_totale, l_range, K_LUT, funzione_l, params_base);
 
 options = odeset('RelTol', 1e-4, 'AbsTol', 1e-6);
 [t_sim, X_sim] = ode45(dinamica_chiusa, t_span, X0, options);
 
 %% 4. Analisi dei Risultati (Stati e Sforzo di Controllo)
-% -- Plot degli Stati --
 figure('Name', 'Stati del Robot', 'Color', 'w');
-subplot(3,1,1);
+subplot(4,1,1);
 plot(t_sim, X_sim(:,1), 'b', 'LineWidth', 1.5);
 ylabel('Posizione s [m]'); title('Spostamento Lineare'); grid on;
 
-subplot(3,1,2);
+subplot(4,1,2);
 plot(t_sim, rad2deg(X_sim(:,2)), 'r', 'LineWidth', 1.5);
-ylabel('Angolo \theta [deg]'); title('Angolo di Tilt (Pendolo)'); grid on;
+ylabel('Angolo \theta [deg]'); title('Angolo di Tilt'); grid on;
 
-subplot(3,1,3);
+subplot(4,1,3);
 plot(t_sim, rad2deg(X_sim(:,3)), 'k', 'LineWidth', 1.5);
-ylabel('Angolo \phi [deg]'); xlabel('Tempo [s]'); title('Angolo di Imbardata (Yaw)'); grid on;
+ylabel('Angolo \phi [deg]'); title('Angolo di Imbardata'); grid on;
+
+% Calcoliamo l(t) per tracciarlo
+l_history = arrayfun(funzione_l, t_sim);
+subplot(4,1,4);
+plot(t_sim, l_history, 'g', 'LineWidth', 1.5);
+ylabel('Altezza l [m]'); xlabel('Tempo [s]'); title('Variazione Lunghezza Pendolo'); grid on;
 
 % -- Calcolo e Plot Sforzo di Controllo (Motori) --
 tau_history = zeros(length(t_sim), 2);
@@ -113,26 +118,29 @@ for i = 1:length(t_sim)
     t_curr = t_sim(i);
     X_curr = X_sim(i, :)';
     
-    % Ricostruiamo X_des istantaneo usando il polinomio di 5° ordine
+    % Ricalcolo lunghezza e interpolazione K
+    l_curr = funzione_l(t_curr);
+K_curr = squeeze(interp1(l_range, K_LUT, l_curr, 'linear', 'extrap'));
+Bv_curr = K_curr; 
+    
     [s_des, s_dot_des] = genera_profilo_quinto_ordine(t_curr, s_target, T_totale);
     [phi_des, phi_dot_des] = genera_profilo_quinto_ordine(t_curr, phi_target, T_totale);
-    
     X_des_curr = [s_des; 0; phi_des; s_dot_des; 0; phi_dot_des];
     
-    % Ricalcolo della coppia esatta applicata in quel momento
-    tau_history(i, :) = (-K * X_curr + Bv * X_des_curr)';
+    tau_history(i, :) = (-K_curr * X_curr + Bv_curr * X_des_curr)';
 end
 
 figure('Name', 'Sforzo di Controllo', 'Color', 'w');
 subplot(2,1,1);
 plot(t_sim, tau_history(:,1), 'b', 'LineWidth', 2);
-ylabel('\tau_l [Nm]'); title('Coppia Motore - Ruota Sinistra (Minimum Jerk)'); grid on;
+ylabel('\tau_l [Nm]'); title('Coppia Motore - Ruota Sinistra (TV-LQR)'); grid on;
 
 subplot(2,1,2);
 plot(t_sim, tau_history(:,2), 'r', 'LineWidth', 2);
-ylabel('\tau_r [Nm]'); xlabel('Tempo [s]'); title('Coppia Motore - Ruota Destra (Minimum Jerk)'); grid on;
+ylabel('\tau_r [Nm]'); xlabel('Tempo [s]'); title('Coppia Motore - Ruota Destra (TV-LQR)'); grid on;
 
 %% 5. Animazione 3D e Salvataggio Video
+% ... (Mantieni il tuo codice di animazione qui, assicurandoti di usare l_history(i) per la z_p invece di l_anim fisso) ...
 disp('Generazione del video in corso...');
 video_filename = 'WIP_Simulation_Completa.mp4';
 v = VideoWriter(video_filename, 'MPEG-4');
@@ -143,7 +151,6 @@ hold on; grid on; axis equal; view(3);
 xlim([-0.5 1.5]); ylim([-0.5 1.5]); zlim([0 1.2]);
 xlabel('X [m]'); ylabel('Y [m]'); zlabel('Z [m]'); title('Simulazione Dinamica VL-WIP');
 
-l_anim = params.l;
 h_axle = plot3([0 0], [0 0], [0 0], 'k-', 'LineWidth', 6);
 h_rod  = plot3([0 0], [0 0], [0 0], 'b-', 'LineWidth', 4);
 h_mass = plot3(0, 0, 0, 'ko', 'MarkerSize', 15, 'MarkerFaceColor', 'r');
@@ -153,10 +160,12 @@ h_path = plot3(0, 0, 0, 'g--', 'LineWidth', 1.5);
 
 t_video = 0:(1/v.FrameRate):t_sim(end);
 X_video = interp1(t_sim, X_sim, t_video);
+l_video = arrayfun(funzione_l, t_video); % Interpoliamo anche l(t) per l'animazione
 path_x = zeros(1, length(t_video)); path_y = zeros(1, length(t_video));
 
 for i = 1:length(t_video)
     s = X_video(i, 1); theta = X_video(i, 2); phi = X_video(i, 3);
+    l_anim = l_video(i); % Lunghezza al frame corrente
     
     x_c = s * cos(phi); y_c = s * sin(phi); z_c = r;
     path_x(i) = x_c; path_y(i) = y_c;
@@ -187,17 +196,31 @@ disp(['Video salvato con successo: ', fullfile(pwd, video_filename)]);
 
 %% --- FUNZIONI DI SUPPORTO ---
 
-function dX = dinamica_non_lineare_wrapper(t, X, s_tgt, phi_tgt, T_totale, K, Bv, params)
-    % 1. Genera Riferimenti Istante per Istante (Minimum Jerk)
+function dX = dinamica_non_lineare_wrapper_tv(t, X, s_tgt, phi_tgt, T_totale, l_range, K_LUT, funzione_l, params)
+    
+    % 1. Determiniamo la lunghezza attuale l(t)
+    l_curr = funzione_l(t);
+    
+    % Aggiorniamo i parametri dipendenti da l
+    params.l = l_curr;
+    params.I_y = (1/3) * params.m_b * l_curr^2;
+    
+    % 2. Interpoliamo K dalla LUT
+    % Usiamo interpn per interpolare lungo la prima dimensione di K_LUT
+    % K_LUT ha dimensioni (n_punti_l, 2, 6). 'squeeze' rimuove la dimensione di l.
+K_curr = squeeze(interp1(l_range, K_LUT, l_curr, 'linear', 'extrap'));
+Bv_curr = K_curr;
+    
+    % 3. Genera Riferimenti Istante per Istante (Minimum Jerk)
     [s_des, s_dot_des] = genera_profilo_quinto_ordine(t, s_tgt, T_totale);
     [phi_des, phi_dot_des] = genera_profilo_quinto_ordine(t, phi_tgt, T_totale);
     
     X_des = [s_des; 0; phi_des; s_dot_des; 0; phi_dot_des];
     
-    % 2. Azione di controllo (LQR)
-    tau_w = -K * X + Bv * X_des; 
+    % 4. Azione di controllo (TV-LQR)
+    tau_w = -K_curr * X + Bv_curr * X_des; 
     
-    % 3. Dinamica Non Lineare
+    % 5. Dinamica Non Lineare
     dX = dinamica_non_lineare(t, X, tau_w, params);
 end
 
@@ -231,9 +254,7 @@ function [pos, vel] = genera_profilo_quinto_ordine(t, target, T_totale)
         pos = target; vel = 0;
     else
         tau = t / T_totale;
-        % Polinomio 5° grado per posizione
         pos = target * (10*tau^3 - 15*tau^4 + 6*tau^5);
-        % Derivata per velocità
         vel = (target / T_totale) * (30*tau^2 - 60*tau^3 + 30*tau^4);
     end
 end
