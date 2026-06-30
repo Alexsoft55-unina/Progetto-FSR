@@ -18,7 +18,30 @@ F_max = 1500;           % Forza z massima [N]
 dc = [0; 0; 0; -g];     % Disturbo di gravità
 dk = dc * dt;
 
+robot_params.mb = 73.0;    % Massa del corpo superiore (kg)
+robot_params.Iz = 3.3;     % Momento di inerzia rispetto all'asse z (kg*m^2)
 
+robot_params.m1 = 1.2;     % Massa dello stinco (kg)
+robot_params.m2 = 5.3;     % Massa della coscia (kg)
+robot_params.m3 = 60.0;    % Massa del torso (kg)
+
+robot_params.l1 = 0.45;    % Lunghezza dello stinco (m)
+robot_params.l2 = 0.45;    % Lunghezza della coscia (m)
+robot_params.l3 = 0.35;    % Altezza del torso (m)
+% Nota per Iy: la tabella indica (1/3)*mb*l^2. Assumo che 'l' sia l3 (torso).
+% Se è un'altra lunghezza, dovrai aggiornare questa formula.
+robot_params.Iy = (1/3) * robot_params.mb * (robot_params.l3)^2;
+% Calcolo dinamico di I1 e I2 (Asta sottile)
+robot_params.I1 = (1/12) * robot_params.m1 * (robot_params.l1)^2;
+robot_params.I2 = (1/12) * robot_params.m2 * (robot_params.l2)^2;
+
+% Assicurati di aggiungere anche lc1 e lc2 (distanza baricentro)
+% Per un'asta omogenea, il baricentro è a metà lunghezza
+robot_params.lc1 = robot_params.l1 / 2;
+robot_params.lc2 = robot_params.l2 / 2;
+
+% CINEMATICA_INVERSA_2R Calcola gli angoli dei giunti per raggiungere un tar
+q_init = cinematica_inversa_2R(0, 0.6, robot_params);
 
 %% Generazione traiettoria 
 %% 3. Setup della Simulazione e Generazione Traiettoria
