@@ -1,7 +1,31 @@
 clear; clc; close all;
 
 %% 1. Parametri del Sistema e Assunzioni
+
+
+load Equazione_Dinamica_Robot_2D.mat
+
+% --- Aggiungi questa dichiarazione ---
+syms qw q1 q2 q3 dq_w dq1 dq2 dq3 real
+% Creazione degli array per la sostituzione
+% Assicurati che le variabili simboliche (old_vars) siano state dichiarate tramite 'syms'
+syms m1 m2 m3 mw l1 l2 l3 Rw g Iw I1 I2 I3 real
+
+old_vars = [m1, m2, m3, mw, l1, l2, l3, Rw, g, Iw, I1, I2, I3];
+new_vals = [10, 10, 60,  5, 0.5, 0.5, 0.5, 0.15, 9.81, 0.05, 0.1, 0.1, 0.1]; % Aggiorna questi valori!
+
+% Applicazione dei parametri alle matrici
+M_param = subs(M_matrix, old_vars, new_vals);
+C_param = subs(C_matrix, old_vars, new_vals);
+G_param = subs(G_matrix, old_vars, new_vals);
+
+% Semplificazione algebrica opzionale ma consigliata
+M_param = simplify(M_param);
+C_param = simplify(C_param);
+G_param = simplify(G_param);
+
 mb = 73;                % Massa dell'upper body [kg] 
+m3 = 60;
 g = 9.81;               % Accelerazione di gravità [m/s^2]
 dt = 0.01;              % Tempo di campionamento [s] (100 Hz)
 N = 15;                 % Orizzonte di predizione
@@ -12,6 +36,23 @@ L_max = 0.8;            % Lunghezza massima della gamba [m]
 zb = 0.6;               % Distanza verticale asse-anca [m]
 F_min = 100;            % Forza z minima [N]
 F_max = 1500;           % Forza z massima [N]
+
+
+% Assicurati che i vettori q e dq contengano le stesse variabili simboliche 
+% presenti nelle tue matrici M_param, C_param, G_param.
+% Esempio (adatta i nomi se le tue variabili simboliche si chiamano diversamente):
+q_vec = [qw; q1; q2; q3]; 
+dq_vec = [dq_w; dq1; dq2; dq3]; 
+
+% Generazione del file funzione ottimizzato
+disp('Generazione della funzione numerica per Simulink in corso...');
+matlabFunction(M_param, C_param, G_param, ...
+    'File', 'Dinamica_Robot', ...
+    'Vars', {q_vec, dq_vec}, ...      % Ingressi della funzione: vettori q e dq
+    'Outputs', {'M', 'C', 'G'}, ...   % Uscite della funzione
+    'Optimize', true);                % Ottimizza il codice per la simulazione
+disp('File Dinamica_Robot.m generato con successo!');
+
 
 % Stato: x = [s; s_dot; z; z_dot]
 % Ingresso: u = [Delta_s; F_z]

@@ -1,0 +1,84 @@
+% Pulizia iniziale
+clear; clc;
+
+% Variabili fisiche e geometriche costanti
+syms Rw mw m1 m2 m3 l1 l2 l3 g Iw I1 I2 I3 real
+
+% Variabile tempo e coordinate generalizzate dipendenti dal tempo
+syms t
+syms qw(t) q1(t) q2(t) q3(t)
+
+%% Modello cinematico
+
+% Ruota
+    sw = Rw*qw;
+
+% Primo Link
+    x1 = l1/2*cos(q1) + sw;
+    y1 = l1/2*sin(q1);
+
+% Secondo Link
+    x2 = l1*cos(q1) + l2/2*cos(q1 + q2) + sw;
+    y2 = l1*sin(q1) + l2/2*sin(q1 + q2);
+
+% Terzo Link
+    x3 = l1*cos(q1) + l2*cos(q1 + q2) + l3/2*sin(q3) + sw;
+    y3 = l1*sin(q1) + l2*sin(q1 + q2) + l3/2*cos(q3);
+
+%% Calcolo delle energie cinetiche 
+    % Velocità angolari dei link
+    omega_w = diff(qw, t);
+    omega_1 = diff(q1, t);
+    omega_2 = diff(q1, t) + diff(q2, t);
+    omega_3 = diff(q3, t);
+
+    % Calcolo delle energie cinetiche (Traslazionale + Rotazionale)
+    Tw = 0.5 * mw * diff(sw, t)^2 + 0.5 * Iw * omega_w^2;                 % Energia cinetica della ruota
+    T1 = 0.5 * m1 * (diff(x1, t)^2 + diff(y1, t)^2) + 0.5 * I1 * omega_1^2; % Energia cinetica del primo link
+    T2 = 0.5 * m2 * (diff(x2, t)^2 + diff(y2, t)^2) + 0.5 * I2 * omega_2^2; % Energia cinetica del secondo link
+    T3 = 0.5 * m3 * (diff(x3, t)^2 + diff(y3, t)^2) + 0.5 * I3 * omega_3^2; % Energia cinetica del terzo link
+    
+% ---- Sommatoria dell'energia cinetica
+    T = Tw + T1 + T2 + T3; % Sommatoria delle energie cinetiche
+
+%% Calcolo delle energie potenziali 
+    Uw = mw * g * Rw;
+    U1 = m1 * g * (Rw + y1);
+    U2 = m2 * g * (Rw + y2);
+    U3 = m3 * g * (Rw + y3);
+
+% --- Sommatoria dell'energia potenziale
+    U = Uw + U1 + U2 + U3;
+
+%% Calcolo Lagrangiana 
+    L = T - U;
+    L = simplify(L);
+
+%% Equazione di Eulero-Lagrange
+
+    % Vettore delle coordinate generalizzate
+    Q = [qw; q1; q2; q3];
+    
+    % Vettore delle derivate prime (velocità)
+    dQ = diff(Q, t);
+    
+    % Inizializzazione del vettore che conterrà le 4 equazioni di moto
+    Eq_moto = sym(zeros(4, 1));
+    
+    disp('Calcolo delle equazioni di Eulero-Lagrange in corso (potrebbe richiedere qualche secondo)...');
+
+    for i = 1:4
+        % 1. Derivata parziale di L rispetto alla velocità (dL/dq_dot)
+        dL_ddq = diff(L, dQ(i));
+        
+        % 2. Derivata totale rispetto al tempo ( d/dt (dL/dq_dot) )
+        d_dt_dL_ddq = diff(dL_ddq, t);
+        
+        % 3. Derivata parziale di L rispetto alla posizione (dL/dq)
+        dL_dq = diff(L, Q(i));
+        
+        % 4. Formulazione finale: Eq = d/dt(dL/dq_dot) - dL/dq
+        Eq_moto(i) = simplify(d_dt_dL_ddq - dL_dq);
+    end
+    
+    disp('Calcolo completato! Il vettore Eq_moto contiene le equazioni del sistema.');
