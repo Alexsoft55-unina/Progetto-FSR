@@ -23,7 +23,7 @@ robot_params.Iz = 3.3;     % Momento di inerzia rispetto all'asse z (kg*m^2)
 
 robot_params.m1 = 1.2;     % Massa dello stinco (kg)
 robot_params.m2 = 5.3;     % Massa della coscia (kg)
-robot_params.m3 = 60.0;    % Massa del torso (kg)
+robot_params.m3 = 66.5;    % Massa del torso (kg)
 
 robot_params.l1 = 0.45;    % Lunghezza dello stinco (m)
 robot_params.l2 = 0.45;    % Lunghezza della coscia (m)
@@ -85,5 +85,5 @@ l2 = 0.45; % Lunghezza Coscia [m]
 
 
 % Parametri Virtual Model Control (Eq. 19)
-k_p = diag([2000, 2000]); % Matrice di Stiffness virtuale (X, Z) [N/m]
-k_d = diag([100, 100]);   % Matrice di Damping virtuale (X, Z) [Ns/m]
+k_p = diag([20000, 20000]); % Matrice di Stiffness virtuale (X, Z) [N/m]
+k_d = diag([5000, 5000]);   % Matrice di Damping virtuale (X, Z) [Ns/m]
