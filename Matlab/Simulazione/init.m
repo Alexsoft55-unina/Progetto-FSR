@@ -98,7 +98,7 @@ T_manovra = 5.0; % Tempo desiderato per compiere il movimento
 x_ref = zeros(4, steps);
 for k = 1:steps
     t_curr = t_vec(k);
-    if t_curr > 1.0
+    if t_curr > 10.0
         [s_des, s_dot_des] = genera_profilo_quinto_ordine(t_curr - 1.0, 1.0, T_manovra);
     else
         s_des = 0; s_dot_des = 0;
@@ -122,6 +122,8 @@ W_bar = kron(eye(N), W);
 %% Task Space Controller
 l1 = 0.45; % Lunghezza Tibia [m]
 l2 = 0.45; % Lunghezza Coscia [m]
+
+
 
 
 

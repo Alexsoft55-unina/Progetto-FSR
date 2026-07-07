@@ -6,6 +6,35 @@ g = 9.81;               % Accelerazione di gravità [m/s^2]
 dt = 0.01;              % Tempo di campionamento [s] (100 Hz)
 N = 15;                 % Orizzonte di predizione
 
+
+
+load Equazione_Dinamica_Robot_2D.mat
+
+% --- Aggiungi questa dichiarazione ---
+syms qw q1 q2 q3 dq_w dq1 dq2 dq3 real
+% Creazione degli array per la sostituzione
+% Assicurati che le variabili simboliche (old_vars) siano state dichiarate tramite 'syms'
+syms m1 m2 m3 mw l1 l2 l3 Rw g Iw I1 I2 I3 real
+
+old_vars = [m1, m2, m3, mw, l1, l2, l3, Rw, g, Iw, I1, I2, I3];
+new_vals = [1.2, 5.3, 60,  3.5, 0.45, 0.45, 0.35, 0.127, 9.81, 0.1,0.0203, 0.0894, 0.6125]; % Aggiorna questi valori!
+
+% Applicazione dei parametri alle matrici
+M_param = subs(M_matrix, old_vars, new_vals);
+C_param = subs(C_matrix, old_vars, new_vals);
+G_param = subs(G_matrix, old_vars, new_vals);
+
+% Semplificazione algebrica opzionale ma consigliata
+M_param = simplify(M_param);
+C_param = simplify(C_param);
+G_param = simplify(G_param);
+
+mb = 73;                % Massa dell'upper body [kg] 
+m3 = 60;
+g = 9.81;               % Accelerazione di gravità [m/s^2]
+dt = 0.01;              % Tempo di campionamento [s] (100 Hz)
+N = 15;                 % Orizzonte di predizione
+
 % Limiti fisici
 mu = 0.6;               % Coefficiente di attrito 
 L_max = 0.8;            % Lunghezza massima della gamba [m]
@@ -87,3 +116,6 @@ l2 = 0.45; % Lunghezza Coscia [m]
 % Parametri Virtual Model Control (Eq. 19)
 k_p = diag([20000, 20000]); % Matrice di Stiffness virtuale (X, Z) [N/m]
 k_d = diag([5000, 5000]);   % Matrice di Damping virtuale (X, Z) [Ns/m]
+
+
+
