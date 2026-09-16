@@ -1,0 +1,1 @@
+time_s,jump_state,theta_deg,theta_dot_degs,x_m,xdot_ms,wheel_u,com_z_m,com_z_vel_ms,fn_total_N,fn_left_N,fn_right_N,min_wheel_gap_m,loaded,hip_L_pos,hip_R_pos,knee_L_pos,knee_R_pos,wheel_L_pos,wheel_R_pos,hip_L_vel,hip_R_vel,knee_L_vel,knee_R_vel,wheel_L_vel,wheel_R_vel,wheel_L_torque_cmd,wheel_R_torque_cmd,imu_gyro_x,imu_gyro_y,imu_gyro_z,imu_accel_x,imu_accel_y,imu_accel_z

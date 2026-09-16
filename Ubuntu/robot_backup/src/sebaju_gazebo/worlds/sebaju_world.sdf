@@ -1,0 +1,72 @@
+<?xml version="1.0"?>
+<sdf version="1.8">
+  <world name="sebaju_world">
+    <!-- 0.5 ms physics keeps the explicit leg-servo damping (kv 14) numerically stable;
+         control and odometry run at 500 Hz, an exact multiple, so their stamps coincide. -->
+    <physics name="0_5ms" type="ignored">
+      <max_step_size>0.0005</max_step_size>
+      <real_time_factor>1.0</real_time_factor>
+    </physics>
+    <gravity>0 0 -9.81</gravity>
+
+    <plugin filename="ignition-gazebo-physics-system" name="ignition::gazebo::systems::Physics"/>
+    <plugin filename="ignition-gazebo-user-commands-system" name="ignition::gazebo::systems::UserCommands"/>
+    <plugin filename="ignition-gazebo-scene-broadcaster-system" name="ignition::gazebo::systems::SceneBroadcaster"/>
+    <plugin filename="ignition-gazebo-imu-system" name="ignition::gazebo::systems::Imu"/>
+    <plugin filename="ignition-gazebo-contact-system" name="ignition::gazebo::systems::Contact"/>
+
+    <light type="directional" name="sun">
+      <cast_shadows>true</cast_shadows>
+      <pose>0 -3 4 0 0 0</pose>
+      <diffuse>0.85 0.85 0.85 1</diffuse>
+      <specular>0.2 0.2 0.2 1</specular>
+      <direction>0.2 0.3 -1</direction>
+    </light>
+
+    <model name="ground_plane">
+      <static>true</static>
+      <link name="link">
+        <collision name="collision">
+          <geometry><plane><normal>0 0 1</normal><size>20 10</size></plane></geometry>
+          <!-- DART combines friction with min(mu_a, mu_b), MuJoCo with max. Ground mu = 2.2 makes every
+               robot/ground pair match MuJoCo: wheels 2.2, legs/torso 1.8. -->
+          <surface>
+            <friction><ode><mu>2.2</mu><mu2>2.2</mu2></ode></friction>
+          </surface>
+        </collision>
+        <visual name="visual">
+          <geometry><plane><normal>0 0 1</normal><size>20 10</size></plane></geometry>
+          <material>
+            <ambient>0.35 0.45 0.25 1</ambient>
+            <diffuse>0.35 0.45 0.25 1</diffuse>
+          </material>
+        </visual>
+      </link>
+    </model>
+
+    <!-- Static anchor holding the SeBaJu torso upright at its spawn pose until the balance
+         controller publishes /sebaju/release. The anchor must be the joint PARENT: DART moves the
+         child body into the parent's skeleton, so with the robot as parent the anchor would lose
+         its weld to the world and hold nothing. -->
+    <model name="sebaju_anchor">
+      <static>true</static>
+      <pose>0 0 0.2439 0 0 0</pose>
+      <link name="anchor_link">
+        <visual name="visual">
+          <geometry><sphere><radius>0.01</radius></sphere></geometry>
+          <material>
+            <ambient>0.8 0.1 0.1 1</ambient>
+            <diffuse>0.8 0.1 0.1 1</diffuse>
+          </material>
+        </visual>
+      </link>
+      <plugin filename="ignition-gazebo-detachable-joint-system" name="ignition::gazebo::systems::DetachableJoint">
+        <parent_link>anchor_link</parent_link>
+        <child_model>sebaju</child_model>
+        <child_link>base_link</child_link>
+        <detach_topic>/sebaju/release</detach_topic>
+      </plugin>
+    </model>
+
+  </world>
+</sdf>

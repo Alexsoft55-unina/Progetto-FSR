@@ -1,0 +1,3 @@
+[console_scripts]
+balance_jump_controller = sebaju_gazebo.balance_jump_controller:main
+

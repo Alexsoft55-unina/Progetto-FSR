@@ -1,0 +1,30 @@
+running develop
+running egg_info
+creating sebaju_gazebo.egg-info
+writing sebaju_gazebo.egg-info/PKG-INFO
+writing dependency_links to sebaju_gazebo.egg-info/dependency_links.txt
+writing entry points to sebaju_gazebo.egg-info/entry_points.txt
+writing requirements to sebaju_gazebo.egg-info/requires.txt
+writing top-level names to sebaju_gazebo.egg-info/top_level.txt
+writing manifest file 'sebaju_gazebo.egg-info/SOURCES.txt'
+reading manifest file 'sebaju_gazebo.egg-info/SOURCES.txt'
+writing manifest file 'sebaju_gazebo.egg-info/SOURCES.txt'
+running build_ext
+Creating /home/alexsoft55/FSR_robot/install/sebaju_gazebo/lib/python3.10/site-packages/sebaju-gazebo.egg-link (link to .)
+Installing balance_jump_controller script to /home/alexsoft55/FSR_robot/install/sebaju_gazebo/lib/sebaju_gazebo
+
+Installed /home/alexsoft55/FSR_robot/build/sebaju_gazebo
+running symlink_data
+creating /home/alexsoft55/FSR_robot/install/sebaju_gazebo/share/ament_index
+creating /home/alexsoft55/FSR_robot/install/sebaju_gazebo/share/ament_index/resource_index
+creating /home/alexsoft55/FSR_robot/install/sebaju_gazebo/share/ament_index/resource_index/packages
+symbolically linking /home/alexsoft55/FSR_robot/build/sebaju_gazebo/resource/sebaju_gazebo -> /home/alexsoft55/FSR_robot/install/sebaju_gazebo/share/ament_index/resource_index/packages
+symbolically linking /home/alexsoft55/FSR_robot/build/sebaju_gazebo/package.xml -> /home/alexsoft55/FSR_robot/install/sebaju_gazebo/share/sebaju_gazebo
+creating /home/alexsoft55/FSR_robot/install/sebaju_gazebo/share/sebaju_gazebo/launch
+symbolically linking /home/alexsoft55/FSR_robot/build/sebaju_gazebo/launch/sebaju_gazebo.launch.py -> /home/alexsoft55/FSR_robot/install/sebaju_gazebo/share/sebaju_gazebo/launch
+creating /home/alexsoft55/FSR_robot/install/sebaju_gazebo/share/sebaju_gazebo/urdf
+symbolically linking /home/alexsoft55/FSR_robot/build/sebaju_gazebo/urdf/sebaju.urdf.xacro -> /home/alexsoft55/FSR_robot/install/sebaju_gazebo/share/sebaju_gazebo/urdf
+creating /home/alexsoft55/FSR_robot/install/sebaju_gazebo/share/sebaju_gazebo/config
+symbolically linking /home/alexsoft55/FSR_robot/build/sebaju_gazebo/config/sebaju_controllers.yaml -> /home/alexsoft55/FSR_robot/install/sebaju_gazebo/share/sebaju_gazebo/config
+creating /home/alexsoft55/FSR_robot/install/sebaju_gazebo/share/sebaju_gazebo/worlds
+symbolically linking /home/alexsoft55/FSR_robot/build/sebaju_gazebo/worlds/sebaju_world.sdf -> /home/alexsoft55/FSR_robot/install/sebaju_gazebo/share/sebaju_gazebo/worlds
