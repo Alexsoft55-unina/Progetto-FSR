@@ -1,0 +1,1 @@
+/home/alexsoft55/rotino_ws/build/rotino_smc/launch/rotino_smc.launch.py

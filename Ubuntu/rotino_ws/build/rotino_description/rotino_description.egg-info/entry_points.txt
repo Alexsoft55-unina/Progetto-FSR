@@ -1,0 +1,3 @@
+[console_scripts]
+model = rotino_description.model:main
+

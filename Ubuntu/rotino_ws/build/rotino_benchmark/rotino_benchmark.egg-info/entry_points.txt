@@ -1,0 +1,5 @@
+[console_scripts]
+campaign = rotino_benchmark.campaign:main
+compare = rotino_benchmark.compare:main
+logger = rotino_benchmark.logger:main
+

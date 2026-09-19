@@ -1,0 +1,64 @@
+DIAGNOSI DEL PID PORTATO A COPPIA
+=================================
+
+SINTOMO
+  Entro 0,5 s dal rilascio dell'ancora il robot riceve un calcio violento e cade.
+  Il PID ORIGINALE (FSR_robot/PID, servo di posizione dentro Gazebo) funziona: +-3..7 deg.
+
+MISURE
+  dt del ciclo di controllo .......... 2,000 ms costanti (500 Hz).  TIMING OK
+  Durante HOLD ....................... giunti a 0,0000 rad, velocita 0, coppie 0.  STATO INIZIALE OK
+  Subito dopo il rilascio ............ hip +-70 rad/s, knee +-43 rad/s,
+                                       coppie sature a +-60 N*m con segno alternato ogni campione.
+  Con coppia gambe = 0 ............... le gambe cedono dolcemente fino al fine corsa. Nessuna violenza.
+  Con segno invertito ................ cedono come sopra. Nessuna violenza.
+  => il PD agisce nel verso giusto, ma entra in ciclo limite bang-bang.
+
+CAUSE ESCLUSE (con misura, non per ipotesi)
+  URDF / mondo / config .............. diff in 02,03,04: solo rinomina + attuazione gambe + ApplyLinkWrench
+  Codice del controllore ............. diff in 01: la legge PD e' identica, cambia solo la destinazione
+  Frequenza odometria ................ identica, 500 Hz in entrambi gli URDF
+  Attivazione dei controller ......... tutti e tre attivati nei log di spawn
+  Coppia stantia per mancata pubblicazione ... _publish_legs chiamato ogni ciclo, nessuna uscita anticipata
+  Riscalamento di kv (12->3, 14->3.5) ........ il calcio resta
+  Ammorbidimento di kp (160->40) ............. il calcio resta
+
+MECCANISMO
+  Al rilascio le gambe prendono carico e acquistano velocita prima che il controllore reagisca.
+  Con tau_max = 60 N*m e inerzia riflessa del ginocchio ~7e-3 kg*m^2:
+      alpha = 60 / 0,007 = 8570 rad/s^2
+      incremento di velocita per ciclo a 500 Hz  = 8570 * 0,002 = 17,1 rad/s
+      incremento di velocita per ciclo a 2000 Hz = 8570 * 0,0005 = 4,3 rad/s
+  A 500 Hz bastano ~4 cicli per arrivare a 70 rad/s: il termine kv*qd satura da solo
+  (12 * 70 = 840 N*m, 14 volte il limite) e il segno si alterna a ogni campione.
+  Non e' la taratura dei guadagni: e' l'autorita di coppia per ciclo.
+
+RIMEDIO IN PROVA
+  Limitare tau delle gambe in modo che l'incremento di velocita per ciclo torni quello che il servo
+  a 2 kHz aveva davvero: tau_max scala con il rapporto di frequenza, 60 / 4 = 15 N*m.
+
+RISULTATI DELLA SCANSIONE (media e massimo di |CoMLean| sugli ultimi 10 s)
+  ORIGINALE (servo di posizione a 2 kHz) .................. ~5 deg          FUNZIONA
+  tau_max=60  kv=12/14  (porting fedele) .................. cade            calcio violento
+  tau_max=60  kv=3/3.5 .................................... 88 deg          cade
+  tau_max=40  kv=3/3.5 .................................... 90 deg          cade
+  tau_max=30  kv=12/14 .................................... 77 deg          cade
+  tau_max=25  kv=6/7 ...................................... 27 deg          in piedi, oscilla
+  tau_max=20  kv=12/14 .................................... 34 deg          in piedi, oscilla
+  tau_max=12  kv=12/14 .................................... 15,3 deg        in piedi
+  tau_max=15  kv=12/14 .................................... 12,6 deg        in piedi
+  smorzamento limitato a 15, kp pieno ..................... 40 deg          oscilla
+  smorzamento limitato a 8, kp pieno ...................... 11,5 deg   <-- MIGLIORE
+  smorzamento su velocita saturata a 2 rad/s .............. 90 deg          cade
+
+LETTURA
+  Abbassare kv PEGGIORA sempre: lo smorzamento serve. Cio che va limitato e' l'ENERGIA che un picco
+  di velocita puo' iniettare in un ciclo, non il guadagno.
+  Limitare il solo termine di smorzamento e' meglio che limitare la coppia totale, perche' lascia
+  alla parte proporzionale l'autorita per tenere la posa.
+
+STATO
+  Il robot non viene piu' lanciato e resta in piedi, ma a 11,5 deg contro i ~5 deg dell'originale.
+  Il residuo non e' piu' nelle gambe: la legge di bilanciamento sulle ruote (k_th, k_thd, k_x, k_xd)
+  era tarata assumendo gambe rigide servoassistite a 2 kHz. Con gambe a 500 Hz il sistema che le
+  ruote vedono e' diverso, e quei guadagni vanno ritarati.

@@ -1,0 +1,15 @@
+package.xml
+setup.cfg
+setup.py
+launch/rotino_mpc.launch.py
+resource/rotino_mpc
+rotino_mpc/__init__.py
+rotino_mpc/controller.py
+rotino_mpc/solvers.py
+rotino_mpc.egg-info/PKG-INFO
+rotino_mpc.egg-info/SOURCES.txt
+rotino_mpc.egg-info/dependency_links.txt
+rotino_mpc.egg-info/entry_points.txt
+rotino_mpc.egg-info/requires.txt
+rotino_mpc.egg-info/top_level.txt
+rotino_mpc.egg-info/zip-safe

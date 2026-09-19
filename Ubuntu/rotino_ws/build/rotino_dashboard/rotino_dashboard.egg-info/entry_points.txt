@@ -1,0 +1,3 @@
+[console_scripts]
+dashboard = rotino_dashboard.dashboard:main
+

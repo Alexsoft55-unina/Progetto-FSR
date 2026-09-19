@@ -1,0 +1,12 @@
+Metadata-Version: 2.1
+Name: rotino-mpc
+Version: 0.1.0
+Summary: RoTino control law: upper-body MPC + time-varying LQR on the wheels + virtual model control on the legs (Cui et al., Micromachines 2022).
+Home-page: UNKNOWN
+Maintainer: Alessando Prisco
+Maintainer-email: enzogpt55@libero.it
+License: TODO: License declaration
+Platform: UNKNOWN
+
+UNKNOWN
+

@@ -1,0 +1,15 @@
+package.xml
+setup.cfg
+setup.py
+resource/rotino_benchmark
+rotino_benchmark/__init__.py
+rotino_benchmark/campaign.py
+rotino_benchmark/compare.py
+rotino_benchmark/logger.py
+rotino_benchmark.egg-info/PKG-INFO
+rotino_benchmark.egg-info/SOURCES.txt
+rotino_benchmark.egg-info/dependency_links.txt
+rotino_benchmark.egg-info/entry_points.txt
+rotino_benchmark.egg-info/requires.txt
+rotino_benchmark.egg-info/top_level.txt
+rotino_benchmark.egg-info/zip-safe

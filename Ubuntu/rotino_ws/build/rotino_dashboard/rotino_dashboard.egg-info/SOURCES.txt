@@ -1,0 +1,14 @@
+package.xml
+setup.cfg
+setup.py
+resource/rotino_dashboard
+rotino_dashboard/__init__.py
+rotino_dashboard/dashboard.py
+rotino_dashboard/ros_bridge.py
+rotino_dashboard.egg-info/PKG-INFO
+rotino_dashboard.egg-info/SOURCES.txt
+rotino_dashboard.egg-info/dependency_links.txt
+rotino_dashboard.egg-info/entry_points.txt
+rotino_dashboard.egg-info/requires.txt
+rotino_dashboard.egg-info/top_level.txt
+rotino_dashboard.egg-info/zip-safe

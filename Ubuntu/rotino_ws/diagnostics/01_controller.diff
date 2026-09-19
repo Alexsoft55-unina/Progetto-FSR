@@ -1,0 +1,68 @@
+--- /home/alexsoft55/rotino_ws/diagnostics/_orig_normalized.py	2026-09-19 23:27:15.571283748 +0200
++++ /home/alexsoft55/rotino_ws/src/rotino_pid/rotino_pid/controller.py	2026-09-19 23:03:25.375244047 +0200
+@@ -12,7 +12,7 @@
+   robot_com / wheel framepos     -> forward kinematics on the URDF (kinematics.py)
+   mj_contactForce wheel/ground   -> /rotino/{left,right}_wheel_contact (gz Contact sensor)
+   wheel motor ctrl (gear 18)     -> /wheel_effort_controller/commands  [Nm]
+-  hip/knee position servo        -> /rotino/<joint>/cmd_pos target angles [rad] (gz JointPositionController)
++  hip/knee joint-space PD        -> /leg_effort_controller/commands torques [Nm]
+ """
+ 
+ import math
+@@ -23,7 +23,7 @@
+ from rclpy.node import Node
+ from ros_gz_interfaces.msg import Contacts
+ from sensor_msgs.msg import Imu, JointState
+-from std_msgs.msg import Empty, Float64, Float64MultiArray, String
++from std_msgs.msg import Empty, Float64MultiArray, String
+ 
+ from rotino_description.kinematics import RobotKinematics, quat_to_matrix
+ from rotino_description.planar_trajectory import CubicSTrajectory
+@@ -43,8 +43,12 @@
+ 
+ HIP_SERVO_KP = 160.0
+ KNEE_SERVO_KP = 200.0
++# These are the gains of the gz JointPositionController this controller used to rely on. The PD now
++# runs in this node at 500 Hz instead of every physics step. KNOWN ISSUE: the robot is kicked within
++# 0.5 s of release. Rescaling kv and softening kp were both ruled out as the cause.
+ HIP_SERVO_KV = 12.0
+ KNEE_SERVO_KV = 14.0
++LEG_TORQUE_MAX = 60.0        # leg_effort in the URDF; was cmd_max of the gz position servo
+ LEG_FORCE_LIMIT = 60.0
+ HIP_CTRL_MIN, HIP_CTRL_MAX = -0.60, 0.60
+ KNEE_CTRL_MIN, KNEE_CTRL_MAX = -0.80, 0.80
+@@ -238,7 +242,7 @@
+             f'COM-axle x offset = {self.com_x_ref:.4f} m, '
+             f'standing torso height = {WHEEL_RADIUS - wheel_mid0[2]:.4f} m')
+ 
+-        self.leg_pubs = [self.create_publisher(Float64, f'/rotino/{name}/cmd_pos', 10) for name in LEG_JOINTS]
++        self.leg_pub = self.create_publisher(Float64MultiArray, '/leg_effort_controller/commands', 10)
+         self.wheel_pub = self.create_publisher(Float64MultiArray, '/wheel_effort_controller/commands', 10)
+         self.release_pub = self.create_publisher(Empty, '/rotino/release', 10)
+         self.state_pub = self.create_publisher(String, '/rotino/jump_state', 10)
+@@ -442,14 +446,19 @@
+     # Hold / release
+     # -----------------------------------------------------------------
+     def _publish_legs(self, targets, q, qd):
+-        """Send hip/knee target angles; returns the estimated servo force for saturation diagnostics."""
++        """Joint-space PD on hip/knee, sent as torques. Returns them for saturation diagnostics.
++
++        This is the exact law the gz JointPositionController used to run inside the simulator for this
++        controller (same kp/kv, same +-leg_effort clamp); it now lives in the node so that every RoTino
++        control law drives the same torque-controlled URDF and the comparison changes the control law
++        and nothing else. LEG_JOINTS order matches leg_effort_controller in rotino_controllers.yaml.
++        """
+         kps = (HIP_SERVO_KP, HIP_SERVO_KP, KNEE_SERVO_KP, KNEE_SERVO_KP)
+         kvs = (HIP_SERVO_KV, HIP_SERVO_KV, KNEE_SERVO_KV, KNEE_SERVO_KV)
+-        servo_forces = []
+-        for pub, kp, kv, target, name in zip(self.leg_pubs, kps, kvs, targets, LEG_JOINTS):
+-            pub.publish(Float64(data=float(target)))
+-            servo_forces.append(kp * (target - q[name]) - kv * qd[name])
+-        return servo_forces
++        tau = [clamp(kp * (target - q[name]) - kv * qd[name], -LEG_TORQUE_MAX, LEG_TORQUE_MAX)
++               for kp, kv, target, name in zip(kps, kvs, targets, LEG_JOINTS)]
++        self.leg_pub.publish(Float64MultiArray(data=[float(x) for x in tau]))
++        return tau
+ 
+     def _publish_wheels(self, wheel_u, yaw_u=0.0):
+         left = WHEEL_GEAR * clamp(wheel_u - yaw_u, -1.0, 1.0)

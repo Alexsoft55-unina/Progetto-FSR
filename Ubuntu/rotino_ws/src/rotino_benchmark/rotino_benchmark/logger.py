@@ -1,0 +1,197 @@
+"""
+RoTino test bench logger: subscribes to every topic published by
+balance_jump_controller.py and writes one labeled CSV row per control step
+(500 Hz), ready to be dragged straight into PlotJuggler.
+
+Columns cover: jump state, COM lean/rate, wheel position/velocity, wheel
+command, COM height/vertical velocity, wheel-ground contact forces (total
+and per side), wheel clearance, contact "loaded" flag, every hip/knee/wheel
+joint position and velocity, commanded wheel torques and IMU gyro/accel.
+"""
+
+import csv
+import math
+import os
+from datetime import datetime
+
+import rclpy
+from ament_index_python.packages import get_package_share_directory
+from rclpy.node import Node
+from ros_gz_interfaces.msg import Contacts
+from sensor_msgs.msg import Imu, JointState
+from std_msgs.msg import Float64MultiArray, String
+
+JOINT_NAMES = ['left_hip', 'right_hip', 'left_knee', 'right_knee',
+               'left_wheel_joint', 'right_wheel_joint']
+
+CONTACT_STALE_TIME = 0.02  # s; older contact samples are treated as "no contact"
+
+HEADER = [
+    'time_s', 'jump_state',
+    'theta_deg', 'theta_dot_degs', 'x_m', 'xdot_ms', 'wheel_u',
+    'com_z_m', 'com_z_vel_ms', 'fn_total_N', 'fn_left_N', 'fn_right_N',
+    'min_wheel_gap_m', 'loaded',
+    'hip_L_pos', 'hip_R_pos', 'knee_L_pos', 'knee_R_pos',
+    'wheel_L_pos', 'wheel_R_pos',
+    'hip_L_vel', 'hip_R_vel', 'knee_L_vel', 'knee_R_vel',
+    'wheel_L_vel', 'wheel_R_vel',
+    'wheel_L_torque_cmd', 'wheel_R_torque_cmd',
+    'imu_gyro_x', 'imu_gyro_y', 'imu_gyro_z',
+    'imu_accel_x', 'imu_accel_y', 'imu_accel_z',
+]
+
+FLUSH_EVERY = 100
+
+
+def stamp_to_sec(stamp):
+    return stamp.sec + stamp.nanosec * 1e-9
+
+
+def contact_force_from_msg(msg):
+    """Sum of contact-wrench force magnitudes for wheel/ground contacts in this message."""
+    total = 0.0
+    ground_contact = False
+    for contact in msg.contacts:
+        if 'ground' not in contact.collision1.name and 'ground' not in contact.collision2.name:
+            continue
+        ground_contact = True
+        for wrench in contact.wrenches:
+            f = wrench.body_1_wrench.force
+            total += math.sqrt(f.x * f.x + f.y * f.y + f.z * f.z)
+    return total, ground_contact
+
+
+class TestBenchLogger(Node):
+
+    def __init__(self):
+        super().__init__('rotino_test_bench_logger')
+        # <workspace>/install/rotino_description/share/rotino_description -> <workspace>/test_bench_logs
+        pkg_share = get_package_share_directory('rotino_description')
+        self.declare_parameter('controller', 'unknown')
+        self.declare_parameter('output_dir', os.path.join(
+            os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(pkg_share)))),
+            'test_bench_logs'))
+        output_dir = str(self.get_parameter('output_dir').value)
+        os.makedirs(output_dir, exist_ok=True)
+
+        law = str(self.get_parameter('controller').value)
+        filename = f"rotino_{law}_{datetime.now():%Y%m%d_%H%M%S}.csv"
+        self.csv_path = os.path.join(output_dir, filename)
+        self._file = open(self.csv_path, 'w', newline='')
+        self._writer = csv.writer(self._file)
+        self._writer.writerow(HEADER)
+        self._row_count = 0
+
+        self.jump_state = 'UNKNOWN'
+        self.joint_pos = {}
+        self.joint_vel = {}
+        self.wheel_cmd = [float('nan'), float('nan')]
+        self.contact = {'left': (-math.inf, 0.0), 'right': (-math.inf, 0.0)}
+        self.imu = None
+
+        self.create_subscription(Float64MultiArray, '/rotino/debug', self._debug_cb, 10)
+        self.create_subscription(String, '/rotino/jump_state', self._jump_state_cb, 10)
+        self.create_subscription(JointState, '/joint_states', self._joint_state_cb, 10)
+        self.create_subscription(Float64MultiArray, '/wheel_effort_controller/commands',
+                                 self._wheel_cmd_cb, 10)
+        self.create_subscription(Contacts, '/rotino/left_wheel_contact',
+                                 lambda msg: self._contact_cb(msg, 'left'), 10)
+        self.create_subscription(Contacts, '/rotino/right_wheel_contact',
+                                 lambda msg: self._contact_cb(msg, 'right'), 10)
+        self.create_subscription(Imu, '/rotino/imu', self._imu_cb, 10)
+
+        self.get_logger().info(f'Test bench logging to: {self.csv_path}')
+
+    # -----------------------------------------------------------------
+    def _jump_state_cb(self, msg):
+        self.jump_state = msg.data
+
+    def _joint_state_cb(self, msg):
+        for name, pos, vel in zip(msg.name, msg.position, msg.velocity):
+            self.joint_pos[name] = pos
+            self.joint_vel[name] = vel
+
+    def _wheel_cmd_cb(self, msg):
+        if len(msg.data) >= 2:
+            self.wheel_cmd = [msg.data[0], msg.data[1]]
+
+    def _contact_cb(self, msg, side):
+        force, ground_contact = contact_force_from_msg(msg)
+        if not ground_contact:
+            return
+        self.contact[side] = (stamp_to_sec(msg.header.stamp), force)
+
+    def _imu_cb(self, msg):
+        self.imu = msg
+
+    def _contact_force(self, side, now_s):
+        stamp, force = self.contact[side]
+        return force if now_s - stamp <= CONTACT_STALE_TIME else 0.0
+
+    # -----------------------------------------------------------------
+    def _debug_cb(self, msg):
+        (t, theta, theta_dot, x, xdot, wheel_u, com_z, com_z_vel,
+         fn_total, min_wheel_gap, loaded) = msg.data
+
+        now_s = self.get_clock().now().nanoseconds * 1e-9
+        fn_left = self._contact_force('left', now_s)
+        fn_right = self._contact_force('right', now_s)
+
+        jp = self.joint_pos
+        jv = self.joint_vel
+        nan = float('nan')
+
+        if self.imu is not None:
+            gyro = self.imu.angular_velocity
+            accel = self.imu.linear_acceleration
+            imu_row = [gyro.x, gyro.y, gyro.z, accel.x, accel.y, accel.z]
+        else:
+            imu_row = [nan] * 6
+
+        row = [
+            t, self.jump_state,
+            math.degrees(theta), math.degrees(theta_dot), x, xdot, wheel_u,
+            com_z, com_z_vel, fn_total, fn_left, fn_right,
+            min_wheel_gap, int(loaded),
+            jp.get('left_hip', nan), jp.get('right_hip', nan),
+            jp.get('left_knee', nan), jp.get('right_knee', nan),
+            jp.get('left_wheel_joint', nan), jp.get('right_wheel_joint', nan),
+            jv.get('left_hip', nan), jv.get('right_hip', nan),
+            jv.get('left_knee', nan), jv.get('right_knee', nan),
+            jv.get('left_wheel_joint', nan), jv.get('right_wheel_joint', nan),
+            self.wheel_cmd[0], self.wheel_cmd[1],
+            *imu_row,
+        ]
+        self._writer.writerow(row)
+        self._row_count += 1
+        if self._row_count % FLUSH_EVERY == 0:
+            self._file.flush()
+        if self._row_count % 2500 == 0:
+            self.get_logger().info(f'Logged {self._row_count} rows (t={t:.2f}s) -> {self.csv_path}')
+
+    def close(self):
+        self._file.flush()
+        self._file.close()
+        self.get_logger().info(
+            f'Test bench log closed: {self._row_count} rows written to {self.csv_path}\n'
+            f'Apri PlotJuggler e trascina il file per plottare tutti i risultati:\n'
+            f'  ros2 run plotjuggler plotjuggler\n'
+            f'  -> Drag & drop: {self.csv_path}')
+
+
+def main(args=None):
+    rclpy.init(args=args)
+    node = TestBenchLogger()
+    try:
+        rclpy.spin(node)
+    except KeyboardInterrupt:
+        pass
+    finally:
+        node.close()
+        node.destroy_node()
+        if rclpy.ok():
+            rclpy.shutdown()
+
+
+if __name__ == '__main__':
+    main()

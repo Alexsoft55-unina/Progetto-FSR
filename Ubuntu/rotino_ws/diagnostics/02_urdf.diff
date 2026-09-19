@@ -1,0 +1,101 @@
+--- /home/alexsoft55/FSR_robot/PID/src/sebaju_gazebo/urdf/sebaju.urdf.xacro	2026-09-16 17:46:08.234457561 +0200
++++ /home/alexsoft55/rotino_ws/src/rotino_description/urdf/rotino.urdf.xacro	2026-09-19 22:46:09.274755330 +0200
+@@ -1,8 +1,8 @@
+ <?xml version="1.0"?>
+-<!-- SeBaJu_BOT(II): URDF conversion of SeBaJu_BOT(II).xml (MuJoCo). All frames, masses and joint axes match the MJCF. -->
+-<robot name="sebaju" xmlns:xacro="http://www.ros.org/wiki/xacro">
++<!-- RoTino_BOT(II): URDF conversion of RoTino_BOT(II).xml (MuJoCo). All frames, masses and joint axes match the MJCF. -->
++<robot name="rotino" xmlns:xacro="http://www.ros.org/wiki/xacro">
+ 
+-  <xacro:arg name="controllers_file" default="$(find sebaju_gazebo)/config/sebaju_controllers.yaml"/>
++  <xacro:arg name="controllers_file" default="$(find rotino_description)/config/rotino_controllers.yaml"/>
+ 
+   <xacro:property name="seg" value="0.0919"/>
+   <xacro:property name="leg_seg_length" value="0.13"/>
+@@ -13,9 +13,8 @@
+   <xacro:property name="hub_radius" value="0.025"/>
+   <xacro:property name="hub_length" value="0.062"/>
+ 
+-  <!-- Hip/knee: the MuJoCo <position> servos (kp 160/200, kv 12/14, force +-60 Nm) are reproduced by gz
+-       JointPositionController systems (bottom of file) that run every physics step; the controller node
+-       only sends target angles, like the MuJoCo "position_servo" mode. -->
++  <!-- Hip/knee are torque-controlled through ros2_control (leg_effort_controller), as required by the
++       virtual model control of the WBR controller. -->
+   <xacro:property name="leg_damping" value="0.8"/>
+   <xacro:property name="leg_effort" value="60.0"/>
+   <!-- MuJoCo wheel motor: gear 18, ctrlrange [-1, 1] -> max 18 Nm -->
+@@ -183,7 +182,7 @@
+     <sensor name="imu_sensor" type="imu">
+       <always_on>true</always_on>
+       <update_rate>500</update_rate>
+-      <topic>/sebaju/imu</topic>
++      <topic>/rotino/imu</topic>
+     </sensor>
+   </gazebo>
+ 
+@@ -200,46 +199,18 @@
+     </joint>
+   </xacro:macro>
+ 
+-  <xacro:macro name="state_joint" params="name">
+-    <joint name="${name}">
+-      <state_interface name="position"/>
+-      <state_interface name="velocity"/>
+-      <state_interface name="effort"/>
+-    </joint>
+-  </xacro:macro>
+-
+   <ros2_control name="GazeboSimSystem" type="system">
+     <hardware>
+       <plugin>gz_ros2_control/GazeboSimSystem</plugin>
+     </hardware>
+-    <xacro:state_joint name="left_hip"/>
+-    <xacro:state_joint name="right_hip"/>
+-    <xacro:state_joint name="left_knee"/>
+-    <xacro:state_joint name="right_knee"/>
++    <xacro:effort_joint name="left_hip" limit="${leg_effort}"/>
++    <xacro:effort_joint name="right_hip" limit="${leg_effort}"/>
++    <xacro:effort_joint name="left_knee" limit="${leg_effort}"/>
++    <xacro:effort_joint name="right_knee" limit="${leg_effort}"/>
+     <xacro:effort_joint name="left_wheel_joint" limit="${wheel_effort}"/>
+     <xacro:effort_joint name="right_wheel_joint" limit="${wheel_effort}"/>
+   </ros2_control>
+ 
+-  <!-- MuJoCo position servos: force = clamp(p_gain*e + d_gain*de/dt, cmd_min, cmd_max) every physics step -->
+-  <xacro:macro name="leg_servo" params="joint kp kv">
+-    <gazebo>
+-      <plugin filename="ignition-gazebo-joint-position-controller-system" name="ignition::gazebo::systems::JointPositionController">
+-        <joint_name>${joint}</joint_name>
+-        <topic>/sebaju/${joint}/cmd_pos</topic>
+-        <p_gain>${kp}</p_gain>
+-        <i_gain>0</i_gain>
+-        <d_gain>${kv}</d_gain>
+-        <cmd_max>${leg_effort}</cmd_max>
+-        <cmd_min>${-leg_effort}</cmd_min>
+-      </plugin>
+-    </gazebo>
+-  </xacro:macro>
+-
+-  <xacro:leg_servo joint="left_hip" kp="160" kv="12"/>
+-  <xacro:leg_servo joint="right_hip" kp="160" kv="12"/>
+-  <xacro:leg_servo joint="left_knee" kp="200" kv="14"/>
+-  <xacro:leg_servo joint="right_knee" kp="200" kv="14"/>
+-
+   <gazebo>
+     <plugin filename="gz_ros2_control-system" name="gz_ros2_control::GazeboSimROS2ControlPlugin">
+       <parameters>$(arg controllers_file)</parameters>
+@@ -250,11 +221,11 @@
+       <odom_frame>world</odom_frame>
+       <robot_base_frame>base_link</robot_base_frame>
+       <odom_publish_frequency>500</odom_publish_frequency>
+-      <odom_topic>/sebaju/odom</odom_topic>
+-      <tf_topic>/sebaju/odom_tf</tf_topic>
++      <odom_topic>/rotino/odom</odom_topic>
++      <tf_topic>/rotino/odom_tf</tf_topic>
+       <dimensions>3</dimensions>
+     </plugin>
+ 
+-    <!-- The hold-until-release DetachableJoint lives on the static sebaju_anchor model in sebaju_world.sdf. -->
++    <!-- The hold-until-release DetachableJoint lives on the static rotino_anchor model in rotino_world.sdf. -->
+   </gazebo>
+ </robot>
