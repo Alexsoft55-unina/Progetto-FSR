@@ -1,0 +1,119 @@
+% Pulizia workspace
+clear; clc;
+
+% 1. Definizione variabili simboliche PURE (senza dipendenza esplicita 't')
+syms Rw mw leq real           
+syms mp Iw g real             
+syms bw real                 % <-- Coefficiente di attrito viscoso sull'attuatore
+syms tau_w tau_1 real        
+syms qw q1 dqw dq1 ddqw ddq1 real % Posizioni, velocità, accelerazioni indipendenti
+
+q = [q1; qw];
+dq = [dq1; dqw];
+ddq = [ddq1; ddqw];
+
+% 2. Modello Cinematico (Regola della catena)
+x_w = Rw * qw;
+x_p = x_w + leq * sin(q1);
+y_p = Rw + leq * cos(q1);
+
+% Velocità lineari calcolate tramite lo Jacobiano: v = J(q) * dq
+v_xw = jacobian(x_w, q) * dq;
+v_xp = jacobian(x_p, q) * dq;
+v_yp = jacobian(y_p, q) * dq;
+
+T = 0.5 * mw * (v_xw^2) + 0.5 * Iw * (dq(1)^2) + 0.5 * mp * (v_xp^2 + v_yp^2); 
+U = mp * g * y_p;
+
+L = T - U;
+
+% 3. Equazioni di Eulero-Lagrange
+dL_ddq = jacobian(L, dq).'; % Vettore colonna delle derivate parziali rispetto a dq
+dL_dq  = jacobian(L, q).';  % Vettore colonna delle derivate parziali rispetto a q
+
+% Derivata temporale di (dL/ddq) tramite la regola della catena:
+d_dt_dL_ddq = jacobian(dL_ddq, q) * dq + jacobian(dL_ddq, dq) * ddq;
+
+eqs = d_dt_dL_ddq - dL_dq;
+
+% 4. Estrazione forma matriciale: M(q)*ddq + C(q,dq)*dq + G(q) = tau
+M = simplify(jacobian(eqs, ddq));
+G = simplify(jacobian(U, q).');
+
+n = length(q);
+C = sym(zeros(n,n));
+for k = 1:n
+    for j = 1:n
+        for i = 1:n
+            c_ijk = 0.5 * (diff(M(k,j), q(i)) + diff(M(k,i), q(j)) - diff(M(i,j), q(k)));
+            C(k,j) = C(k,j) + c_ijk * dq(i);
+        end
+    end
+end
+C = simplify(C);
+
+% Integrazione della forza dissipativa non conservativa
+% Aggiungiamo l'attrito viscoso bw alla dinamica del giunto ruota (qw)
+C(1,1) = C(1,1) + bw;
+
+% 5. Stampa a video dei risultati non lineari
+disp('--------------------------------------------------');
+disp('Matrice di Inerzia M(q):');
+disp('--------------------------------------------------');
+pretty(M)
+
+disp(' ');
+disp('--------------------------------------------------');
+disp('Matrice di Coriolis e Smorzamento C(q, dq):');
+disp('--------------------------------------------------');
+pretty(C)
+
+disp(' ');
+disp('--------------------------------------------------');
+disp('Vettore di Gravità G(q):');
+disp('--------------------------------------------------');
+pretty(G)
+
+% --------------------------------------------------------
+% FASE 2: LINEARIZZAZIONE NELLO SPAZIO DI STATO
+% --------------------------------------------------------
+
+% 1. Definizione dello stato x e dell'ingresso u
+x = [q; dq];         % [q1; qw; dq1; dqw]
+u = [tau_1; tau_w];  
+
+% 2. Isoliamo le accelerazioni (ddq)
+ddq_expr = M \ (u - C*dq - G);
+
+% 3. Costruzione del sistema non lineare dx/dt = f(x, u)
+f = [dq; ddq_expr];
+
+% 4. Linearizzazione simbolica tramite Jacobiano
+A_sym = jacobian(f, x);
+B_sym = jacobian(f, u);
+
+% 5. Valutazione nel punto di equilibrio instabile (q1 = 0)
+% (La variabile bw, essendo un parametro di sistema e non uno stato, 
+%  non va azzerata e rimarrà nelle matrici finali)
+var_list = [qw, q1, dqw, dq1, tau_w, tau_1];
+eq_point = [0,  0,  0,   0,   0,     0    ];
+
+A_lin = subs(A_sym, var_list, eq_point);
+B_lin = subs(B_sym, var_list, eq_point);
+
+% Semplificazione algebrica finale
+A = simplify(A_lin);
+B = simplify(B_lin);
+
+% 6. Stampa a video del modello linearizzato
+disp(' ');
+disp('--------------------------------------------------');
+disp('Matrice della dinamica linearizzata A:');
+disp('--------------------------------------------------');
+pretty(A)
+
+disp(' ');
+disp('--------------------------------------------------');
+disp('Matrice degli ingressi linearizzata B:');
+disp('--------------------------------------------------');
+pretty(B)

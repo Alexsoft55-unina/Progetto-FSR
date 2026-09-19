@@ -1,7 +1,4 @@
-%% Simulazione Completa VL-WIP con TV-LQR e Traiettoria a Minimum Jerk
-% Basato su: "Modeling and Control of a Wheeled Biped Robot" (MDPI)
 
-clear; close all; clc;
 
 %% 1. Parametri Fisici Costanti e Linearizzazione Simbolica
 % --- Parametri Fisici Costanti ---
