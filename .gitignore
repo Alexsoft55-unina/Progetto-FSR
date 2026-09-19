@@ -1,1 +1,6 @@
 slprj
+*.slx.autosave
+*.aux
+*.log
+*.out
+*.synctex.gz
