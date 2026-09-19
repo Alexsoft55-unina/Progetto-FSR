@@ -1,0 +1,105 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[italian]{babel}
+\usepackage{amsmath, amssymb, amsfonts}
+\usepackage{graphicx}
+\usepackage{geometry}
+\usepackage{hyperref}
+\usepackage{bm}
+
+\geometry{a4paper, margin=2.5cm}
+
+\title{\textbf{Controllo Non Lineare di un Robot Bipede su Ruote (WBR)\\tramite Sliding Mode e Partial Feedback Linearization}}
+\author{Progetto di Field and Service Robotics}
+\date{\today}
+
+\begin{document}
+
+\maketitle
+
+\begin{abstract}
+Il presente documento descrive l'architettura di controllo progettata per un Wheeled-Biped Robot (WBR). Il sistema è caratterizzato da una dinamica fortemente non lineare e sottoattuata. Per la stabilizzazione e il tracciamento delle traiettorie è stata adottata un'architettura in cascata che impiega una tecnica di Partial Feedback Linearization per il disaccoppiamento dinamico, un Super-Twisting Sliding Mode Control per l'equilibrio del baricentro (pitch), e uno Sliding Mode classico per la regolazione della postura.
+\end{abstract}
+
+\section{Modello Dinamico e Partial Feedback Linearization}
+
+L'equazione del moto del robot manipolatore nello spazio dei giunti è data dalla classica forma matriciale:
+\begin{equation}
+    M(q)\ddot{q} + C(q,\dot{q})\dot{q} + G(q) = B \tau
+\end{equation}
+dove $q = [q_1, q_w, q_2, q_3]^T$ include il giunto passivo (inclinazione assoluta) e i giunti attuati (ruote, ginocchia, torso). Il sistema è sottoattuato e non collocato. Riscrivendo le equazioni raggruppando il grado di libertà non attuato (indice $u$) e quelli attuati (indice $a$), si ottiene:
+\begin{align}
+    M_{uu} \ddot{q}_u + M_{ua} \ddot{q}_a + h_u &= B_u \tau \\
+    M_{au} \ddot{q}_u + M_{aa} \ddot{q}_a + h_a &= B_a \tau
+\end{align}
+dove $h = C(q,\dot{q})\dot{q} + G(q)$. Dalla prima equazione, esplicitando l'accelerazione del giunto passivo $\ddot{q}_u$ e sostituendola nella seconda, è possibile ottenere una dinamica equivalente in cui appare solo l'accelerazione dei giunti attuati $v = \ddot{q}_a$:
+\begin{equation}
+    \bar{M} v + \bar{h} = D \tau
+\end{equation}
+con le matrici definite tramite il complemento di Schur:
+\begin{align}
+    D &= B_a - \frac{M_{au}}{M_{uu}} B_u \\
+    \bar{M} &= M_{aa} - \frac{M_{au}}{M_{uu}} M_{ua} \\
+    \bar{h} &= h_a - \frac{M_{au}}{M_{uu}} h_u
+\end{align}
+Essendo $\bar{M}$ definita positiva e $D$ invertibile, la legge di controllo di feedback linearization parziale che impone un'accelerazione virtuale $v$ ai giunti attivi è:
+\begin{equation}
+    \tau = D^{-1} (\bar{M} v + \bar{h})
+\end{equation}
+
+\section{Architettura di Controllo in Cascata}
+
+Il problema di controllo richiede la stabilizzazione simultanea dell'inclinazione del robot (pitch) e il controllo della velocità di avanzamento, un problema classico per i sistemi assimilabili a un pendolo inverso su ruote (che presentano una dinamica a fase non minima). Il controllo è strutturato in due anelli.
+
+\subsection{Anello Esterno: Controllo di Velocità}
+L'anello esterno, a dinamica più lenta, regola la velocità del baricentro $v_G$ del robot inseguendo un riferimento $v_{\text{ref}}$.
+Viene impiegato un controllore Proporzionale-Integrale (PI) sull'errore $e_v = v_G - v_{\text{ref}}$. A causa della proprietà di fase non minima (per accelerare in avanti, il robot deve prima inclinarsi in avanti, generando un errore di velocità transitorio negativo), i guadagni $K_P$ e $K_I$ sono strettamente \textbf{negativi}.
+L'uscita dell'anello esterno è il riferimento di beccheggio $\theta_{\text{ref}}$:
+\begin{equation}
+    \theta_{\text{ref}} = K_P e_v + K_I \int e_v dt
+\end{equation}
+Il segnale viene poi opportunamente saturato ($\pm \theta_{\max}$) per evitare che riferimenti di pitch troppo elevati portino il robot al ribaltamento, e viene implementata una logica di \textit{anti-windup} sull'integratore.
+
+\subsection{Anello Interno: Super-Twisting per il Pitch}
+Per garantire l'inseguimento robusto dell'angolo di pitch $\theta$ generato dall'anello esterno, si utilizza una tecnica Sliding Mode. L'errore è $e_1 = \theta - \theta_{\text{ref}}$ e la superficie di sliding associata è:
+\begin{equation}
+    s_1 = \dot{e}_1 + c_1 e_1
+\end{equation}
+Al fine di reiezione robusta dei disturbi minimizzando l'effetto del \textit{chattering} (oscillazioni ad alta frequenza dannose per gli attuatori), si applica l'algoritmo \textbf{Super-Twisting} (Second Order Sliding Mode Control). L'accelerazione desiderata per il pitch $w_\theta$ è data da:
+\begin{align}
+    w_\theta &= -c_1 \dot{e}_1 - k_a \sqrt{|s_1|} \text{sgn}(s_1) + W \\
+    \dot{W} &= -k_b \text{sgn}(s_1)
+\end{align}
+Nella pratica implementativa, la funzione discontinua segno ($\text{sgn}$) viene regolarizzata con una $\tanh(s_1/\epsilon_1)$.
+
+\subsection{Controllo di Postura (Ginocchio e Torso)}
+I giunti di postura (ginocchio $q_2$ e torso $q_3$) devono mantenere posizioni di riferimento costanti, definite dal target cinematico per raggiungere una determinata altezza o configurazione operativa. Per questi giunti viene implementato un First Order Sliding Mode Control continuo:
+\begin{equation}
+    s_i = \dot{e}_i + c_i e_i, \quad i \in \{2, 3\}
+\end{equation}
+\begin{equation}
+    w_i = -c_i \dot{e}_i - k_i s_i - \eta_i \tanh\left(\frac{s_i}{\phi_i}\right)
+\end{equation}
+dove $w_i$ rappresenta l'accelerazione di giunto desiderata, mentre $\phi_i$ è lo spessore del \textit{boundary layer} introdotto per eliminare il chattering.
+
+\section{Assegnazione delle Coppie e Saturazioni}
+
+Date le accelerazioni target $w = [w_\theta, w_2, w_3]^T$, si ricavano le accelerazioni nei giunti attivi $v$ invertendo le relazioni cinematiche. Data una matrice Jacobiana opportuna $A$ per cui $A v = w - f$, si ha:
+\begin{equation}
+    v = A^{-1} (w - f)
+\end{equation}
+Con il vettore $v$ calcolato, la legge PFL ripristina le coppie ai motori $\tau$. 
+
+\subsection{Limiti Fisici}
+A valle del calcolo si impongono due vincoli fondamentali per la corretta simulazione realistica in Simscape:
+\begin{enumerate}
+    \item \textbf{Saturazione di Attuazione}: Tutti i comandi di coppia vengono saturati ai limiti nominali dei motori $\pm \tau_{\max}$.
+    \item \textbf{Limite di Slittamento (Slip)}: Affinché le ruote non perdano aderenza sul terreno, la coppia trasmessa alle ruote $\tau_w$ è limitata dalla forza di attrito statico massima ammissibile:
+    \begin{equation}
+        |\tau_w| \leq \mu N_{\text{nom}} R_w
+    \end{equation}
+    dove $\mu$ è il coefficiente di attrito stimato, $N_{\text{nom}}$ la reazione normale approssimata e $R_w$ il raggio della ruota.
+\end{enumerate}
+
+\end{document}
+

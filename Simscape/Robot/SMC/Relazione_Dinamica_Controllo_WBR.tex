@@ -1,0 +1,110 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[italian]{babel}
+\usepackage{amsmath, amssymb, amsfonts}
+\usepackage{geometry}
+\usepackage{hyperref}
+\usepackage{bm}
+
+\geometry{a4paper, margin=2.5cm}
+
+\title{\textbf{Modellazione Dinamica Esplicita del VL-WIP\\tramite Formulazione di Lagrange-d'Alembert}}
+\author{Progetto di Field and Service Robotics}
+\date{\today}
+
+\begin{document}
+
+\maketitle
+
+\begin{abstract}
+Il presente documento descrive passo dopo passo le equazioni effettive per il calcolo del modello dinamico di un Wheeled Biped Robot (VL-WIP - Variable-Length Wheeled Inverted Pendulum). Tutte le equazioni cinematiche, energetiche e vincolari riportate corrispondono alla derivazione analitica puntuale del sistema considerato, proiettate nello spazio nullo (Lagrange-d'Alembert) per la corretta gestione dei vincoli non-olonomi.
+\end{abstract}
+
+\section{Coordinate Generalizzate e Cinematica Diretta}
+
+Il modello assume il moto su un piano orizzontale, una dinamica di beccheggio (pitch) per il corpo e la variazione di lunghezza delle gambe. L'assetto è descritto dal vettore di $n = 7$ coordinate generalizzate:
+\begin{equation}
+    q = \begin{bmatrix} x & y & \psi & \theta & l & \phi_R & \phi_L \end{bmatrix}^T
+\end{equation}
+dove $(x,y)$ è il centro dell'asse ruote, $\psi$ l'imbardata (heading), $\theta$ l'inclinazione del corpo superiore (pitch rispetto all'asse laterale), $l$ la lunghezza della gamba e $\phi_R, \phi_L$ gli angoli di rotazione delle singole ruote.
+
+Sia $e_f = [\cos\psi, \sin\psi, 0]^T$ il versore di avanzamento, $e_s = [-\sin\psi, \cos\psi, 0]^T$ l'asse laterale e $e_z = [0, 0, 1]^T$ l'asse verticale. I centri di massa delle ruote destra ($P_R$), sinistra ($P_L$) e del corpo superiore ($P_B$) sono definiti esplicitamente come:
+\begin{align}
+    P_0 &= \begin{bmatrix} x \\ y \\ r \end{bmatrix} \\
+    P_R &= P_0 + \frac{d}{2} e_s = \begin{bmatrix} x - \frac{d}{2}\sin\psi \\ y + \frac{d}{2}\cos\psi \\ r \end{bmatrix} \\
+    P_L &= P_0 - \frac{d}{2} e_s = \begin{bmatrix} x + \frac{d}{2}\sin\psi \\ y - \frac{d}{2}\cos\psi \\ r \end{bmatrix} \\
+    P_B &= P_0 + l \sin\theta e_f + l \cos\theta e_z = \begin{bmatrix} x + l \sin\theta \cos\psi \\ y + l \sin\theta \sin\psi \\ r + l \cos\theta \end{bmatrix}
+\end{align}
+Derivando nel tempo i vettori di posizione si ottengono le velocità lineari assolute dei baricentri, indicate come $v_R, v_L, v_B$.
+
+\section{Energia del Sistema (Modello Non Vincolato)}
+
+L'energia cinetica totale $T$ è la somma delle energie traslazionali e rotazionali dei link. Siano $m_w$ la massa di ogni ruota, $I_w$ l'inerzia di rotolamento della ruota, $m_b$ la massa del corpo, e $I_{by}, I_{bz}$ le inerzie del corpo rispetto a pitch e yaw.
+L'energia cinetica esplicita del robot è data da:
+\begin{align}
+    T_{w,tr} &= \frac{1}{2}m_w (v_R^T v_R + v_L^T v_L) = m_w \left( \dot{x}^2 + \dot{y}^2 + \frac{d^2}{4}\dot{\psi}^2 \right) \\
+    T_{w,sp} &= \frac{1}{2}I_w (\dot{\phi}_R^2 + \dot{\phi}_L^2) \\
+    T_{B,tr} &= \frac{1}{2}m_b (v_B^T v_B) \\
+    T_{B,rot} &= \frac{1}{2}I_{by} \dot{\theta}^2 + \frac{1}{2}I_{bz} \dot{\psi}^2 \\
+    T(q, \dot{q}) &= T_{w,tr} + T_{w,sp} + T_{B,tr} + T_{B,rot}
+\end{align}
+La matrice di massa non vincolata $M(q) \in \mathbb{R}^{7 \times 7}$ è matematicamente definita come l'Hessiano dell'energia cinetica: $M(q) = \frac{\partial}{\partial \dot{q}} \left( \frac{\partial T}{\partial \dot{q}} \right)^T$.
+
+L'energia potenziale gravitazionale dipende unicamente dalla quota del corpo superiore:
+\begin{equation}
+    V(q) = m_b g (r + l \cos\theta)
+\end{equation}
+
+\section{Vincoli di Puro Rotolamento e Spazio Nullo}
+
+Le ruote introducono vincoli non-olonomi di puro rotolamento. Le condizioni di aderenza impediscono al robot di muoversi lateralmente e impongono che l'avanzamento dei punti di contatto sia dato dalla rotazione della singola ruota ($r\dot{\phi}$). Il sistema di vincoli $A(q)\dot{q} = 0$ equivale alle tre equazioni scalari:
+\begin{align}
+    -\dot{x}\sin\psi + \dot{y}\cos\psi &= 0 \quad \text{(no slittamento laterale)} \\
+    (\dot{x}\cos\psi + \dot{y}\sin\psi) + \frac{d}{2}\dot{\psi} - r\dot{\phi}_R &= 0 \quad \text{(rotolamento ruota dx)} \\
+    (\dot{x}\cos\psi + \dot{y}\sin\psi) - \frac{d}{2}\dot{\psi} - r\dot{\phi}_L &= 0 \quad \text{(rotolamento ruota sx)}
+\end{align}
+
+Per formulare le equazioni tramite il principio di Lagrange-d'Alembert, si sceglie un vettore di $m = 4$ velocità indipendenti (pseudo-velocità):
+\begin{equation}
+    u = \begin{bmatrix} \dot{\phi}_R \\ \dot{\phi}_L \\ \dot{\theta} \\ \dot{l} \end{bmatrix}
+\end{equation}
+Risolvendo i vincoli rispetto a $u$, otteniamo la cinematica del robot $\dot{q} = S(q)u$. Dalle equazioni di vincolo si ricava che la velocità di avanzamento del corpo è $v_f = \frac{r}{2}(\dot{\phi}_R + \dot{\phi}_L)$ e la velocità di imbardata è $\dot{\psi} = \frac{r}{d}(\dot{\phi}_R - \dot{\phi}_L)$. La matrice $S(q) \in \mathbb{R}^{7 \times 4}$ che genera lo spazio nullo della distribuzione è perciò esplicitamente:
+\begin{equation}
+    S(q) = \begin{bmatrix}
+    \frac{r}{2}\cos\psi & \frac{r}{2}\cos\psi & 0 & 0 \\
+    \frac{r}{2}\sin\psi & \frac{r}{2}\sin\psi & 0 & 0 \\
+    \frac{r}{d} & -\frac{r}{d} & 0 & 0 \\
+    0 & 0 & 1 & 0 \\
+    0 & 0 & 0 & 1 \\
+    1 & 0 & 0 & 0 \\
+    0 & 1 & 0 & 0
+    \end{bmatrix}
+\end{equation}
+
+\section{Proiezione ed Equazioni del Moto Ridotte}
+
+Definiamo il vettore delle forze generalizzate applicate $F \in \mathbb{R}^7$. Se $\tau_R$ e $\tau_L$ sono le coppie motrici alle ruote (le quali, per reazione fisica sul corpo di un pendolo su ruote, imprimono una coppia uguale e contraria sul beccheggio $\theta$) e $F_l$ è la forza lineare della gamba, abbiamo:
+\begin{equation}
+    F = \begin{bmatrix} 0 & 0 & 0 & -(\tau_R + \tau_L) & F_l & \tau_R & \tau_L \end{bmatrix}^T
+\end{equation}
+
+Proiettando le equazioni classiche di Eulero-Lagrange nello spazio nullo dei vincoli pre-moltiplicando per la trasposta $S^T(q)$, si elide il contributo dei moltiplicatori di Lagrange $\lambda$. Il modello ridotto $M_b(q)\dot{u} + n_b(q,u) = B_b \tau$ è calcolato numericamente (e simbolicamente) tramite:
+\begin{align}
+    M_b(q) &= S^T(q) M(q) S(q) \\
+    n_b(q,u) &= S^T(q) \left[ M(q) \dot{S}(q) u + n(q,\dot{q})\big|_{\dot{q} = S u} \right] \\
+    B_b(\tau_{in}) &= S^T(q) F
+\end{align}
+
+Svolgendo esplicitamente il prodotto matriciale per gli ingressi $S^T F$, usando la forma definita di $S(q)$ ed $F$, si osserva l'effetto incrociato dell'attuazione. Il termine sulle singole ruote mappa direttamente alle rispettive coppie, mentre sul pitch viene proiettata la somma delle reazioni:
+\begin{equation}
+    B_b(\tau_{in}) = \begin{bmatrix}
+    1 & 0 & 0 \\
+    0 & 1 & 0 \\
+    -1 & -1 & 0 \\
+    0 & 0 & 1
+    \end{bmatrix}
+    \begin{bmatrix} \tau_R \\ \tau_L \\ F_l \end{bmatrix}
+\end{equation}
+Questa è l'equazione fondamentale del modello finale, che mostra chiaramente come le due ruote ($u_1, u_2$) siano attuate indipendentemente, la lunghezza della gamba ($u_4$) lo sia parimenti tramite $F_l$, mentre il bilanciamento del corpo ($u_3$, ovvero $\theta$) sia controllabile indirettamente (sottoattuazione e dipendenza PFL) dalla somma in opposizione delle coppie erogate ai motori di trazione.
+
+\end{document}
