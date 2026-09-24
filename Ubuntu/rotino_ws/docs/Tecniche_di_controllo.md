@@ -153,7 +153,7 @@ Lo zero sta in $\sigma^2 = (a_2b_1 - a_1b_2)/b_1$. In posa nominale $(105{,}82\c
 In termini fisici: per accelerare in avanti a regime il baricentro deve stare davanti all'asse. Per portarcelo le ruote devono prima arretrare. Una coppia positiva produce subito $\ddot s = b_1u > 0$, ma ruota il pendolo all'indietro ($b_2 < 0$); la gravità prende poi il sopravvento e il moto netto si inverte. Nessun controllore causale può seguire un gradino di velocità senza questa sottoelongazione iniziale.
 
 **Guadagno statico inclinazione → accelerazione.** Se il pendolo è tenuto a inclinazione costante ($\ddot\theta = 0$), la coppia necessaria è $u = -a_2\theta/b_2$ e l'asse accelera con
-$$\ddot s = \Big(a_1 - \frac{b_1a_2}{b_2}\Big)\theta \equiv g_{st}\,\theta,\qquad g_{st} = 6{,}14\ \text{m/(s}^2\text{·rad)}\ \text{in posa nominale}.$$
+$$\ddot s = \Big(a_1 - \frac{b_1a_2}{b_2}\Big)\theta \equiv g_{st}\,\theta,\qquad g_{st} = 6{,}14\ \mathrm{m/(s^2\cdot rad)}\ \text{in posa nominale}.$$
 **[D]+[C]** È il meccanismo su cui si reggono l'anello esterno dello SMC (§5.2) e l'MPC (§4.5): **l'inclinazione è l'ingresso effettivo della traslazione**. Il suo limite superiore fissa la massima accelerazione ottenibile. Per inclinazioni costanti di 10,48° e 12,03°, che sono i limiti di MPC e SMC, $g_{st}\tan\theta$ vale rispettivamente 1,13 e 1,31 m/s². La formula usa la tangente perché così è definito $\theta_{ref}$ nell'MPC; per angoli piccoli coincide con $g_{st}\theta$.
 
 **Disaccoppiamento.** $A$ e $B$ sono a blocchi: sagittale $(s, \theta, \dot s, \dot\theta)$ su $\tau_l+\tau_r$, imbardata $(\varphi, \dot\varphi)$ su $\tau_r-\tau_l$. Nel modello lineare il bilanciamento e la sterzata sono indipendenti.
@@ -317,7 +317,7 @@ $$\psi_{cmd} = \psi_{ref} - \operatorname{atan}(K_{lat}\,e_\perp)\cdot\min\!\big
 L'arcotangente limita la correzione a ±90° e per errori piccoli dà 2 rad di rotta per metro di errore. Il fattore di velocità azzera la correzione da fermo: un veicolo differenziale annulla l'errore laterale solo muovendosi (vincolo anolonomo), e da fermo girare sul posto per inseguire un punto laterale non riduce l'errore.
 
 **(B) Rotta.** PD in unità normalizzate, saturato a `MAX_YAW` = 0,15 (2,7 N·m):
-$$u_{yaw} = K_\psi(\psi_{cmd}-\psi) + K_\omega(\dot\psi_{ref}-\dot\psi),\qquad K_\psi\cdot18 = 1{,}8\ \text{N·m/rad},\quad K_\omega\cdot 18 = 0{,}45\ \text{N·m·s/rad}.$$
+$$u_{yaw} = K_\psi(\psi_{cmd}-\psi) + K_\omega(\dot\psi_{ref}-\dot\psi),\qquad K_\psi\cdot18 = 1{,}8\ \mathrm{N\cdot m/rad},\quad K_\omega\cdot 18 = 0{,}45\ \mathrm{N\cdot m\cdot s/rad}.$$
 Con $\ddot\varphi = 2b_3\tau_d$ i poli sono le radici di $\sigma^2 + 2b_3\cdot0{,}45\,\sigma + 2b_3\cdot1{,}8$: **$-26{,}7$ e $-4{,}7$ rad/s**, cioè un anello sovrasmorzato **[C]**. Il commento alla riga 82 dichiara che l'attrito di strisciamento delle ruote in curva richiede circa 5 volte il guadagno calcolato sulla sola inerzia **[E]**. Il modello (§1.4) non contiene questo attrito; MPC e SMC lo compensano con un feedforward esplicito (§4.4).
 
 L'errore lungo la traiettoria e l'errore di velocità sostituiscono $x - x_{ref}$ e $\dot x - \dot x_{ref}$ in (A).
