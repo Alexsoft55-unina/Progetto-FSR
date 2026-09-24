@@ -1,0 +1,323 @@
+\documentclass[11pt,a4paper]{article}
+
+\usepackage[utf8]{inputenc}
+\usepackage[italian]{babel}
+\usepackage[margin=2.5cm]{geometry}
+\usepackage{amsmath,amssymb,amsfonts}
+\usepackage{booktabs}
+\usepackage{graphicx}
+\usepackage{xcolor}
+\usepackage{hyperref}
+\usepackage{tcolorbox}
+\usepackage{tikz}
+\usepackage{array}
+\usepackage{fancyhdr}
+
+% Configurazione colori e box didattici
+\definecolor{primary}{RGB}{26, 82, 118}
+\definecolor{secondary}{RGB}{40, 116, 166}
+\definecolor{boxbg}{RGB}{245, 247, 250}
+\definecolor{boxframe}{RGB}{174, 182, 191}
+
+\tcbset{
+  colback=boxbg,
+  colframe=primary,
+  fonttitle=\bfseries,
+  boxrule=1pt,
+  arc=3mm,
+  left=4mm, right=4mm, top=3mm, bottom=3mm
+}
+
+\hypersetup{
+  colorlinks=true,
+  linkcolor=secondary,
+  citecolor=secondary,
+  urlcolor=secondary
+}
+
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\small Controllo del Robot Bipede su Ruote RoTino}
+\fancyhead[R]{\small FSR -- Guida Tecnica}
+\fancyfoot[C]{\thepage}
+
+\title{\LARGE\textbf{Guida Definitiva al Controllo di RoTino}\\
+\large\textit{Dalla Fisica del Pendolo Inverso a PID, MPC e Sliding Mode:\\
+Spiegazione Passo-Passo, Teoria, Confronto e Analisi dei Disturbi}}
+\author{\textbf{Aldo Rosicarelli} -- Field and Service Robotics}
+\date{Settembre 2026}
+
+\begin{document}
+
+\maketitle
+
+\begin{abstract}
+Questo documento offre una trattazione pedagogica, completa e rigorosa dell'architettura di controllo del robot bipede su ruote (\textit{Wheeled Biped Robot}, WBR) denominato \textbf{RoTino}. Vengono analizzate le peculiarità fisiche del sistema (pendolo inverso a lunghezza variabile, fase non minima, asimmetria baricentrica), i motivi per cui determinate tecniche sono state introdotte, il funzionamento dettagliato di ciascuna delle tre leggi implementate nel workspace (\textbf{PID a coppia}, \textbf{MPC + TV-LQR + VMC}, e \textbf{Cascata Sliding Mode}), i rispettivi vantaggi e svantaggi, e una risposta esaustiva alla domanda fondamentale: \textit{perché alla spinta impulsiva MPC e SMC rispondono con un picco simile, ma si comportano in modo radicalmente diverso sui disturbi persistenti?}
+\end{abstract}
+
+\tableofcontents
+\newpage
+
+% -------------------------------------------------------------------------------------
+\section{Il Problema Fisico: Capire la Macchina prima di Controllarla}
+% -------------------------------------------------------------------------------------
+
+Per capire perché si scelgono certe tecniche di controllo e perché certe formule hanno segni apparentemente "strani", bisogna prima comprendere cosa fa RoTino dal punto di vista fisico.
+
+\subsection{Che cos'è RoTino?}
+RoTino è un robot bipede su ruote (\textit{Wheeled Biped Robot} -- WBR):
+\begin{itemize}
+    \item Due gambe a due gradi di libertà ciascuna (anca e ginocchio, giunti rotoidali);
+    \item Due ruote motrici indipendenti all'estremità inferiore delle gambe;
+    \item Un corpo superiore (\textit{torso}) rigido che alloggia l'elettronica, le batterie e una zavorra.
+\end{itemize}
+L'obiettivo primario è stare in equilibrio su due ruote, variare la quota di marcia accovacciandosi o allungandosi, compiere salti verticali e inseguire traiettorie nel piano.
+
+\subsection{Le 4 Trappole Fisiche di RoTino}
+
+\begin{tcolorbox}[title=Trappola 1: Instabilità Naturale ad Alta Frequenza]
+RoTino si comporta fondamentalmente come un \textbf{pendolo inverso}. Il suo polo instabile sagittale ha una pulsazione di circa:
+\begin{equation}
+\omega_{unstable} = \sqrt{a_2} \approx 10.3\ \text{rad/s} \quad \Longrightarrow \quad \tau_{divergenza} = \frac{1}{\omega_{unstable}} \approx 97\ \text{ms}
+\end{equation}
+Se il sistema di controllo interrompe l'azione o commette un ritardo superiore a 97 millisecondi, il robot cade rovinosamente senza alcuna possibilità di recupero.
+\end{tcolorbox}
+
+\begin{tcolorbox}[title=Trappola 2: Il Sistema è a Fase Non Minima (Zero a Parte Reale Positiva)]
+Questa è la proprietà più controintuitiva ma fondamentale del robot. La funzione di trasferimento dalla coppia ruote $\tau$ alla posizione dell'asse $s$ presenta uno \textbf{zero a parte reale positiva} a circa $+6.23\ \text{rad/s}$:
+\begin{equation}
+\frac{S(\sigma)}{U(\sigma)} = \frac{b_1\sigma^2 + (a_1b_2 - a_2b_1)}{\sigma^2(\sigma^2 - a_2)}, \quad \sigma_{zero} \approx +6.23\ \text{rad/s}
+\end{equation}
+\textbf{Cosa significa fisicamente?} Per accelerare in avanti a regime, il baricentro del robot deve trovarsi inclinato in avanti. Ma per inclinare il baricentro in avanti, le ruote devono inizialmente \textbf{dare un colpo all'indietro}! Se dessi coppia in avanti all'istante zero, il centro ruote avanzerebbe subito ($b_1 > 0$), ma il pendolo ruoterebbe all'indietro per reazione d'inerzia ($b_2 < 0$), provocando il ribaltamento all'indietro. 
+\textbf{Regola d'oro}: \textit{L'inclinazione $\theta$ è l'effettivo comando di accelerazione della traslazione}:
+\begin{equation}
+\ddot{s} \approx g_{st} \theta, \qquad g_{st} \approx 6.14\ \text{m/(s}^2\cdot\text{rad)}
+\end{equation}
+\end{tcolorbox}
+
+\begin{tcolorbox}[title=Trappola 3: Il Baricentro del Torso è Spostato in Avanti]
+A causa della zavorra, nella posa a torso orizzontale il baricentro non sta sopra le anche, ma circa \textbf{1.3 cm in avanti}. Ne consegue che la posa di equilibrio statico ($\theta = 0$) \textbf{non corrisponde al torso orizzontale}, bensì a un torso inclinato all'indietro di circa \textbf{4.7°}.
+\end{tcolorbox}
+
+\begin{tcolorbox}[title=Trappola 4: La Dinamica Cambia quando il Robot si Abbassa (VL-WIP)]
+Quando RoTino piega le ginocchia per accovacciarsi, la lunghezza del pendolo equivalente $l$ varia da 22 cm a 7 cm. Di conseguenza:
+\begin{itemize}
+    \item L'inerzia del pendolo cala drasticamente;
+    \item L'autorità di coppia sul beccheggio $b_2$ passa da $-38$ a $-80\ \text{s}^{-2}\text{/(N}\cdot\text{m)}$;
+    \item Un guadagno di controllo costante tarato per una certa altezza risulterebbe o troppo debole da alto o violentemente instabile da basso.
+\end{itemize}
+\end{tcolorbox}
+
+% -------------------------------------------------------------------------------------
+\section{Quadro d'Insieme: Cosa è Stato Fatto nel Progetto}
+% -------------------------------------------------------------------------------------
+
+Il lavoro svolto nel repository ha trasformato un insieme frammentato di script prototipali in un'architettura integrata, modulare e verificata a 500 Hz:
+
+\begin{enumerate}
+    \item \textbf{Unificazione nel workspace \texttt{rotino\_ws}}: 
+    Creati 6 package ROS 2 standard:
+    \begin{itemize}
+        \item \texttt{rotino\_description}: URDF, mondo Gazebo, cinematica e dinamica condivisa;
+        \item \texttt{rotino\_pid}: controllore basato su retroazione statica e PD di giunto;
+        \item \texttt{rotino\_mpc}: architettura disaccoppiata MPC + TV-LQR + VMC;
+        \item \texttt{rotino\_smc}: cascata sliding mode con Super-Twisting e SMC di gamba;
+        \item \texttt{rotino\_dashboard}: GUI di monitoraggio in tempo reale;
+        \item \texttt{rotino\_benchmark}: suite di test automatizzati, logger telemetrico a 500 Hz, aggregatore metriche e generatore di grafici.
+    \end{itemize}
+    
+    \item \textbf{Porting a coppia omogeneo}:
+    Tutti e tre i controllori agiscono adesso sullo stesso identico substrato: comandi di coppia ruote (\texttt{Float64MultiArray}) e coppie di giunto gambe (\texttt{leg\_effort\_controller}) a 500 Hz ($\Delta t = 2.0\text{ ms}$).
+    
+    \item \textbf{Risoluzione del Bang-Bang del PID a 500 Hz}:
+    Il PD di giunto originale girava a 2 kHz dentro il motore fisico di MuJoCo. Spostato a 500 Hz nel nodo ROS 2, l'energia iniettabile per ciclo cresceva di 4 volte, mandando in saturazione il termine derivativo $-k_v \dot{q}$ e trasformandolo in un bang-bang a commutazione a ogni passo. Il problema è stato risolto saturando selettivamente lo smorzamento a $\pm 8\text{ N}\cdot\text{m}$.
+    
+    \item \textbf{Eliminazione del Ciclo Limite ad Alta Velocità in SMC}:
+    Nello SMC l'anello esterno usava originariamente la velocità del baricentro $V_{com} = V_{asse} + \omega \times r_{com}$. Poiché durante il dondolio il termine d'oscillazione vale circa $0.4\text{ m/s}$, si chiudeva un anello di retroazione positiva rapido che portava il robot a oscillare a $\pm 6^\circ$ superati i $0.7\text{ m/s}$. Sostituendo con la velocità filtrata dell'asse, lo SMC ha raggiunto stabilmente i \textbf{2.0 m/s}.
+    
+    \item \textbf{Framework di Benchmark Accademico}:
+    Aggiunto il salvataggio automatico di grafici ad alta risoluzione (300 DPI) con linee di riferimento tratteggiate, colonne di errore e ritratti di fase $(\theta, \dot{\theta})$ con marcatore di disturbo e retta della superficie di scorrimento.
+\end{enumerate}
+
+% -------------------------------------------------------------------------------------
+\section{Tecnica 1: Il Controllore PID (PD in Parallelo)}
+% -------------------------------------------------------------------------------------
+
+\subsection{Come Funziona}
+Il nome "PID" è convenzionale, poiché nel codice non vi sono integratori attivi sul bilanciamento sagittale. È strutturato su quattro blocchi:
+
+\begin{equation}
+\tau_{c} = 18 \cdot \Big[ k_\theta (\theta - \theta_{ref}) + k_{\dot{\theta}} \dot{\theta} + k_x (x - x_{ref}) + k_{\dot{x}} (\dot{x} - \dot{x}_{ref}) \Big]
+\end{equation}
+
+Tutti e quattro gli stati entrano \textbf{in parallelo} per calcolare la coppia di modo comune sulle ruote. Le gambe sono mosse da PD di giunto indipendenti ad altissima rigidezza ($k_p = 160\text{--}200\text{ N}\cdot\text{m/rad}$, equivalenti a circa $28\text{ kN/m}$ al piede), trattando le gambe come aste rigide.
+
+\subsection{Perché Sceglierlo}
+\begin{itemize}
+    \item \textbf{Semplicità concettuale}: richiede solo nozioni base di controlli automatici;
+    \item \textbf{Costo computazionale trascurabile}: pochissime somme e moltiplicazioni.
+\end{itemize}
+
+\subsection{Vantaggi e Svantaggi}
+\begin{itemize}
+    \item[\textcolor{green}{\textbf{+}}] Facile da implementare al primo stadio di prototipazione.
+    \item[\textcolor{red}{\textbf{--}}] \textbf{Poli quasi non smorzati}: il rapporto tra rigidezza di posizione e smorzamento genera una coppia di poli lenti con $\zeta = 0.069$ (periodo di dondolio di quasi 3 secondi).
+    \item[\textcolor{red}{\textbf{--}}] \textbf{Assetto piegato}: a regime il robot non si stabilizza a $0^\circ$ ma rimane inclinato a circa $10.5^\circ\text{--}11^\circ$.
+    \item[\textcolor{red}{\textbf{--}}] \textbf{Perdita di aderenza}: a causa delle oscillazioni rigide delle gambe, il robot perde il contatto con il suolo per oltre l'80\% del tempo nelle manovre dinamiche.
+\end{itemize}
+
+% -------------------------------------------------------------------------------------
+\section{Tecnica 2: MPC + TV-LQR + VMC (L'Approccio del Paper Cui et al.)}
+% -------------------------------------------------------------------------------------
+
+\subsection{L'Idea Fondamentale: Disaccoppiare per Vincere}
+Controllare tutto il robot con un unico solutore non lineare completo (Whole-Body Model Predictive Control) richiederebbe tempi di calcolo proibitivi per una frequenza di 500 Hz. La genialità dell'approccio proposto da Cui et al. consiste nello \textbf{spezzare il problema in tre livelli gerarchici}:
+
+\begin{center}
+\begin{tikzpicture}[node distance=1.8cm, auto]
+  \node [draw, fill=blue!10, rounded corners, text width=9cm, text centered] (mpc) 
+    {\textbf{1. Upper-Body MPC (100 Hz)}\\
+     Pianifica lo spostamento orizzontale del CoM $\Delta s$ e la forza verticale $F_z$ considerando i vincoli di attrito e spazio di lavoro.};
+  \node [draw, fill=green!10, rounded corners, text width=7cm, text centered, below left of=mpc, xshift=-0.5cm, yshift=-1cm] (lqr) 
+    {\textbf{2. TV-LQR Ruote (500 Hz)}\\
+     Stabilizza velocemente il pendolo VL-WIP calcolando le coppie ruote ottime.};
+  \node [draw, fill=yellow!10, rounded corners, text width=7cm, text centered, below right of=mpc, xshift=0.5cm, yshift=-1cm] (vmc) 
+    {\textbf{3. VMC Gambe (500 Hz)}\\
+     Realizza $\Delta s$ e genera il sostegno $F_z$ tramite forze virtuali di gamba.};
+     
+  \draw[->, thick] (mpc) -| node[above, pos=0.25] {$\theta^* = \text{atan2}(\Delta s, z)$} (lqr);
+  \draw[->, thick] (mpc) -| node[above, pos=0.25] {$\Delta s, F_z$} (vmc);
+\end{tikzpicture}
+\end{center}
+
+\subsection{Come Funziona nel Dettaglio}
+
+\subsubsection{A. L'Upper-Body MPC (100 Hz, Frequenza Lenta)}
+Tratta il corpo superiore come una massa concentrata e risolve a ogni passo due problemi di Programmazione Quadratica condensata (\textit{QP condensata}) su un orizzonte di $N = 25$ passi ($0.5\text{ s}$ di anticipo) tramite l'algoritmo gradiente proiettato accelerato FISTA (60 iterazioni):
+\begin{equation}
+\min_U \frac{1}{2} U^T H U + g^T U \quad \text{soggetto a} \quad |\Delta s| \le \text{DS\_MAX\_CAP} = 0.03\ \text{m}
+\end{equation}
+\textbf{Perché è geniale?} Perché guarda il futuro: sapendo che il robot è a fase non minima, l'MPC comincia a inclinare il corpo superiore con $0.5\text{ s}$ di anticipo rispetto all'accelerazione desiderata. Inoltre, il vincolo rigido $|\Delta s| \le 0.03\text{ m}$ impedisce a monte che il robot richieda inclinazioni superiori a $10.48^\circ$, evitando il ribaltamento.
+
+\subsubsection{B. Il TV-LQR (Time-Varying LQR a 500 Hz, Frequenza Veloce)}
+Il bilanciamento del pendolo VL-WIP lineare $\dot{X} = A(l)X + B(l)U$ viene risolto tramite l'equazione algebrica di Riccati continua (CARE) pre-calcolata su una griglia di altezze $l$ e interpolata in tempo reale:
+\begin{equation}
+U = -K(l)(X - X_{ref})
+\end{equation}
+\textbf{La trovata ingegneristica dell'imbardata}: Il peso nella matrice di costo $R$ per il modo differenziale è posto a $R_{diff} = 100$ contro $R_{common} = 2$. Questa penalizzazione 50 volte superiore abbassa la banda passante della rotazione a $15.4\text{ rad/s}$, tenendola ben lontana dalla risonanza torsionale delle gambe ($76\text{ rad/s} \approx 12\text{ Hz}$), che altrimenti scatenerebbe oscillazioni permanenti.
+
+\subsubsection{C. Il VMC (Virtual Model Control, 500 Hz)}
+Calcola le coppie da applicare ad anca e ginocchio tramite lo Jacobiano geometrico $J$:
+\begin{equation}
+\tau_{gambe} = J^T \Big[ K_p (p_d - p_f) + K_d (v_d - v_f) - \frac{1}{2}F_z \hat{z} \Big] + b_{leg}\dot{q}
+\end{equation}
+In appoggio, la rigidezza verticale virtuale è impostata volutamente a zero ($K_{p,z} = 0$): \textbf{il robot non usa una molla verticale di posizione, ma affida il sostegno al 100\% alla forza ottima $F_z$ pianificata dall'MPC}.
+
+\subsection{Vantaggi e Svantaggi}
+\begin{itemize}
+    \item[\textcolor{green}{\textbf{+}}] \textbf{Comportamento a regime impeccabile}: beccheggio a regime a $0.000^\circ$ assoluto.
+    \item[\textcolor{green}{\textbf{+}}] \textbf{Pianificazione predittiva con vincoli}: rispetta a priori l'aderenza col terreno e l'escursione delle gambe.
+    \item[\textcolor{green}{\textbf{+}}] \textbf{Zero chattering}: le coppie alle ruote sono continue, lisce ed estremamente parsimoniose dal punto di vista energetico.
+    \item[\textcolor{red}{\textbf{--}}] \textbf{Nessuna azione integrale sagittale}: se sul torso agisce una spinta costante (es. vento continuo o salita), l'LQR non la azzera e lascia un errore di posizione permanente di decine di centimetri.
+    \item[\textcolor{red}{\textbf{--}}] \textbf{Complessità computazionale}: richiede la risoluzione di due problemi di ottimizzazione QP ogni 10 ms.
+\end{itemize}
+
+% -------------------------------------------------------------------------------------
+\section{Tecnica 3: Cascata Sliding Mode (SMC)}
+% -------------------------------------------------------------------------------------
+
+\subsection{L'Idea Fondamentale: Controllo Robusto Non Lineare in Forma Chiusa}
+Lo Sliding Mode Control (SMC) sostituisce l'ottimizzazione computazionale con una legge geometrica non lineare in grado di forzare lo stato del robot su una determinata "varietà di scorrimento" e mantenercelo a tempo finito, indipendentemente da incertezze di modello o disturbi esterni.
+
+\subsection{Come Funziona nel Dettaglio}
+
+\subsubsection{A. L'Anello Esterno di Velocità e Posizione (PI a Guadagni Negativi)}
+Calcola l'angolo di beccheggio desiderato $\theta^*$ a partire dall'errore di velocità e posizione:
+\begin{equation}
+\theta^* = \text{sat}_{\theta_{max}} \Big( K_P (\dot{s} - v_{ref}) + K_I \int (\dot{s} - v_{ref}) dt \Big), \quad K_P = -0.30, \quad K_I = -0.10
+\end{equation}
+\textbf{Perché i guadagni sono negativi?} Come spiegato al punto 1.2, per la fase non minima l'accelerazione è proporzionale all'inclinazione ($\ddot{s} \approx g_{st}\theta$). Con la definizione di errore $e_v = \dot{s} - v_{ref}$, se il robot è troppo lento ($e_v < 0$) deve inclinarsi in avanti ($\theta^* > 0$). Dunque $K_P$ e $K_I$ \textbf{devono essere obbligatoriamente negativi}.
+
+\subsubsection{B. L'Anello di Beccheggio: Super-Twisting del Secondo Ordine}
+Definita la superficie di scorrimento:
+\begin{equation}
+s_1 = \dot{\theta} + c_1 (\theta - \theta^*), \qquad c_1 = 10\ \text{s}^{-1}
+\end{equation}
+Il controllore inverte esattamente il modello dinamico control-affine:
+\begin{equation}
+\tau_c = \frac{\nu - a_2(l)\theta}{2 b_2(l)}, \qquad \nu = -c_1 \dot{\theta} - k_a \sqrt{|s_1|} \sigma_\varepsilon(s_1) + W, \quad \dot{W} = -k_b \sigma_\varepsilon(s_1)
+\end{equation}
+dove $\sigma_\varepsilon(s_1) = \frac{s_1}{|s_1| + \varepsilon}$ è una funzione segno regolarizzata nello strato limite $\varepsilon = 0.02\ \text{rad/s}$.
+\textbf{Il ruolo chiave di $W(t)$}: $W(t)$ è un integratore discontinuo interno che accumula e annulla automaticamente qualsiasi disturbo, incertezza o discrepanza nei coefficienti $a_2, b_2$.
+
+\subsubsection{C. Lo Sliding Mode delle Gambe}
+Sostituisce il VMC con un'analoga legge in spazio operativo provvista di un termine robusto $K_{sw} = 8\text{ N}$.
+\textbf{Differenza critica}: mentre nell'MPC la quota era mantenuta dall'ottimizzatore, nello SMC la rigidezza verticale virtuale \textbf{deve essere ripristinata} a $1200\text{ N/m}$ (che sale a $14\text{ kN/m}$ dentro lo strato limite), altrimenti in appoggio il robot cederebbe verticalmente.
+
+\subsection{Vantaggi e Svantaggi}
+\begin{itemize}
+    \item[\textcolor{green}{\textbf{+}}] \textbf{Cancellazione totale dei disturbi persistenti}: grazie agli integratori $W(t)$ e $\int e_v$, annulla perfettamente l'errore di posizione a regime anche sotto forze continue o carichi sbilanciati.
+    \item[\textcolor{green}{\textbf{+}}] \textbf{Esecuzione istantanea}: formule algebriche esplicite in forma chiusa, tempo di calcolo $< 0.5\text{ ms}$ di CPU (nessun algoritmo iterativo).
+    \item[\textcolor{green}{\textbf{+}}] \textbf{Velocità di crociera elevata}: testato stabilmente fino a \textbf{2.0 m/s} su percorsi rettilinei.
+    \item[\textcolor{red}{\textbf{--}}] \textbf{Presenza di Chattering}: a causa del ritardo introdotto dal filtro su $\dot{\theta}$ (circa 9 ms, corrispondente a uno sfasamento di $32^\circ$ a 70 rad/s), lo stato oscilla attorno allo strato limite generando una fluttuazione di coppia a circa \textbf{10 Hz}.
+    \item[\textcolor{red}{\textbf{--}}] \textbf{Meno reattivo nei primi 100 ms di un impatto}: il guadagno del termine in radice $\sqrt{|s_1|}$ decresce all'aumentare dell'errore, rendendolo temporaneamente più "morbido" di un LQR lineare sotto urti bruschi.
+\end{itemize}
+
+% -------------------------------------------------------------------------------------
+\section{Il Confronto Chiave: Analisi dei Disturbi e Phase Portrait}
+% -------------------------------------------------------------------------------------
+
+\subsection{Il Paradosso della Spinta Impulsiva: Perché Rispondono Uguali?}
+Quando applichiamo un impulso orizzontale di $2.7\text{ N}\cdot\text{s}$ per $12.5\text{ ms}$ sul torso, misuriamo in simulazione un picco di beccheggio in avanti quasi identico:
+\begin{equation}
+\theta_{max, MPC} \approx 11.36^\circ \qquad \text{contro} \qquad \theta_{max, SMC} \approx 12.09^\circ
+\end{equation}
+Questo risultato potrebbe far credere che lo Sliding Mode non apporti alcun beneficio di robustezza. La Sezione 6 del documento dimostra che \textbf{questa interpretazione è errata per tre motivi fisici}:
+
+\begin{enumerate}
+    \item \textbf{La spinta è un impulso, non un disturbo adattato}: in 12.5 ms la forza applica un salto istantaneo di velocità angolare $\Delta \dot{\theta} \approx -4.2\text{ rad/s}$. La superficie di scorrimento viene abbandonata all'istante ($s_1 \approx -5\text{ rad/s}$, 250 volte lo strato limite). Lo SMC entra in fase di raggiungimento, dove le proprietà di invarianza non sono attive.
+    \item \textbf{L'aderenza fisica impedisce di annullare la spinta}: fermare il beccheggio durante l'impulso richiederebbe oltre $3.4\text{ N}\cdot\text{m}$ per ruota, ma l'attrito massimo col suolo è $\mu N r \approx 2.8\text{ N}\cdot\text{m}$. La fisica impedisce a qualunque controllore di fare miracoli senza far pattinare le ruote.
+    \item \textbf{Il picco è deciso dalla saturazione progettuale}: per recuperare, il robot deve inclinarsi in avanti. L'MPC è saturato da progetto a $\Delta s \le 0.03\text{ m} \leftrightarrow \mathbf{10.48^\circ}$, mentre lo SMC è saturato a $\theta^* \le \mathbf{12.03^\circ}$. Entrambi i controllori sbattono contro il proprio limite di sicurezza: \textbf{il picco misurato misura il valore numerico scelto nel codice, non la bravura della legge di controllo!}
+\end{enumerate}
+
+\subsection{Dove lo Sliding Mode Stravince: Disturbi Persistenti}
+Se applichiamo un disturbo prolungato nel tempo (es. una forza orizzontale costante di $3\text{ N}$, che simula una salita o una raffica di vento):
+\begin{itemize}
+    \item \textbf{TV-LQR / MPC}: privo di azione integrale, subisce una deriva e si arresta con un \textbf{errore permanente di posizione di ben 65 cm} ($s_{regime} = -0.654\text{ m}$).
+    \item \textbf{Sliding Mode}: la variabile $W(t)$ stima la forza costante e l'anello esterno azzera la posizione, riportando il robot \textbf{esattamente a zero} ($s_{regime} = 0.000\text{ m}$).
+\end{itemize}
+
+\subsection{A Cosa Serve il Piano delle Fasi ($\theta$ vs $\dot{\theta}$)}
+Il ritratto di fase non è un semplice vezzo grafico:
+\begin{itemize}
+    \item \textbf{Visualizza Reaching Phase e Sliding Phase}: nel grafico si vede l'orbita dello stato che viene scaraventata via dall'impulso, intercetta la retta viola $s_1 = \dot{\theta} + c_1 \theta = 0$ e poi scivola lungo di essa verso l'origine.
+    \item \textbf{Distingue la stabilità asintotica dai cicli limite}: una traiettoria che spira e collassa nel punto $(0,0)$ certifica la convergenza asintotica; una traiettoria che si chiude su un anello ellittico permanente segnala un ciclo limite distruttivo.
+\end{itemize}
+
+% -------------------------------------------------------------------------------------
+\section{Tabella di Sintesi Comparativa}
+% -------------------------------------------------------------------------------------
+
+\begin{table}[h!]
+\centering
+\small
+\renewcommand{\arraystretch}{1.3}
+\begin{tabular}{lccc}
+\toprule
+\textbf{Caratteristica} & \textbf{PID} & \textbf{MPC + TV-LQR + VMC} & \textbf{SMC (Sliding Mode)} \\
+\midrule
+\textbf{Architettura} & PD parallelo su 4 stati & Disaccoppiata Gerarchica & Cascata Non Lineare \\
+\textbf{Uso del Modello} & Nessuno (tarato a mano) & VL-WIP + Massa Concentrata & Inversione Modello VL-WIP \\
+\textbf{Stato nominale} & Inclinato a $\sim 11^\circ$ & $\theta = 0.00^\circ$ perfetto & $\theta \approx 0.20^\circ$ \\
+\textbf{Costo Computazionale} & Trascurabile ($< 0.1\text{ ms}$) & Elevato (QP 100 Hz, FISTA) & Minimo ($< 0.5\text{ ms}$, forma chiusa) \\
+\textbf{Gestione Vincoli} & Saturazione a posteriori & Ottimizzazione con anteprima & Saturazione a posteriori \\
+\textbf{Chattering Coppie} & Altissimo (bang-bang a 500 Hz) & Assente (profilo liscio) & Basso ($\sim 10\text{ Hz}$ da ritardo filtro) \\
+\textbf{Spinta Impulsiva} & Instabile / Caduta & Picco $11.36^\circ$, rinculo $-0.9^\circ$ & Picco $12.09^\circ$, rinculo $-12.7^\circ$ \\
+\textbf{Disturbo Persistente} & Errore permanente & Errore di posizione ($65\text{ cm}$) & \textbf{Errore nullo ($0.00\text{ cm}$)} \\
+\textbf{Velocità Massima} & $\sim 0.4\text{ m/s}$ & $0.6\text{ m/s}$ & \textbf{2.0 m/s} \\
+\bottomrule
+\end{tabular}
+\caption{Confronto sintetico tra le tre leggi di controllo implementate in RoTino.}
+\end{table}
+
+\end{document}
