@@ -21,6 +21,7 @@ setup(
             'logger = rotino_benchmark.logger:main',
             'campaign = rotino_benchmark.campaign:main',
             'compare = rotino_benchmark.compare:main',
+            'plot = rotino_benchmark.plot:main',
         ],
     },
 )

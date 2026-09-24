@@ -4,3 +4,11 @@ slprj
 *.log
 *.out
 *.synctex.gz
+
+# Python
+__pycache__/
+*.pyc
+
+# Benchmark outputs
+**/benchmark_runs/
+**/test_bench_logs/

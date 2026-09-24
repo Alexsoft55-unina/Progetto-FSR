@@ -1,1 +1,0 @@
-/home/alexsoft55/rotino_ws/src/rotino_pid/launch/rotino_pid.launch.py

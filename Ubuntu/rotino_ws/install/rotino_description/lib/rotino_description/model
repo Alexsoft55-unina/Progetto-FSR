@@ -1,10 +1,10 @@
 #!/usr/bin/python3
-# EASY-INSTALL-ENTRY-SCRIPT: 'rotino-description','console_scripts','model'
+# EASY-INSTALL-ENTRY-SCRIPT: 'rotino_description==0.1.0','console_scripts','model'
 import re
 import sys
 
 # for compatibility with easy_install; see #2198
-__requires__ = 'rotino-description'
+__requires__ = 'rotino_description==0.1.0'
 
 try:
     from importlib.metadata import distribution
@@ -30,4 +30,4 @@ globals().setdefault('load_entry_point', importlib_load_entry_point)
 
 if __name__ == '__main__':
     sys.argv[0] = re.sub(r'(-script\.pyw?|\.exe)?$', '', sys.argv[0])
-    sys.exit(load_entry_point('rotino-description', 'console_scripts', 'model')())
+    sys.exit(load_entry_point('rotino_description==0.1.0', 'console_scripts', 'model')())
