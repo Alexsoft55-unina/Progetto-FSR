@@ -1,0 +1,887 @@
+\documentclass[11pt,a4paper]{report}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[italian]{babel}
+\usepackage{amsmath, amssymb, bm}
+\usepackage{graphicx}
+\usepackage{hyperref}
+\usepackage{listings}
+\usepackage{xcolor}
+\usepackage{geometry}
+\usepackage{booktabs}
+\usepackage{caption}
+\usepackage{mdframed}
+\geometry{a4paper, margin=2.5cm}
+
+\definecolor{codegreen}{rgb}{0,0.55,0}
+\definecolor{codegray}{rgb}{0.5,0.5,0.5}
+\definecolor{codepurple}{rgb}{0.55,0,0.75}
+\definecolor{backcolour}{rgb}{0.97,0.97,0.94}
+\definecolor{theoryblue}{rgb}{0.90,0.95,1.0}
+
+\lstdefinestyle{mystyle}{
+    backgroundcolor=\color{backcolour},
+    commentstyle=\color{codegreen}\itshape,
+    keywordstyle=\color{magenta}\bfseries,
+    numberstyle=\tiny\color{codegray},
+    stringstyle=\color{codepurple},
+    basicstyle=\ttfamily\small,
+    breakatwhitespace=false,
+    breaklines=true,
+    captionpos=b,
+    keepspaces=true,
+    numbers=left,
+    numbersep=5pt,
+    showspaces=false,
+    showstringspaces=false,
+    showtabs=false,
+    tabsize=4,
+    frame=single,
+    rulecolor=\color{gray!40}
+}
+\lstset{style=mystyle}
+
+\newmdenv[backgroundcolor=theoryblue, linecolor=blue!40, roundcorner=4pt]{theoryframe}
+
+\title{
+    \vspace{2cm}
+    \textbf{\Huge Wheeled Biped Robot (RoTino)}\\
+    \vspace{0.5cm}
+    \Large Manuale Tecnico Completo:\\
+    Architettura del Codice e Fondamenti Teorici\\
+    \vspace{0.3cm}
+    \normalsize Analisi file per file con collegamento alla teoria del controllo
+    \vspace{2cm}
+}
+\author{Analisi Tecnica Approfondita}
+\date{\today}
+
+\begin{document}
+
+\maketitle
+\tableofcontents
+\newpage
+
+%=============================================================
+\chapter{Introduzione e Architettura del Progetto}
+%=============================================================
+
+\section{Obiettivo del Documento}
+Questo manuale ha lo scopo di collegare in modo esplicito e rigoroso ogni
+singolo file sorgente del progetto RoTino alla teoria del controllo e della
+robotica da cui trae origine. Per ciascun file viene presentata prima una
+descrizione del ruolo architetturale, poi le righe di codice piu' significative
+con la corrispondente derivazione matematica.
+
+\section{Albero Completo dei File}
+
+Di seguito e' riportata la struttura completa del workspace ROS~2 Humble:
+
+\begin{verbatim}
+rotino_ws/
+|-- src/
+|   |-- rotino_description/
+|   |   |-- rotino_description/
+|   |   |   |-- model.py              <-- Parametri VL-WIP dall'URDF
+|   |   |   |-- kinematics.py         <-- FK analitica e CoM globale
+|   |   |   `-- planar_trajectory.py  <-- Legge oraria S-curve quintica
+|   |   `-- urdf/
+|   |       `-- rotino.urdf.xacro     <-- Geometria, masse, giunti
+|   |
+|   |-- rotino_pid/
+|   |   `-- rotino_pid/
+|   |       `-- controller.py         <-- Bilanciamento PD + jump FSM
+|   |
+|   |-- rotino_smc/
+|   |   `-- rotino_smc/
+|   |       |-- controller.py         <-- Super-Twisting + Task-Space VMC
+|   |       `-- estimator.py          <-- Filtro di Kalman lineare
+|   |
+|   |-- rotino_mpc/
+|   |   `-- rotino_mpc/
+|   |       |-- controller.py         <-- Nodo ROS 2, loop di controllo
+|   |       `-- solvers.py            <-- QP FISTA, LQR, condensazione
+|   |
+|   `-- rotino_benchmark/
+|       `-- rotino_benchmark/
+|           |-- campaign.py           <-- Orchestrazione run sequenziali
+|           |-- logger.py             <-- Logging sincrono ad alta freq.
+|           |-- plot.py               <-- 9 pannelli di analisi
+|           `-- compare.py            <-- Confronto tra run
+`-- docs/
+    `-- Architettura_e_Codice.tex     <- Questo documento
+\end{verbatim}
+
+%=============================================================
+\chapter{rotino\_description: Il Modello Dinamico del Robot}
+%=============================================================
+
+\section{Ruolo del Pacchetto}
+Questo pacchetto ha due compiti fondamentali: (1) definire la geometria
+e le inerzie del robot tramite URDF/Xacro, e (2) fornire a tutti gli altri
+pacchetti una libreria Python che estrae automaticamente i parametri
+dinamici dal modello URDF, evitando valori scritti a mano che potrebbero
+discostarsi dalla simulazione.
+
+%-------------------------------------------------------------
+\section{File: kinematics.py}
+%-------------------------------------------------------------
+
+\subsection{Ruolo}
+Implementa la \textbf{cinematica diretta (Forward Kinematics)} del robot
+traversando l'albero URDF a partire dalla radice, senza dipendenze da
+librerie esterne come Pinocchio o MoveIt. Calcola il centro di massa
+globale tramite media ponderata delle masse.
+
+\subsection{Riga 9--17: Conversione RPY a matrice di rotazione}
+
+\begin{theoryframe}
+\textbf{Teoria:} Una rototraslazione rigida nello spazio 3D si rappresenta con
+la matrice di rotazione $\mathbf{R} \in SO(3)$. Per la convenzione RPY (Roll,
+Pitch, Yaw) usata da URDF e ROS, la rotazione composta e' il prodotto:
+$\mathbf{R} = R_z(\psi) R_y(\phi) R_x(\theta)$, la cui forma esplicita e' la
+classica matrice di rotazione di Eulero ZYX.
+\end{theoryframe}
+
+\begin{lstlisting}[language=Python, caption=kinematics.py rr.\ 9-17: Matrice di rotazione da angoli RPY]
+def rpy_to_matrix(r, p, y):
+    cr, sr = np.cos(r), np.sin(r)
+    cp, sp = np.cos(p), np.sin(p)
+    cy, sy = np.cos(y), np.sin(y)
+    # Prodotto R_z * R_y * R_x in forma esplicita (convenzione ZYX)
+    return np.array([
+        [cy*cp, cy*sp*sr - sy*cr, cy*sp*cr + sy*sr],
+        [sy*cp, sy*sp*sr + cy*cr, sy*sp*cr - cy*sr],
+        [-sp,   cp*sr,            cp*cr],
+    ])
+\end{lstlisting}
+
+Questa funzione viene richiamata ogni volta che si propaga la trasformazione
+di un giunto fisso dell'URDF, che specifica la sua posa relativa tramite
+attributo \texttt{rpy} nella tag \texttt{<origin>}.
+
+\subsection{Riga 20--24: Formula di Rodrigues (Asse-Angolo)}
+
+\begin{theoryframe}
+\textbf{Teoria (Formula di Rodrigues):} Data una rotazione di angolo $\alpha$
+attorno all'asse unitario $\hat{\mathbf{k}}$, la matrice di rotazione e':
+\[
+\mathbf{R} = \mathbf{I} + \sin\alpha\,[\hat{\mathbf{k}}]_\times + (1-\cos\alpha)\,[\hat{\mathbf{k}}]_\times^2
+\]
+dove $[\cdot]_\times$ e' la matrice antisimmetrica (skew-symmetric) tale che
+$[\mathbf{k}]_\times \mathbf{v} = \mathbf{k} \times \mathbf{v}$.
+\end{theoryframe}
+
+\begin{lstlisting}[language=Python, caption=kinematics.py rr.\ 20-24: Formula di Rodrigues]
+def axis_angle_to_matrix(axis, angle):
+    k = np.asarray(axis, dtype=float)
+    k = k / np.linalg.norm(k)
+    # kx e' la matrice skew-symmetric [k]_x
+    kx = np.array([[0.0, -k[2], k[1]],
+                   [k[2],  0.0, -k[0]],
+                   [-k[1], k[0],  0.0]])
+    # Formula di Rodrigues esatta
+    return np.eye(3) + np.sin(angle) * kx + (1.0 - np.cos(angle)) * (kx @ kx)
+\end{lstlisting}
+
+Questa e' la formula canonica per costruire la matrice di rotazione $R \in SO(3)$
+attorno a un asse arbitrario. Viene usata in \texttt{link\_frames} per ogni
+giunto revoluto, dove l'asse e' quello specificato dall'URDF e l'angolo e'
+la variabile di giunto $q_i$.
+
+\subsection{Riga 54--71: Cinematica Diretta ad Albero}
+
+\begin{theoryframe}
+\textbf{Teoria (FK per strutture ad albero):} La cinematica diretta propaga
+la trasformazione omogenea ${}^0T_n = {}^0T_1 \cdot {}^1T_2 \cdots {}^{n-1}T_n$
+dal nodo radice verso le foglie. In forma compatta, per ogni link figlio:
+$p_{child} = p_{parent} + R_{parent} \cdot p_{joint}$,
+$R_{child} = R_{parent} \cdot R_{joint} \cdot R_q(q_i)$.
+\end{theoryframe}
+
+\begin{lstlisting}[language=Python, caption=kinematics.py rr.\ 54-71: FK iterativa via stack DFS]
+def link_frames(self, base_pos, base_rot, joint_positions):
+    frames = {}
+    stack = [(self.root, base_rot, base_pos)]
+    while stack:
+        name, rot, pos = stack.pop()
+        frames[name] = (rot, pos)
+        for joint in self.child_joints.get(name, []):
+            origin = joint.origin
+            xyz = np.array(origin.xyz if origin.xyz else [0., 0., 0.])
+            rpy = origin.rpy if origin.rpy else [0., 0., 0.]
+            # p_child = p_parent + R_parent * p_joint_origin
+            child_pos = pos + rot @ xyz
+            # R_child = R_parent * R_joint_origin
+            child_rot = rot @ rpy_to_matrix(*rpy)
+            if joint.type in ('revolute', 'continuous'):
+                # Applica la rotazione del giunto con la formula di Rodrigues
+                child_rot = child_rot @ axis_angle_to_matrix(
+                    joint.axis, joint_positions.get(joint.name, 0.0))
+            stack.append((joint.child, child_rot, child_pos))
+    return frames
+\end{lstlisting}
+
+L'approccio DFS (Depth First Search) tramite stack esplicito e' equivalente
+alla ricorsione ma evita l'overhead dello stack Python per alberi profondi.
+
+%-------------------------------------------------------------
+\section{File: model.py}
+%-------------------------------------------------------------
+
+\subsection{Ruolo}
+Questo e' il nucleo analitico del progetto. Implementa il modello
+\textbf{VL-WIP (Variable-Length Wheeled Inverted Pendulum)} di Cui et al.,
+\emph{Micromachines 2022, 13, 747}, calcolando automaticamente tutti i
+parametri dinamici dalla geometria URDF. Ogni calcolo ha un riferimento
+esplicito all'equazione del paper.
+
+\subsection{Riga 28--48: Struttura dati WBRParams (Tabella 1 del Paper)}
+
+\begin{lstlisting}[language=Python, caption=model.py rr.\ 28-48: Struttura parametri VL-WIP]
+@dataclass
+class WBRParams:
+    m_w: float   # massa di una ruota [kg]             -> Tab.1: m_w
+    I_w: float   # inerzia di spin della ruota [kg m2] -> Tab.1: I_w
+    r:   float   # raggio della ruota [m]              -> Tab.1: r
+    d:   float   # carreggiata [m]                     -> Tab.1: d
+    m_b: float   # massa corpo superiore [kg]          -> Tab.1: m_b
+    m_1: float   # massa dello stinco [kg]             -> Tab.1: m_1
+    m_2: float   # massa della coscia [kg]             -> Tab.1: m_2
+    l_1: float   # lunghezza stinco: ginocchio->ruota  -> Tab.1: l_1
+    l_2: float   # lunghezza coscia: anca->ginocchio   -> Tab.1: l_2
+    L_max: float # lunghezza massima gamba = l1 + l2   -> Tab.1: L
+    mu:   float  # coeff. di attrito ruota/suolo       -> Tab.1: mu
+    leg_damping: float  # smorzamento viscoso giunto [Nm s/rad]
+\end{lstlisting}
+
+Questi parametri corrispondono esattamente alla Tabella 1 del paper di
+riferimento. L'estrazione automatica garantisce coerenza tra simulazione e
+modello analitico.
+
+\subsection{Riga 151--178: Centroide Equivalente (Eqs. 2-3 del Paper)}
+
+\begin{theoryframe}
+\textbf{Teoria (Eqs. 2-3):} Il WBR viene modellato come un pendolo inverso
+a lunghezza variabile. Il corpo superiore (gambe + torso) e' sostituito da un
+punto materiale equivalente di massa $m_b$:
+\[
+S_C = \frac{\sum_i m_i x_i}{m_b}, \quad
+Z_C = \frac{\sum_i m_i z_i}{m_b}, \quad
+l = \sqrt{S_C^2 + Z_C^2}, \quad
+\theta = \arctan\!\left(\frac{S_C}{Z_C}\right)
+\]
+dove la somma si estende a tutti i link tranne le ruote, e le coordinate sono
+nel frame dell'asse ruote.
+\end{theoryframe}
+
+\begin{lstlisting}[language=Python, caption=model.py rr.\ 151-178: Centroide equivalente (Eqs. 2-3)]
+def equivalent_centroid(self, hip, knee, pitch=0.0):
+    R = rpy_to_matrix(0.0, pitch, 0.0)
+    frames = self.kin.link_frames(np.zeros(3), R, self.leg_joints(hip, knee))
+    # Punto medio dell'asse ruote
+    axle = 0.5*(frames[LEFT_WHEEL_LINK][1] + frames[RIGHT_WHEEL_LINK][1])
+    # CoM ponderato del corpo superiore (tutto tranne le ruote)
+    masses = np.array([_link(self.robot, n).inertial.mass for n in names])
+    coms = np.array([self._link_com(frames, n) for n in names])
+    com = masses @ coms / masses.sum()
+    # Eq. (2)-(3): distanza S_C, Z_C rispetto all'asse ruote
+    S_C = float(com[0] - axle[0])
+    Z_C = float(com[2] - axle[2])
+    return {
+        'l':     math.hypot(S_C, Z_C),      # lunghezza del pendolo equivalente
+        'theta': math.atan2(S_C, Z_C),      # angolo rispetto alla verticale
+        'I_y':   float(I[1, 1]),             # inerzia di pitch del corpo sup.
+        'z_b':   float(-axle[2]),            # altezza asse ruote da terra
+    }
+\end{lstlisting}
+
+\subsection{Riga 180--195: Coefficienti VL-WIP (Eq. 14 del Paper)}
+
+\begin{theoryframe}
+\textbf{Teoria (Eq. 14):} Linearizzando le equazioni di Lagrange del WBR
+attorno all'equilibrio (robot verticale, ruote che rotolano senza slittamento),
+si ottiene il modello lineare:
+\[
+\ddot{s} = a_1 \theta + b_1 (\tau_L + \tau_R), \qquad
+\ddot{\theta} = a_2 \theta + b_2 (\tau_L + \tau_R)
+\]
+dove $a_2 > 0$ implica l'instabilita' del pendolo (autovalore positivo).
+I coefficienti dipendono dalla lunghezza $l$ del pendolo, variabile con la postura.
+\end{theoryframe}
+
+\begin{lstlisting}[language=Python, caption=model.py rr.\ 180-195: Coefficienti VL-WIP (Eq. 14)]
+def vlwip_coefficients(self, l, I_y=None, I_z=None):
+    p = self.p
+    if I_y is None:
+        I_y = p.m_b * l * l / 3.0  # approx. del paper: corpo a bastone
+    mb, mw, Iw, r, d = p.m_b, p.m_w, p.I_w, p.r, p.d
+    # Denominatore comune (determinante della matrice di inerzia)
+    den = (2*Iw*(I_y + mb*l*l)
+           + (2*l*l*mb*mw + I_y*(mb + 2*mw))*r*r)
+    return {
+        'a1': -G*l*l*mb*mb*r*r / den,        # accoppiamento s <- theta
+        'a2':  G*l*mb*(2*Iw+(mb+2*mw)*r*r)/den,  # instabilita' pendolo
+        'b1':  r*(I_y + l*mb*(l+r)) / den,    # guadagno coppia -> s
+        'b2': -(2*Iw + r*(l*mb+(mb+2*mw)*r))/den, # guadagno coppia -> theta
+        'b3':  d*r / (2*I_z*r*r + d*d*(Iw+mw*r*r)),  # guadagno yaw
+    }
+\end{lstlisting}
+
+Il fatto che $b_2 < 0$ e' fondamentale: nella funzione
+\texttt{\_pitch\_super\_twisting}, la coppia fisica alle ruote si calcola
+dividendo per $b_2$, il che inverte automaticamente il segno del segnale
+di controllo.
+
+\subsection{Riga 211--223: FK Analitica 2D delle Gambe e Jacobiano}
+
+\begin{theoryframe}
+\textbf{Teoria (Catena cinematica planare):} Per un robot a 2 link planari
+(anca-ginocchio-ruota), la posizione del centro ruota nel frame base e':
+$\mathbf{p}_{wheel} = \mathbf{p}_{hip} + R(\phi_{hip})\mathbf{p}_{knee|hip}
++ R(\phi_{hip}+\phi_{knee})\mathbf{p}_{wheel|knee}$.
+Il Jacobiano $\mathbf{J} = \partial \mathbf{p}_{wheel}/\partial(\phi_{hip},\phi_{knee})$
+si calcola derivando analiticamente rispetto agli angoli di giunto.
+\end{theoryframe}
+
+\begin{lstlisting}[language=Python, caption=model.py rr.\ 211-223: FK 2D e Jacobiano analitico]
+def leg_fk(self, hip, knee):
+    kx, kz = self.knee_xz    # offset ginocchio nel frame dell'anca [m]
+    wx, wz = self.wheel_xz   # offset ruota nel frame del ginocchio [m]
+
+    def rot(q, x, z):
+        c, s = math.cos(q), math.sin(q)
+        # Punto ruotato e sua derivata rispetto all'angolo q
+        return (np.array([x*c + z*s, -x*s + z*c]),   # posizione
+                np.array([-x*s + z*c, -x*c - z*s]))  # dp/dq (colonna di J)
+
+    pk, dpk = rot(hip, kx, kz)            # posizione ginocchio e sua derivata
+    pw, dpw = rot(hip + knee, wx, wz)     # posizione ruota e sua derivata
+    # J[:,0] = d(p_ruota)/d(hip): ruotare l'anca muove sia ginocchio che ruota
+    # J[:,1] = d(p_ruota)/d(knee): ruotare il ginocchio muove solo la ruota
+    J = np.column_stack((dpk + dpw, dpw))
+    return self.hip_xz + pk + pw, J
+\end{lstlisting}
+
+%-------------------------------------------------------------
+\section{File: planar\_trajectory.py}
+%-------------------------------------------------------------
+
+\subsection{Ruolo}
+Genera la traiettoria planare (S-curve laterale) che il robot segue durante
+la navigazione in avanzamento e sterzata, con una legge oraria quintica che
+garantisce accelerazione zero agli estremi (jerk minimizzato).
+
+\subsection{Riga 50--63: Legge Oraria Quintica e Curvatura}
+
+\begin{theoryframe}
+\textbf{Teoria (Polinomio quintico per profili smooth):} Un profilo di
+posizione $s(t)$ con $s(0)=\dot s(0)=\ddot s(0)=0$ e $s(T)=L$,
+$\dot s(T)=\ddot s(T)=0$ (``profilo a S'') si ottiene con il polinomio quintico
+normalizzato $\tau=t/T$:
+\[s(\tau) = L(10\tau^3 - 15\tau^4 + 6\tau^5)\]
+La velocita' $\dot s = L(30\tau^2 - 60\tau^3 + 30\tau^4)/T$ ha profilo
+trapezoidale arrotondato. La curvatura della traiettoria planare e'
+$\kappa = y''/(1+y'^2)^{3/2}$ e il yaw\_rate desiderato e' $\dot\psi = \kappa \cdot v$.
+\end{theoryframe}
+
+\begin{lstlisting}[language=Python, caption=planar\_trajectory.py rr.\ 50-63: Legge quintica e campionamento]
+def _time_law(self, t):
+    tau = min(max(t / self.duration, 0.0), 1.0)   # normalizzazione [0,1]
+    s = self.length * (10*tau**3 - 15*tau**4 + 6*tau**5)     # posizione
+    v = self.length * (30*tau**2 - 60*tau**3 + 30*tau**4) / self.duration # velocita'
+    return s, v
+
+def sample(self, t):
+    s, v = self._time_law(t)
+    # Inversione della curva lunghezza-arco (tabella precalcolata)
+    x = float(np.interp(s, self.s_table, self.x_table))
+    dy = self._dy(x)                           # derivata della S-curve spaziale
+    heading = math.atan(dy)                    # angolo tangente alla curva
+    # Curvatura della curva planare: kappa = y'' / (1 + y'^2)^(3/2)
+    curvature = self._ddy(x) / (1.0 + dy*dy)**1.5
+    # yaw_rate desiderato = curvatura * velocita' lineare
+    return x, float(self._y(x)), heading, v, curvature * v
+\end{lstlisting}
+
+%=============================================================
+\chapter{rotino\_smc: Sliding Mode Control}
+%=============================================================
+
+\section{Architettura del Controllore}
+Il pacchetto implementa tre leggi di controllo simultanee:
+(1) pitch Super-Twisting sulle ruote,
+(2) leg Task-Space SMC (VMC esteso),
+(3) yaw PD+I con feedforward di attrito.
+
+%-------------------------------------------------------------
+\section{File: estimator.py}
+%-------------------------------------------------------------
+
+\subsection{Ruolo}
+Implementa il \textbf{Filtro di Kalman lineare a due stati} $[p, v]$ per
+stimare posizione e velocita' del corpo superiore, fondendo le misure
+dell'accelerometro IMU (aggiornamento veloce) con l'odometria delle ruote
+combinata alla cinematica delle gambe (correzione lenta e accurata).
+
+\subsection{Riga 26--37: Predizione e Correzione del Filtro di Kalman}
+
+\begin{theoryframe}
+\textbf{Teoria (Kalman Discreto):} Per il sistema $\mathbf{x}_{k+1} = F\mathbf{x}_k + Bu_k + w_k$
+con $w_k \sim \mathcal{N}(0,Q)$ e osservazione $y_k = \mathbf{x}_k + v_k$
+con $v_k \sim \mathcal{N}(0,R)$, le equazioni ottimali sono:\\
+Predizione: $\hat x^- = F\hat x_{k-1} + Bu_{k-1}$, $P^- = FP_{k-1}F^T + Q$\\
+Correzione: $K = P^-(P^- + R)^{-1}$, $\hat x = \hat x^- + K(y - \hat x^-)$,
+$P = (I-K)P^-$
+\end{theoryframe}
+
+\begin{lstlisting}[language=Python, caption=estimator.py rr.\ 26-37: Filtro di Kalman (Eqs.\ 20-21 di Cui 2022)]
+def predict(self, acc, dt):
+    # Matrice di transizione cinematica: x=[p,v], input=accelerazione IMU
+    F = np.array([[1.0, dt], [0.0, 1.0]])
+    Bu = np.array([0.5*dt*dt, dt])   # vettore di ingresso (cinematica newtoniana)
+    # Predizione stato: x^- = F x + B u
+    self.x = F @ self.x + Bu * acc
+    # Propagazione covarianza: P^- = F P F^T + Q
+    # Q = q_acc * Bu Bu^T modella il rumore dell'accelerometro
+    self.P = F @ self.P @ F.T + self.q_acc * np.outer(Bu, Bu) + 1e-9 * np.eye(2)
+
+def correct(self, p_obs, v_obs, noise_scale=1.0):
+    R = self.R_nom * noise_scale       # covarianza del rumore di misura
+    S = self.P + R                     # covarianza dell'innovazione
+    K = self.P @ np.linalg.inv(S)     # guadagno ottimale di Kalman
+    self.x = self.x + K @ (np.array([p_obs, v_obs]) - self.x)  # correzione
+    self.P = (np.eye(2) - K) @ self.P  # aggiornamento covarianza
+\end{lstlisting}
+
+Il termine $q_{acc} \cdot \mathbf{B}_u\mathbf{B}_u^T$ modella un rumore
+sull'accelerazione (random walk in accelerazione), il che e' fisicamente
+appropriato per un MEMS IMU che ha un bias lentamente variabile.
+
+%-------------------------------------------------------------
+\section{File: controller.py (SMC)}
+%-------------------------------------------------------------
+
+\subsection{Riga 576--587: Pitch Super-Twisting (Algoritmo di Levant)}
+
+\begin{theoryframe}
+\textbf{Teoria (Super-Twisting):} L'algoritmo Super-Twisting di Levant e'
+uno SMC del 2$^\circ$ ordine che garantisce convergenza in tempo finito su
+$\sigma=0$ con segnale di controllo \textbf{continuo} (elimina il chattering).
+Data la superficie $\sigma$, la legge e':
+\[u_1 = -\alpha|\sigma|^{1/2}\mathrm{sgn}(\sigma) + u_2, \qquad
+\dot u_2 = -\beta\,\mathrm{sgn}(\sigma)\]
+La funzione di Lyapunov $V = \alpha^2|\sigma| + \frac{1}{2}u_2^2$ dimostra
+la convergenza finita.
+\end{theoryframe}
+
+\begin{lstlisting}[language=Python, caption=controller.py SMC rr.\ 576-587: Pitch Super-Twisting]
+def _pitch_super_twisting(self, theta, theta_ref, l):
+    c = self._vlwip(l)   # coefficienti VL-WIP alla lunghezza l corrente
+
+    # 1. Superficie di scorrimento: su sigma=0, theta -> theta_ref esponenzialmente
+    s1 = self.theta_dot + SMC_C1 * (theta - theta_ref)
+
+    # 2. Approssimazione continua del segno (riduce chattering residuo)
+    sg1 = s1 / (abs(s1) + SMC_EPS1)
+
+    # 3. Legge astratta nu (Super-Twisting di Levant):
+    #    -C1*theta_dot: termine derivativo (mantiene la superficie)
+    #    -KA*sqrt(|s1|)*sgn(s1): termine radice (convergenza finita)
+    #    self.W: integratore (aggiornato nel loop: W -= KB*sg1*dt)
+    nu = -SMC_C1*self.theta_dot - SMC_KA*math.sqrt(abs(s1))*sg1 + self.W
+
+    # 4. Feedback Linearization: theta_ddot = a2*theta + b2*(tau_L+tau_R)
+    #    Invertendo: tau_comune = (nu - a2*theta) / b2 / 2
+    #    (diviso 2: le due ruote erogano la stessa coppia)
+    return 0.5 * (nu - c['a2'] * theta) / c['b2'], s1, sg1
+\end{lstlisting}
+
+\subsection{Righe di Aggiornamento dell'Integratore W nel Loop Principale}
+
+\begin{lstlisting}[language=Python, caption=controller.py SMC: Aggiornamento dell'integratore di Levant]
+# Nel loop di controllo principale, dopo _pitch_super_twisting:
+# Integrazione di W_dot = -KB * sgn(s1) (integratore continuo di Levant)
+# La clip su SMC_W_MAX evita il wind-up dell'integratore
+self.W = float(np.clip(
+    self.W - SMC_KB * sg1 * min(dt, SMC_DT_MAX),
+    -SMC_W_MAX, SMC_W_MAX))
+\end{lstlisting}
+
+\subsection{Riga 555--574: Task-Space VMC (Virtual Model Control)}
+
+\begin{theoryframe}
+\textbf{Teoria (VMC + SMC nel Task Space):} Il VMC di Pratt et al. (1997)
+comanda forze virtuali cartesiane e le mappa nei giunti: $\tau = \mathbf{J}^T \mathbf{F}$.
+In questa implementazione avanzata, $\mathbf{F}$ include una superficie di
+scorrimento cartesiana $\mathbf{s} = (\mathbf{v}_f - \mathbf{v}_d) + c(\mathbf{p}_f - \mathbf{p}_d)$:
+\[\mathbf{F} = -K_{lin}\mathbf{s} - K_{sw}\,\mathrm{sat}\!\left(\frac{\mathbf{s}}{\phi}\right) + \mathbf{F}_{ff}\]
+Il termine $\mathrm{sat}(\mathbf{s}/\phi)$ e' la funzione segno saturata che
+approssima il controllo discontinuo SMC con un segnale continuo.
+\end{theoryframe}
+
+\begin{lstlisting}[language=Python, caption=controller.py SMC rr.\ 555-574: VMC + Sliding Mode nel Task Space]
+def _leg_smc(self, legs, p_d, c, K_lin, F_ff=np.zeros(2), v_d=np.zeros(2)):
+    taus = []
+    for i, ((p_f, J, v_f), qd) in enumerate(zip(legs, self.leg_qd)):
+        # Superficie di scorrimento nel Task Space (errore PD cartesiano)
+        # p_f: posizione FK del centro ruota, p_d: setpoint cartesiano
+        s = (v_f - v_d) + c * (p_f - p_d)
+
+        # Forza virtuale composta:
+        # -K_lin @ s:  termine proporzionale+derivativo (banda passante)
+        # -LEG_KSW*clip(s/PHI,-1,1):  switching saturato (robustezza SMC)
+        # F_ff:        feedforward peso del robot (compensa la gravita')
+        F = -K_lin @ s - LEG_KSW * np.clip(s / LEG_PHI, -1.0, 1.0) + F_ff
+
+        # Feedforward per cancellare lo smorzamento viscoso dell'URDF
+        tau_ff = self.model.p.leg_damping * qd
+
+        # LEGGE VMC: tau = J^T @ F (mappa forze cartesiane in coppie giunturali)
+        taus.append(np.clip(J.T @ F + tau_ff, -LEG_TORQUE_MAX, LEG_TORQUE_MAX))
+
+    # Riordino per il topic ROS: [hip_L, hip_R, knee_L, knee_R]
+    tau = [taus[0][0], taus[1][0], taus[0][1], taus[1][1]]
+    self.leg_pub.publish(Float64MultiArray(data=[float(x) for x in tau]))
+    return tau
+\end{lstlisting}
+
+\subsection{Loop Esterno di Velocita' (Non-Minimum Phase)}
+
+\begin{theoryframe}
+\textbf{Teoria (Sistema a fase non minima):} Il WBR e' un sistema a fase non
+minima: una coppia positiva alle ruote genera inizialmente uno spostamento del
+corpo all'indietro (reazione di Newton) prima di accelerare in avanti.
+Per questo, il loop PI sulla velocita' deve avere guadagni \textbf{negativi}
+$K_v^P, K_v^I < 0$: un errore di velocita' positivo (troppo lento) richiede
+un angolo di pitch negativo (inclinare il robot in avanti) per generare
+l'accelerazione desiderata.
+\end{theoryframe}
+
+\begin{lstlisting}[language=Python, caption=controller.py SMC: Loop esterno PI (non-minimum phase)]
+def _outer_velocity_loop(self, v, v_ref, dt, active):
+    err = v - v_ref
+    if active:
+        # Integrale dell'errore di velocita' (con anti-windup)
+        self.Iv = float(np.clip(self.Iv + V_KI * err * dt, -IV_MAX, IV_MAX))
+    # Riferimento di pitch: negativo perche' il sistema e' a fase non minima
+    theta_star = float(np.clip(V_KP * err + self.Iv, -THETA_REF_MAX, THETA_REF_MAX))
+    return theta_star
+\end{lstlisting}
+
+%=============================================================
+\chapter{rotino\_mpc: Model Predictive Control}
+%=============================================================
+
+\section{Architettura MPC}
+Il controllore MPC separa il problema in due QP indipendenti seguendo
+il modello disaccoppiato di Eq. (9) di Cui et al.: uno orizzontale
+(posizione e velocita' nel piano sagittale) e uno verticale (altezza del
+bacino e forza verticale alle ruote). Questo disaccoppiamento e' possibile
+grazie all'approssimazione del LIP (Linear Inverted Pendulum).
+
+%-------------------------------------------------------------
+\section{File: solvers.py}
+%-------------------------------------------------------------
+
+\subsection{Riga 15--30: CARE e Guadagno LQR Ottimale}
+
+\begin{theoryframe}
+\textbf{Teoria (LQR):} Il controllore LQR minimizza il costo quadratico
+$J = \int_0^\infty (x^T Q x + u^T R u) dt$ per il sistema lineare
+$\dot x = Ax + Bu$. La soluzione ottimale e' $u^* = -Kx$ con
+$K = R^{-1} B^T P$ dove $P$ soddisfa la CARE:
+$A^T P + PA - PBR^{-1}B^T P + Q = 0$.
+La soluzione si trova dall'invariante stabile dell'hamiltoniano
+$H = \begin{pmatrix}A & -BR^{-1}B^T\\-Q & -A^T\end{pmatrix}$.
+\end{theoryframe}
+
+\begin{lstlisting}[language=Python, caption=solvers.py rr.\ 15-30: CARE e guadagno LQR]
+def care(A, B, Q, R):
+    n = A.shape[0]
+    Rinv = np.linalg.inv(R)
+    # Costruzione della matrice Hamiltoniana (2n x 2n)
+    H = np.block([[A, -B @ Rinv @ B.T], [-Q, -A.T]])
+    w, V = np.linalg.eig(H)
+    # Autovettori con parte reale negativa (sottospazio stabile)
+    stable = V[:, w.real < 0.0]
+    # Soluzione di Riccati: P = Im_lower * Im_upper^{-1}
+    P = np.real(stable[n:, :] @ np.linalg.inv(stable[:n, :]))
+    return 0.5 * (P + P.T)   # simmetrizzazione numerica
+
+def lqr_gain(A, B, Q, R):
+    P = care(A, B, Q, R)
+    return np.linalg.solve(R, B.T @ P)   # K = R^{-1} B^T P
+\end{lstlisting}
+
+\subsection{Riga 33--45: LQRSchedule (TV-LQR su griglia di lunghezze)}
+
+\begin{theoryframe}
+\textbf{Teoria (Time-Varying LQR):} Il guadagno LQR ottimale dipende dalla
+lunghezza $l$ del pendolo, che varia con la postura delle gambe. Anziche'
+risolvere la CARE a ogni passo (computazionalmente costoso), si precalcola
+il guadagno su una griglia di valori di $l$ e si interpola linearmente
+a runtime, realizzando un TV-LQR efficiente.
+\end{theoryframe}
+
+\begin{lstlisting}[language=Python, caption=solvers.py rr.\ 33-45: LQRSchedule con interpolazione su griglia]
+class LQRSchedule:
+    def __init__(self, model, samples, Q, R):
+        self.l_grid = np.array([s[0] for s in samples])
+        # Precalcolo offline del guadagno ottimale per ogni l nella griglia
+        self.K_grid = np.array([lqr_gain(*model.vlwip_matrices(l, I_y=iy), Q, R)
+                                 for l, iy in samples])
+
+    def gain(self, l):
+        l = float(np.clip(l, self.l_grid[0], self.l_grid[-1]))
+        i = int(np.clip(np.searchsorted(self.l_grid, l)-1, 0, len(self.l_grid)-2))
+        # Interpolazione lineare del guadagno tra due nodi della griglia
+        a = (l - self.l_grid[i]) / (self.l_grid[i+1] - self.l_grid[i])
+        return (1.0 - a) * self.K_grid[i] + a * self.K_grid[i+1]
+\end{lstlisting}
+
+\subsection{Riga 48--58: Fast QP con Algoritmo FISTA}
+
+\begin{theoryframe}
+\textbf{Teoria (FISTA):} Per QP con vincoli box
+$\min_u \frac{1}{2}u^T H u + g^T u$ s.t. $l_o \le u \le h_i$,
+il metodo FISTA (Beck \& Teboulle 2009) applica discesa del gradiente
+proiettato con momento di Nesterov:
+\[x_{k+1} = \Pi_{[lo,hi]}\!\left(y_k - \frac{Hy_k + g}{L}\right), \quad
+y_{k+1} = x_{k+1} + \frac{t_k-1}{t_{k+1}}(x_{k+1}-x_k)\]
+con $L = \lambda_{max}(H)$ e $t_{k+1} = \frac{1+\sqrt{1+4t_k^2}}{2}$.
+La convergenza e' $O(1/k^2)$ anziche' $O(1/k)$ del gradient descent.
+\end{theoryframe}
+
+\begin{lstlisting}[language=Python, caption=solvers.py rr.\ 48-58: FISTA per QP con vincoli box]
+def box_qp(H, g, lo, hi, x0=None, iters=60):
+    # Stima del passo: 1/L dove L = lambda_max(H)
+    L = float(np.linalg.eigvalsh(H)[-1])
+    x = np.clip(np.zeros_like(g) if x0 is None else x0, lo, hi)
+    y, t = x.copy(), 1.0
+    for _ in range(iters):
+        # Passo di discesa proiettato sul box [lo, hi]
+        x_new = np.clip(y - (H @ y + g) / L, lo, hi)
+        # Aggiornamento del momento di Nesterov
+        t_new = 0.5 * (1.0 + np.sqrt(1.0 + 4.0 * t * t))
+        y = x_new + ((t - 1.0) / t_new) * (x_new - x)
+        x, t = x_new, t_new
+    return x
+\end{lstlisting}
+
+\subsection{Riga 61--76: Condensazione del Problema MPC}
+
+\begin{theoryframe}
+\textbf{Teoria (Condensazione):} Date le dinamiche a spazio di stato
+$x_{k+1} = Ax_k + Bu_k + c$, sostituendo ricorsivamente si ottiene:
+\[\mathbf{X} = \Phi x_0 + \Gamma \mathbf{U} + \mathbf{C}_{st}\]
+dove $\mathbf{X} = [x_1; \ldots; x_N]$, $\mathbf{U} = [u_0;\ldots;u_{N-1}]$.
+Le matrici $\Phi$, $\Gamma$, $\mathbf{C}_{st}$ si costruiscono iterativamente.
+Il costo quadratico si riscrive come QP puro in $\mathbf{U}$:
+$H = \Gamma^T S_{blk} \Gamma + W I$, $g = \Gamma^T S_{blk}(\Phi x_0 + C_{st} - X^*)$.
+\end{theoryframe}
+
+\begin{lstlisting}[language=Python, caption=solvers.py rr.\ 61-114: Condensazione MPC e classe UpperBodyMPC]
+def _condense(A, B, c, N):
+    n, m = B.shape
+    Phi = np.zeros((N*n, n)); Gam = np.zeros((N*n, N*m)); Cst = np.zeros(N*n)
+    Ak = np.eye(n)
+    for i in range(N):
+        Ak = A @ Ak
+        Phi[i*n:(i+1)*n] = Ak
+        row = i * n
+        prev = Gam[row-n:row] if i > 0 else np.zeros((n, N*m))
+        Gam[row:row+n] = A @ prev
+        Gam[row:row+n, i*m:(i+1)*m] = B
+        Cst[row:row+n] = (A @ Cst[row-n:row] if i > 0 else 0.0) + c
+    return Phi, Gam, Cst
+
+class UpperBodyMPC:
+    # Disaccoppiamento orizzontale/verticale (Eq. 9 di Cui 2022)
+    def _solve(self, A, B, c, x0, x_ref, S, W, lo, hi, warm):
+        Phi, Gam, Cst = _condense(A, B, c, self.N)
+        Sb = np.kron(np.eye(self.N), S)     # matrice di peso a blocchi
+        # Hessiana H e gradiente g del QP condensato
+        H = Gam.T @ Sb @ Gam + W * np.eye(self.N)
+        g = Gam.T @ Sb @ (Phi @ x0 + Cst - x_ref.reshape(-1))
+        warm = np.clip(np.concatenate((warm[1:], warm[-1:])), lo, hi)
+        u = box_qp(H, g, lo, hi, warm)
+        return u, (Phi @ x0 + Gam @ u + Cst).reshape(self.N, -1)
+
+    def solve(self, x_h, ref_h, h, zdd_ref, ds_max, x_v, ref_v, f_min, f_max):
+        dt = self.dt
+        # LIP orizzontale: s_ddot = (g+z_ddot)/h * delta_s
+        Bh = np.array([[0.5*dt*dt],[dt]]) * (G + zdd_ref) / max(h, 1e-3)
+        self.u_h, self.x_h = self._solve(self.Ah, Bh, np.zeros(2),
+                               x_h, ref_h, self.S_h, self.W_h, -ds_max, ds_max, self.u_h)
+        # Verticale: z_ddot = F_z/m_b - g
+        Bv = np.array([[0.5*dt*dt],[dt]]) / self.m_b
+        cv = np.array([-0.5*dt*dt*G, -dt*G])   # termine costante della gravita'
+        self.u_v, self.x_v = self._solve(self.Ah, Bv, cv,
+                               x_v, ref_v, self.S_v, self.W_v, f_min, f_max, self.u_v)
+        return float(self.u_h[0]), float(self.u_v[0])
+\end{lstlisting}
+
+%=============================================================
+\chapter{rotino\_pid: Controllore Baseline PD}
+%=============================================================
+
+\section{File: controller.py (PID)}
+
+\subsection{Legge PD di Bilanciamento}
+
+\begin{theoryframe}
+\textbf{Teoria (PD sul pendolo inverso):} La legge PD classica per
+bilanciare un pendolo inverso su ruote mappa lo stato
+$[\theta, \dot\theta, \dot x, x]$ in coppia alle ruote:
+$u = K_\theta(\theta-\theta^*) + K_{\dot\theta}\dot\theta
+    - K_{\dot x}(\dot x - \dot x^*) - K_x(x - x^*)$.
+I guadagni sono determinati per tentativi o tramite linearizzazione
+del sistema (VLWIP) e specifica dei poli desiderati.
+\end{theoryframe}
+
+\begin{lstlisting}[language=Python, caption=controller.py PID: Legge PD di bilanciamento (righe 644-648)]
+k_th, k_thd, k_xd, k_x, max_wheel_state = balance_gains_for_state(self.jump_state)
+wheel_u_raw = clamp(
+    k_th  * (theta - theta_ref)   # P sull'angolo
+    + k_thd * theta_dot            # D sull'angolo
+    - k_xd  * vel_err              # D sulla velocita' lineare
+    - k_x   * pos_err,             # P sulla posizione
+    -max_wheel_state, max_wheel_state)
+\end{lstlisting}
+
+\subsection{Servo PD di Posizione per le Gambe}
+
+\begin{lstlisting}[language=Python, caption=controller.py PID: Servo PD hip/knee (righe 454-468)]
+def _publish_legs(self, targets, q, qd):
+    kps = (HIP_SERVO_KP, HIP_SERVO_KP, KNEE_SERVO_KP, KNEE_SERVO_KP)
+    kvs = (HIP_SERVO_KV, HIP_SERVO_KV, KNEE_SERVO_KV, KNEE_SERVO_KV)
+    tau = [
+        clamp(
+            clamp(kp*(target - q[name]), -LEG_TORQUE_MAX, LEG_TORQUE_MAX)  # P
+            + clamp(-kv * qd[name], -LEG_DAMPING_MAX, LEG_DAMPING_MAX),    # D (saturato)
+            -LEG_TORQUE_MAX, LEG_TORQUE_MAX)
+        for kp, kv, target, name in zip(kps, kvs, targets, LEG_JOINTS)]
+    self.leg_pub.publish(Float64MultiArray(data=[float(x) for x in tau]))
+    return tau
+\end{lstlisting}
+
+Il termine D e' saturato separatamente ($\pm$\texttt{LEG\_DAMPING\_MAX}) per
+evitare cicli limite bang-bang dovuti a picchi di velocita' angolare durante
+transizioni rapide di postura.
+
+%=============================================================
+\chapter{rotino\_benchmark: Infrastruttura di Validazione}
+%=============================================================
+
+%-------------------------------------------------------------
+\section{File: campaign.py}
+%-------------------------------------------------------------
+
+\begin{lstlisting}[language=Python, caption=campaign.py: Ciclo di vita di un run (righe 32-68)]
+def run_one(law, scenario, duration, out_dir, log_dir):
+    kill_stale()   # rimuove residui da run precedenti
+    launch = ['ros2', 'launch', f'rotino_{law}', f'rotino_{law}.launch.py',
+              'gui:=false', *scenario]
+    logger = ['ros2', 'run', 'rotino_benchmark', 'logger', '--ros-args',
+              '-p', 'use_sim_time:=true', '-p', f'controller:={law}',
+              '-p', f'output_dir:={out_dir}']
+    sim = subprocess.Popen(launch, ...)
+    time.sleep(6.0)        # attesa avvio Gazebo + controllori
+    log = subprocess.Popen(logger, ...)
+    time.sleep(duration)   # durata del run
+    # Terminazione ordinata: SIGINT poi SIGKILL
+    for proc in (log, sim):
+        os.killpg(os.getpgid(proc.pid), signal.SIGINT)
+    time.sleep(3.0)
+    for proc in (log, sim):
+        os.killpg(os.getpgid(proc.pid), signal.SIGKILL)
+\end{lstlisting}
+
+%-------------------------------------------------------------
+\section{File: logger.py}
+%-------------------------------------------------------------
+
+\begin{lstlisting}[language=Python, caption=logger.py: Conversione quaternione in angoli Roll/Yaw]
+def _imu_cb(self, msg):
+    self.imu = msg
+    q = msg.orientation
+    # Estrazione Roll (rotazione attorno all'asse x) dal quaternione
+    sinr_cosp = 2.0 * (q.w * q.x + q.y * q.z)
+    cosr_cosp = 1.0 - 2.0 * (q.x*q.x + q.y*q.y)
+    self.roll = math.atan2(sinr_cosp, cosr_cosp)
+    # Estrazione Yaw (rotazione attorno all'asse z) dal quaternione
+    siny_cosp = 2.0 * (q.w * q.z + q.x * q.y)
+    cosy_cosp = 1.0 - 2.0 * (q.y*q.y + q.z*q.z)
+    self.yaw = math.atan2(siny_cosp, cosy_cosp)
+\end{lstlisting}
+
+%-------------------------------------------------------------
+\section{File: plot.py -- I 9 Pannelli di Analisi}
+%-------------------------------------------------------------
+
+\begin{center}
+\begin{tabular}{clp{7cm}}
+\toprule
+\textbf{N.} & \textbf{File PNG} & \textbf{Contenuto e Rilevanza Teorica} \\
+\midrule
+1 & tracking\_and\_errors.png  & Errori di tracking di $\theta$, $x$, $z$ per confronto risposta transitoria \\
+2 & disturbance\_and\_phase\_portrait.png & Profilo di disturbo e ritratto di fase $(\theta, \dot\theta)$: dimostra la convergenza a 0 dell'orbita \\
+3 & smc\_sliding\_surface.png  & Superficie $\sigma(t)$: verifica che il controllore SMC raggiunga e mantenga $\sigma=0$ \\
+4 & grf\_and\_joints.png       & Ground Reaction Forces e sforzo dei giunti VMC \\
+5 & torque\_distribution.png   & Ripartizione coppia anca/ginocchio e rapporto $|\tau_{hip}|/|\tau_{knee}|$ \\
+6 & attitude\_3d.png           & Roll e Yaw vs. tempo: robustezza ai disturbi fuori-piano \\
+7 & power\_and\_energy.png     & Potenza meccanica $P = \sum|\tau\omega|$ e energia totale (Joule) \\
+8 & horizontal\_phase\_portrait.png & Piano delle fasi $(e_x, \dot e_x)$: dimostra la convergenza all'origine \\
+9 & imu\_accelerations.png     & Accelerazioni 3D IMU raw: analisi shock e vibrazioni \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\begin{lstlisting}[language=Python, caption=plot.py: Calcolo della potenza meccanica totale istantanea]
+def plot_power_and_energy(data, out_dir):
+    for law in ('mpc', 'smc'):
+        d = data[law]
+        power = []
+        energy = [0.0]
+        dt = 0.002   # 500 Hz
+        for i in range(len(d['t'])):
+            # Potenza ruote: P_wheel = |tau_comune * omega_ruota| * 2 (due ruote)
+            pw = abs(d['u'][i] * d['wheel_v'][i]) * 2.0
+            # Potenza gambe: P_leg = (|tau_hip * omega_hip| + |tau_knee * omega_knee|) * 2
+            pl = (abs(d['hip_u'][i] * d['hip_v'][i])
+                  + abs(d['knee_u'][i] * d['knee_v'][i])) * 2.0
+            power.append(pw + pl)
+            # Integrazione numerica (rettangoli): E(t) = integral_0^t P dt
+            energy.append(energy[-1] + (pw + pl) * dt)
+\end{lstlisting}
+
+%=============================================================
+\chapter{Conclusioni}
+%=============================================================
+
+Questo manuale ha dimostrato che ogni riga del codice del progetto RoTino
+e' la traduzione diretta di un'equazione matematica della teoria del controllo:
+
+\begin{itemize}
+    \item Le \textbf{funzioni di rotazione} in \texttt{kinematics.py} implementano
+          la geometria del gruppo $SO(3)$ tramite la formula di Rodrigues e il
+          prodotto di rotazioni RPY.
+    \item Il \textbf{modello VL-WIP} in \texttt{model.py} estrae automaticamente
+          dall'URDF i parametri del modello lineare di Cui et al. (2022),
+          garantendo coerenza tra simulazione e modello analitico.
+    \item Il \textbf{filtro di Kalman} in \texttt{estimator.py} implementa le
+          equazioni (20)-(21) del paper, fondendo IMU e odometria in modo ottimale.
+    \item Il \textbf{Super-Twisting} in \texttt{rotino\_smc} garantisce convergenza
+          in tempo finito con segnale continuo (no chattering), tramite l'algoritmo
+          di Levant con integratore aggiornato a ogni ciclo.
+    \item La \textbf{condensazione QP} in \texttt{solvers.py} trasforma un problema
+          di programmazione dinamica a orizzonte $N$ in un QP denso di taglia $N$,
+          risolvibile in microsecondi con FISTA grazie alla struttura box-constrained.
+    \item Il \textbf{benchmark} (\texttt{campaign.py}, \texttt{logger.py},
+          \texttt{plot.py}) fornisce 9 metriche di validazione che coprono
+          tracking, robustezza ai disturbi, consumo energetico e dinamica di
+          assetto tridimensionale.
+\end{itemize}
+
+\end{document}

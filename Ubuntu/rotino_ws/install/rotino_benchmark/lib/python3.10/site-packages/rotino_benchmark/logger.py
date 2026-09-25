@@ -36,6 +36,8 @@ HEADER = [
     'hip_L_vel', 'hip_R_vel', 'knee_L_vel', 'knee_R_vel',
     'wheel_L_vel', 'wheel_R_vel',
     'wheel_L_torque_cmd', 'wheel_R_torque_cmd',
+    'hip_L_torque_cmd', 'hip_R_torque_cmd', 'knee_L_torque_cmd', 'knee_R_torque_cmd',
+    'roll_deg', 'yaw_deg',
     'imu_gyro_x', 'imu_gyro_y', 'imu_gyro_z',
     'imu_accel_x', 'imu_accel_y', 'imu_accel_z',
     'theta_ref_deg', 'theta_err_deg',
@@ -91,6 +93,9 @@ class TestBenchLogger(Node):
         self.joint_pos = {}
         self.joint_vel = {}
         self.wheel_cmd = [float('nan'), float('nan')]
+        self.leg_cmd = [float('nan'), float('nan'), float('nan'), float('nan')]
+        self.roll = 0.0
+        self.yaw = 0.0
         self.contact = {'left': (-math.inf, 0.0), 'right': (-math.inf, 0.0)}
         self.imu = None
         self.wbr_data = None
@@ -104,6 +109,8 @@ class TestBenchLogger(Node):
         self.create_subscription(JointState, '/joint_states', self._joint_state_cb, 10)
         self.create_subscription(Float64MultiArray, '/wheel_effort_controller/commands',
                                  self._wheel_cmd_cb, 10)
+        self.create_subscription(Float64MultiArray, '/leg_effort_controller/commands',
+                                 self._leg_cmd_cb, 10)
         self.create_subscription(Contacts, '/rotino/left_wheel_contact',
                                  lambda msg: self._contact_cb(msg, 'left'), 10)
         self.create_subscription(Contacts, '/rotino/right_wheel_contact',
@@ -142,6 +149,10 @@ class TestBenchLogger(Node):
         if len(msg.data) >= 2:
             self.wheel_cmd = [msg.data[0], msg.data[1]]
 
+    def _leg_cmd_cb(self, msg):
+        if len(msg.data) >= 4:
+            self.leg_cmd = [msg.data[0], msg.data[1], msg.data[2], msg.data[3]]
+
     def _contact_cb(self, msg, side):
         force, ground_contact = contact_force_from_msg(msg)
         if not ground_contact:
@@ -150,6 +161,15 @@ class TestBenchLogger(Node):
 
     def _imu_cb(self, msg):
         self.imu = msg
+        q = msg.orientation
+        sinr_cosp = 2.0 * (q.w * q.x + q.y * q.z)
+        cosr_cosp = 1.0 - 2.0 * (q.x * q.x + q.y * q.y)
+        import math
+        self.roll = math.atan2(sinr_cosp, cosr_cosp)
+        
+        siny_cosp = 2.0 * (q.w * q.z + q.x * q.y)
+        cosy_cosp = 1.0 - 2.0 * (q.y * q.y + q.z * q.z)
+        self.yaw = math.atan2(siny_cosp, cosy_cosp)
 
     def _contact_force(self, side, now_s):
         stamp, force = self.contact[side]
@@ -217,6 +237,8 @@ class TestBenchLogger(Node):
             jv.get('left_knee', nan), jv.get('right_knee', nan),
             jv.get('left_wheel_joint', nan), jv.get('right_wheel_joint', nan),
             self.wheel_cmd[0], self.wheel_cmd[1],
+            self.leg_cmd[0], self.leg_cmd[1], self.leg_cmd[2], self.leg_cmd[3],
+            math.degrees(self.roll), math.degrees(self.yaw),
             *imu_row,
             *errors_row,
         ]

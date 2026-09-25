@@ -200,6 +200,13 @@ $p_{axle}^b$ è il punto medio dei due centri ruota nella terna `base_link`, dat
 $$\omega_{ruota} = \dot q_{ruota} + \omega_{pitch} + \dot q_{hip} + \dot q_{knee} .$$
 Con puro rotolamento $V_w = \tfrac r2(\omega_l+\omega_r)\,\hat h$. $P_w$ è l'integrale di $V_w$ con quota fissata a $r$. Usare solo $\dot q_{ruota}$ attribuirebbe alla traslazione ogni oscillazione di beccheggio e ogni movimento delle gambe.
 
+**Equazioni complete del filtro.** L'algoritmo esegue a 500 Hz le classiche equazioni del Filtro di Kalman Discreto Lineare. Avendo osservazioni dirette su tutto lo stato ($H=I$), la formulazione si semplifica. La fase di predizione (tramite IMU) aggiorna stato e covarianza:
+$$ x_{k|k-1} = F x_{k-1|k-1} + \Gamma a_{w,k}, \qquad P_{k|k-1} = F P_{k-1|k-1} F^T + Q $$
+La fase di correzione (tramite Odometria) fonde la predizione con la misura $y_k$:
+$$ K_k = P_{k|k-1}(P_{k|k-1} + R)^{-1} $$
+$$ x_{k|k} = x_{k|k-1} + K_k (y_k - x_{k|k-1}), \qquad P_{k|k} = (I - K_k)P_{k|k-1} $$
+L'innovazione $(y_k - x_{k|k-1})$ rappresenta lo scarto tra l'odometria misurata e la propagazione dell'IMU, compensata dinamicamente dal guadagno $K_k$.
+
 **Parametri e guadagno a regime.** $q_a = 0{,}5$ (m/s²)², $R = \operatorname{diag}(10^{-4}\ \text{m}^2,\ 10^{-3}\ \text{m}^2/\text{s}^2)$. Il guadagno a regime per passo è **[C]**
 $$K_\infty = \begin{bmatrix}0{,}0070 & 0{,}0017\\ 0{,}0168 & 0{,}0434\end{bmatrix}.$$
 Gli autovalori di $(I-K_\infty)F$ sono 0,9929 e 0,9567, cioè costanti di tempo di 280 ms e 45 ms. L'IMU domina sotto i 45 ms e l'odometria sopra i 280 ms. Nel mezzo le due fonti si fondono. Il filtro serve a eliminare il rumore di derivazione e i salti dell'odometria, non a correggere derive lente dell'IMU. Queste sono comunque limitate perché l'orientazione arriva già stimata.

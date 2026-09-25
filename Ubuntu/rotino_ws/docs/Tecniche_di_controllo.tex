@@ -303,14 +303,14 @@ ruotati in terna mondo e i termini di trasporto di Steiner.
 \endhead
 \bottomrule\noalign{}
 \endlastfoot
-−0,45 & +0,90 & 0,2454 & +0,0180 & 0,2180 & 0,2188 & +4,73° & 0,0201 \\
-−0,30 & +0,60 & 0,2299 & +0,0163 & 0,2040 & 0,2046 & +4,58° & 0,0194 \\
-−0,15 & +0,30 & 0,2092 & +0,0147 & 0,1852 & 0,1858 & +4,55° & 0,0184 \\
+-0,45 & +0,90 & 0,2454 & +0,0180 & 0,2180 & 0,2188 & +4,73° & 0,0201 \\
+-0,30 & +0,60 & 0,2299 & +0,0163 & 0,2040 & 0,2046 & +4,58° & 0,0194 \\
+-0,15 & +0,30 & 0,2092 & +0,0147 & 0,1852 & 0,1858 & +4,55° & 0,0184 \\
 \textbf{0} & \textbf{0} & \textbf{0,1838} & \textbf{+0,0133} &
 \textbf{0,1622} & \textbf{0,1627} & \textbf{+4,69°} & \textbf{0,0174} \\
-+0,15 & −0,30 & 0,1543 & +0,0121 & 0,1354 & 0,1359 & +5,10° & 0,0163 \\
-+0,30 & −0,60 & 0,1213 & +0,0111 & 0,1055 & 0,1061 & +6,00° & 0,0153 \\
-+0,45 & −0,90 & 0,0856 & +0,0103 & 0,0731 & 0,0738 & +8,06° & 0,0145 \\
++0,15 & -0,30 & 0,1543 & +0,0121 & 0,1354 & 0,1359 & +5,10° & 0,0163 \\
++0,30 & -0,60 & 0,1213 & +0,0111 & 0,1055 & 0,1061 & +6,00° & 0,0153 \\
++0,45 & -0,90 & 0,0856 & +0,0103 & 0,0731 & 0,0738 & +8,06° & 0,0145 \\
 \end{longtable}
 }
 
@@ -413,14 +413,14 @@ Coefficienti lungo la griglia di pose, con \(I_y\) reale
 \endhead
 \bottomrule\noalign{}
 \endlastfoot
-0,2188 & −12,02 & 89,17 & 8,055 & −38,20 & 9,44 \\
-0,2046 & −11,73 & 93,07 & 8,040 & −40,72 & 9,65 \\
-0,1858 & −11,29 & 98,64 & 8,007 & −44,57 & 9,93 \\
-\textbf{0,1627} & \textbf{−10,60} & \textbf{105,82} & \textbf{7,933} &
-\textbf{−50,15} & \textbf{10,29} \\
-0,1359 & −9,54 & 113,94 & 7,762 & −57,98 & 10,67 \\
-0,1061 & −7,86 & 120,35 & 7,379 & −68,44 & 10,97 \\
-0,0738 & −5,32 & 116,94 & 6,564 & −80,40 & 10,81 \\
+0,2188 & -12,02 & 89,17 & 8,055 & -38,20 & 9,44 \\
+0,2046 & -11,73 & 93,07 & 8,040 & -40,72 & 9,65 \\
+0,1858 & -11,29 & 98,64 & 8,007 & -44,57 & 9,93 \\
+\textbf{0,1627} & \textbf{-10,60} & \textbf{105,82} & \textbf{7,933} &
+\textbf{-50,15} & \textbf{10,29} \\
+0,1359 & -9,54 & 113,94 & 7,762 & -57,98 & 10,67 \\
+0,1061 & -7,86 & 120,35 & 7,379 & -68,44 & 10,97 \\
+0,0738 & -5,32 & 116,94 & 6,564 & -80,40 & 10,81 \\
 \end{longtable}
 }
 
@@ -584,6 +584,13 @@ Con puro rotolamento \(V_w = \tfrac r2(\omega_l+\omega_r)\,\hat h\).
 \(\dot q_{ruota}\) attribuirebbe alla traslazione ogni oscillazione di
 beccheggio e ogni movimento delle gambe.
 
+\textbf{Equazioni complete del filtro.} L'algoritmo esegue a 500 Hz le classiche equazioni del Filtro di Kalman Discreto Lineare. Avendo osservazioni dirette su tutto lo stato (\(H=I\)), la formulazione si semplifica. La fase di predizione (tramite IMU) aggiorna stato e covarianza:
+\[ x_{k|k-1} = F x_{k-1|k-1} + \Gamma a_{w,k}, \qquad P_{k|k-1} = F P_{k-1|k-1} F^T + Q \]
+La fase di correzione (tramite Odometria) fonde la predizione con la misura \(y_k\):
+\[ K_k = P_{k|k-1}(P_{k|k-1} + R)^{-1} \]
+\[ x_{k|k} = x_{k|k-1} + K_k (y_k - x_{k|k-1}), \qquad P_{k|k} = (I - K_k)P_{k|k-1} \]
+L'innovazione \((y_k - x_{k|k-1})\) rappresenta lo scarto tra l'odometria misurata e la propagazione dell'IMU, compensata dinamicamente dal guadagno \(K_k\).
+
 \textbf{Parametri e guadagno a regime.} \(q_a = 0{,}5\) (m/s²)²,
 \(R = \operatorname{diag}(10^{-4}\ \text{m}^2,\ 10^{-3}\ \text{m}^2/\text{s}^2)\).
 Il guadagno a regime per passo è \textbf{{[}C{]}}
@@ -677,7 +684,7 @@ supervisore a stati.
                                 │                                   ▼
    traiettoria planare ──► (C) guida laterale → ψ_cmd ──► (B) PD di rotta → yaw_u (modo differenziale)
                                 │                                   │
-                                └──────► τ_l = 18·clamp(u − yaw_u),  τ_r = 18·clamp(u + yaw_u) ◄──┘
+                                └──────► τ_l = 18·clamp(u - yaw_u),  τ_r = 18·clamp(u + yaw_u) ◄──┘
 \end{verbatim}
 
 \begin{itemize}
@@ -943,12 +950,12 @@ Uscita
 \endhead
 \bottomrule\noalign{}
 \endlastfoot
-PRELOAD & da (0, 0) a (+0,12, −0,22) con smoothstep in 0,80 s:
+PRELOAD & da (0, 0) a (+0,12, -0,22) con smoothstep in 0,80 s:
 accucciata & dopo 0,80 s \\
-THRUST & da PRELOAD a (−0,27, +0,44) con \(1-(1-\tau)^3\) in 0,02 s:
+THRUST & da PRELOAD a (-0,27, +0,44) con \(1-(1-\tau)^3\) in 0,02 s:
 estensione brusca & decollo, o 0,16 s senza decollo → LANDING \\
 FLIGHT & posa congelata al decollo & contatto confermato \\
-LANDING & dalla posa di contatto a (+0,08, −0,20) in 0,80 s: gambe
+LANDING & dalla posa di contatto a (+0,08, -0,20) in 0,80 s: gambe
 cedevoli & dopo 0,80 s \\
 RECOVERY & ritorno a (0, 0) in 2,0 s & dopo 2,0 s \\
 SETTLE & (0, 0) & assestamento per 0,30 s o 12 s di attesa \\
@@ -991,7 +998,7 @@ SETTLE & (0, 0) & assestamento per 0,30 s o 12 s di attesa \\
                                               │ piano del baricentro x_h(t+Δt)
                                               ▼
  stima (s, θ, φ, ṡ, θ̇, φ̇) ──► TV-LQR K(l), 500 Hz ──► τ_l, τ_r (ruote)
-                                  X_ref = [s_plan − Δs, atan2(Δs, z_ref), φ_ref, ṡ_plan, 0, φ̇_ref]
+                                  X_ref = [s_plan - Δs, atan2(Δs, z_ref), φ_ref, ṡ_plan, 0, φ̇_ref]
  Δs, z_ref, F_z ──────────────► VMC task-space, 500 Hz ──► τ_hip, τ_knee (gambe)
 \end{verbatim}
 
@@ -1471,11 +1478,11 @@ identici all'MPC (§2, §4.8).
 \subsubsection{5.1 Struttura}\label{struttura}
 
 \begin{verbatim}
- s_ref, ṡ_ref ─► v_ref = ṡ_ref + K_POS(s_ref − s) ─► PI a guadagni negativi ─► θ* (saturato a ±12°)
+ s_ref, ṡ_ref ─► v_ref = ṡ_ref + K_POS(s_ref - s) ─► PI a guadagni negativi ─► θ* (saturato a ±12°)
                                                                                    │
- θ, θ̇, l ───────────────────────────────────► super-twisting su s₁ = θ̇ + c₁(θ − θ*) ─► τ_c
+ θ, θ̇, l ───────────────────────────────────► super-twisting su s₁ = θ̇ + c₁(θ - θ*) ─► τ_c
  φ, φ̇, φ_ref ────────────────────────────────► PD + attrito + integrale ─────────────► τ_d
-                                                         τ_l = τ_c − τ_d,  τ_r = τ_c + τ_d
+                                                         τ_l = τ_c - τ_d,  τ_r = τ_c + τ_d
  z_ref, ż_ref, z̈_ref ─► F_z = m_b(g + z̈_ref) ─► SMC task-space per gamba ─► τ_hip, τ_knee
 \end{verbatim}
 
@@ -1854,8 +1861,8 @@ SMC 4,5 N·s
 \endlastfoot
 Picco di beccheggio in avanti (recupero) & \textbf{11,36°} &
 \textbf{12,09°} & \textbf{11,75°} & \textbf{12,23°} \\
-Oscillazione iniziale all'indietro (primi 0,4 s) & −0,59° & −6,45° &
-−0,94° & −12,68° \\
+Oscillazione iniziale all'indietro (primi 0,4 s) & -0,59° & -6,45° &
+-0,94° & -12,68° \\
 Velocità di picco {[}m/s{]} & 0,98 & 1,11 & 1,92 & 2,69 \\
 Spazio percorso {[}m{]} & 0,37 & 0,56 & 0,91 & 1,49 \\
 Coppia di modo comune massima {[}N·m{]} & 3,22 & 0,95 & 3,66 & 1,37 \\
@@ -1869,7 +1876,7 @@ Chattering, \(\lvert\Delta\tau\rvert\) medio per campione {[}N·m{]} &
 Il picco in avanti, cioè la grandezza che di solito si guarda,
 differisce di meno di 1°. Su tutto il resto lo SMC non è migliore: - nei
 primi 100 ms lascia ruotare il pendolo all'indietro molto di più (fino a
-−12,7° contro −0,9°); - percorre più strada e impiega più tempo; - a
+-12,7° contro -0,9°); - percorre più strada e impiega più tempo; - a
 regime ha un'attività di coppia che l'MPC non ha.
 
 Il tempo di recupero dello SMC è gonfiato dal suo rumore a regime (0,14°
@@ -1936,8 +1943,8 @@ Impulso \(J\)
 \endhead
 \bottomrule\noalign{}
 \endlastfoot
-2,7 N·s & −0,046 m/s & \textbf{−4,24 rad/s} & −339 rad/s² \\
-4,5 N·s & −0,077 m/s & \textbf{−7,07 rad/s} & −565 rad/s² \\
+2,7 N·s & -0,046 m/s & \textbf{-4,24 rad/s} & -339 rad/s² \\
+4,5 N·s & -0,077 m/s & \textbf{-7,07 rad/s} & -565 rad/s² \\
 \end{longtable}
 }
 
@@ -2041,7 +2048,7 @@ di controllo.
 Subito dopo la spinta il pendolo ruota all'indietro con
 \(\dot\theta\approx-4\) o \(-7\) rad/s. L'MPC risponde con 3,2-3,7 N·m
 di modo comune e contiene la rotazione sotto 1°. Lo SMC risponde con
-0,95-1,37 N·m e il pendolo arriva a −6,5° e −12,7° \textbf{{[}S-G{]}}.
+0,95-1,37 N·m e il pendolo arriva a -6,5° e -12,7° \textbf{{[}S-G{]}}.
 La coppia dello SMC si ricostruisce dalla legge del §5.3. Con
 \(\dot\theta\approx-4{,}2\) rad/s e \(\theta^*\) già a +0,21 rad,
 \(s_1\approx-4{,}2 - 10\cdot0{,}21 = -6{,}3\) rad/s. Allora
@@ -2104,15 +2111,15 @@ SMC
 \endhead
 \bottomrule\noalign{}
 \endlastfoot
-Forza costante −3 N sul torso & \(s\) a regime & \textbf{−0,654 m} &
-\textbf{−0,023 m} (in convergenza) \\
+Forza costante -3 N sul torso & \(s\) a regime & \textbf{-0,654 m} &
+\textbf{-0,023 m} (in convergenza) \\
 & \(\theta\) a regime & +7,41° & +7,36° \\
 Bias di coppia +0,3 N·m per ruota (adattato) & \(s\) a regime &
-\textbf{−0,077 m} & \textbf{0,000 m} \\
-& picco di \(\theta\) & −0,70° & −2,57° \\
+\textbf{-0,077 m} & \textbf{0,000 m} \\
+& picco di \(\theta\) & -0,70° & -2,57° \\
 Momento costante 0,35 N·m sul pendolo (baricentro spostato di circa 1
 cm) & \(s\) a regime & \textbf{+0,325 m} & \textbf{+0,011 m} \\
-& \(\theta\) a regime & −3,56° & −3,51° \\
+& \(\theta\) a regime & -3,56° & -3,51° \\
 \end{longtable}
 }
 
@@ -2317,8 +2324,8 @@ Gambe & PD di giunto, rigidezza verticale \textasciitilde28 kN/m & VMC,
 nello strato limite) \\
 Azione integrale & no & solo sull'imbardata & beccheggio (\(W\)),
 velocità, imbardata \\
-Reazione iniziale a 4,5 N·s \textbf{{[}S-G{]}} & n/m & −0,9°
-all'indietro, 3,7 N·m & −12,7° all'indietro, 1,4 N·m \\
+Reazione iniziale a 4,5 N·s \textbf{{[}S-G{]}} & n/m & -0,9°
+all'indietro, 3,7 N·m & -12,7° all'indietro, 1,4 N·m \\
 Picco in avanti a 4,5 N·s \textbf{{[}S-G{]}} & n/m & 11,75° (limite
 10,48°) & 12,23° (limite 12,03°) \\
 Poli sagittali (posa nominale) & \(-0{,}149\pm2{,}14j\) (poco smorzati)
@@ -2404,7 +2411,7 @@ contatto garantito; spinta \\
 affidata a \(F_z\) \\
 \texttt{KF\_Q\_ACC}, \texttt{KF\_R\_POS}, \texttt{KF\_R\_VEL} & 0,5;
 1e-4; 1e-3 & MPC :89-91, SMC :112-114 & τ di fusione 45 / 280 ms \\
-\texttt{SMC\_KP}, \texttt{SMC\_KI} & −0,30, −0,10 &
+\texttt{SMC\_KP}, \texttt{SMC\_KI} & -0,30, -0,10 &
 \texttt{rotino\_smc/controller.py:49-50} & banda 1,84 rad/s; segno
 §5.2 \\
 \texttt{TH\_MAX} & 0,21 rad & :51 & validità del linearizzato; θ ≤
@@ -2433,7 +2440,7 @@ posizione dell'originale \\
 \texttt{LEG\_DAMPING\_MAX} & 8 N·m & :57 & diagnosi del bang-bang a 500
 Hz \textbf{{[}E{]}} \\
 \texttt{K\_PSI}, \texttt{K\_OMEGA}, \texttt{K\_LAT} & 0,10; 0,025; 2,0 &
-:82-84 & poli di imbardata −26,7, −4,7 \\
+:82-84 & poli di imbardata -26,7, -4,7 \\
 \end{longtable}
 }
 

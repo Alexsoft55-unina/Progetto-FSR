@@ -46,6 +46,12 @@ def load_run_data(run_dir):
             v_ref, v_err = [], []
             z_ref, z_err = [], []
             s1, push_f = [], []
+            fn_left, fn_right = [], []
+            hip_pos, knee_pos = [], []
+            hip_u, knee_u = [], []
+            roll, yaw = [], []
+            hip_v, knee_v, wheel_v = [], [], []
+            accel_x, accel_y, accel_z = [], [], []
 
             for r in reader:
                 try:
@@ -88,6 +94,20 @@ def load_run_data(run_dir):
                     z_err.append(ze)
                     s1.append(s1_val)
                     push_f.append(pf)
+                    fn_left.append(float(r.get('fn_left_N', 0.0)))
+                    fn_right.append(float(r.get('fn_right_N', 0.0)))
+                    hip_pos.append(float(r.get('hip_L_pos', 0.0)))
+                    knee_pos.append(float(r.get('knee_L_pos', 0.0)))
+                    hip_u.append(float(r.get('hip_L_torque_cmd', 0.0)))
+                    knee_u.append(float(r.get('knee_L_torque_cmd', 0.0)))
+                    roll.append(float(r.get('roll_deg', 0.0)))
+                    yaw.append(float(r.get('yaw_deg', 0.0)))
+                    hip_v.append(float(r.get('hip_L_vel', 0.0)))
+                    knee_v.append(float(r.get('knee_L_vel', 0.0)))
+                    wheel_v.append(float(r.get('wheel_L_vel', 0.0)))
+                    accel_x.append(float(r.get('imu_accel_x', 0.0)))
+                    accel_y.append(float(r.get('imu_accel_y', 0.0)))
+                    accel_z.append(float(r.get('imu_accel_z', 0.0)))
                 except (ValueError, TypeError):
                     continue
 
@@ -99,7 +119,7 @@ def load_run_data(run_dir):
                     's_ref': s_ref, 's_err': s_err,
                     'v_ref': v_ref, 'v_err': v_err,
                     'z_ref': z_ref, 'z_err': z_err,
-                    's1': s1, 'push_f': push_f,
+                    's1': s1, 'push_f': push_f, 'fn_left': fn_left, 'fn_right': fn_right, 'hip_pos': hip_pos, 'knee_pos': knee_pos, 'hip_u': hip_u, 'knee_u': knee_u, 'roll': roll, 'yaw': yaw, 'hip_v': hip_v, 'knee_v': knee_v, 'wheel_v': wheel_v, 'accel_x': accel_x, 'accel_y': accel_y, 'accel_z': accel_z,
                 }
     return data
 
@@ -300,6 +320,49 @@ def plot_disturbance_and_phase_portrait(data, out_dir):
     return path
 
 
+
+
+def plot_ground_reaction_forces_and_joints(data, out_dir):
+    """Layout D: Ground reaction forces & VMC Joint action."""
+    fig, axes = plt.subplots(2, 1, figsize=(10, 8), sharex=True)
+    
+    # 1. Ground Reaction Forces
+    for law in ('mpc', 'smc'):
+        if law not in data:
+            continue
+        d = data[law]
+        c = COLORS.get(law, '#333')
+        # Plot total force (left + right)
+        fn_tot = [l + r for l, r in zip(d['fn_left'], d['fn_right'])]
+        axes[0].plot(d['t'], fn_tot, label=f'{law.upper()} Total GRF', color=c, lw=1.5)
+        # Also plot individual for one of them (e.g. SMC) to avoid clutter, or just total is fine
+    axes[0].set_title('Ground Reaction Forces (GRF)', fontsize=12, fontweight='bold')
+    axes[0].set_ylabel('Force [N]', fontsize=10)
+    axes[0].grid(True, linestyle='--', alpha=0.5)
+    axes[0].legend(loc='upper right', fontsize=9)
+    
+    # 2. VMC Joint Action (Knee and Hip)
+    for law in ('mpc', 'smc'):
+        if law not in data:
+            continue
+        d = data[law]
+        if 'smc' in data and law != 'smc':
+            continue # just plot one to avoid clutter, preference to SMC
+        axes[1].plot(d['t'], d['knee_pos'], label=f'{law.upper()} Knee Pos (Left)', color='#3498db', lw=1.5)
+        axes[1].plot(d['t'], d['hip_pos'], label=f'{law.upper()} Hip Pos (Left)', color='#e74c3c', lw=1.5)
+        
+    axes[1].set_title('Leg Joint Kinematics (VMC Action)', fontsize=12, fontweight='bold')
+    axes[1].set_xlabel('Time [s]', fontsize=10)
+    axes[1].set_ylabel('Joint Angle [rad]', fontsize=10)
+    axes[1].grid(True, linestyle='--', alpha=0.5)
+    axes[1].legend(loc='upper right', fontsize=9)
+
+    plt.tight_layout()
+    path = os.path.join(out_dir, 'grf_and_joints.png')
+    plt.savefig(path, dpi=300)
+    plt.close()
+    return path
+
 def plot_smc_sliding_surface(data, out_dir):
     """Layout C: Evolution of the sliding mode variable s1 and phase plane reaching phase."""
     if 'smc' not in data:
@@ -343,6 +406,182 @@ def plot_smc_sliding_surface(data, out_dir):
     return path
 
 
+
+
+def plot_torque_distribution(data, out_dir):
+    """Layout E: Hip vs Knee Torque Distribution (TMECH style)."""
+    fig, axes = plt.subplots(2, 1, figsize=(10, 8), sharex=True)
+    
+    for law in ('mpc', 'smc'):
+        if law not in data: continue
+        if law == 'mpc' and 'smc' in data: continue # Avoid clutter, plot SMC
+        
+        d = data[law]
+        axes[0].plot(d['t'], d['hip_u'], label=r'Hip Torque $	au_{hip}$', color='#e74c3c', lw=1.5)
+        axes[0].plot(d['t'], d['knee_u'], label=r'Knee Torque $	au_{knee}$', color='#3498db', lw=1.5)
+        
+        # Calculate ratio, avoid div by zero
+        ratio = [abs(h) / (abs(k) + 1e-3) for h, k in zip(d['hip_u'], d['knee_u'])]
+        # filter spikes for better visualization
+        ratio = [min(r, 10.0) for r in ratio]
+        axes[1].plot(d['t'], ratio, label=r'Torque Ratio $|	au_{hip}| / |	au_{knee}|$', color='#9b59b6', lw=1.5)
+        
+    axes[0].set_title('Torque Distribution (Hip vs Knee)', fontsize=12, fontweight='bold')
+    axes[0].set_ylabel('Torque [Nm]', fontsize=10)
+    axes[0].grid(True, linestyle='--', alpha=0.5)
+    axes[0].legend(loc='upper right')
+    
+    axes[1].set_title('Joint Torque Ratio', fontsize=12, fontweight='bold')
+    axes[1].set_xlabel('Time [s]', fontsize=10)
+    axes[1].set_ylabel('Ratio', fontsize=10)
+    axes[1].grid(True, linestyle='--', alpha=0.5)
+    axes[1].legend(loc='upper right')
+
+    plt.tight_layout()
+    path = os.path.join(out_dir, 'torque_distribution.png')
+    plt.savefig(path, dpi=300)
+    plt.close()
+    return path
+
+
+def plot_power_and_energy(data, out_dir):
+    """Layout G: Mechanical Power and Energy Consumption."""
+    fig, axes = plt.subplots(2, 1, figsize=(10, 8), sharex=True)
+    
+    for law in ('mpc', 'smc'):
+        if law not in data: continue
+        d = data[law]
+        c = COLORS.get(law, '#333')
+        
+        # Calculate instantaneous mechanical power: sum of abs(tau * omega)
+        # Power is for one leg/wheel, multiply by 2 for total rough estimate
+        power = []
+        energy = [0.0]
+        dt = 0.002 # 500Hz
+        for i in range(len(d['t'])):
+            # Wheel: tau * omega.  u is average torque (so u * wheel_v * 2)
+            pw = abs(d['u'][i] * d['wheel_v'][i]) * 2.0
+            # Legs: (hip_u * hip_v + knee_u * knee_v) * 2
+            pl = (abs(d['hip_u'][i] * d['hip_v'][i]) + abs(d['knee_u'][i] * d['knee_v'][i])) * 2.0
+            p_tot = pw + pl
+            power.append(p_tot)
+            if i > 0:
+                energy.append(energy[-1] + p_tot * dt)
+                
+        axes[0].plot(d['t'], power, label=f'{law.upper()} Total Power', color=c, lw=1.2, alpha=0.85)
+        axes[1].plot(d['t'], energy, label=f'{law.upper()} Total Energy', color=c, lw=2.0)
+        
+    axes[0].set_title('Instantaneous Mechanical Power', fontsize=12, fontweight='bold')
+    axes[0].set_ylabel('Power [W]', fontsize=10)
+    axes[0].grid(True, linestyle='--', alpha=0.5)
+    axes[0].legend(loc='upper right')
+    
+    axes[1].set_title('Energy Consumption (Integral of Power)', fontsize=12, fontweight='bold')
+    axes[1].set_xlabel('Time [s]', fontsize=10)
+    axes[1].set_ylabel('Energy [Joules]', fontsize=10)
+    axes[1].grid(True, linestyle='--', alpha=0.5)
+    axes[1].legend(loc='upper left')
+
+    plt.tight_layout()
+    path = os.path.join(out_dir, 'power_and_energy.png')
+    plt.savefig(path, dpi=300)
+    plt.close()
+    return path
+
+def plot_horizontal_phase_portrait(data, out_dir):
+    """Layout H: Phase portrait of the Cartesian position X vs Vx."""
+    fig, ax = plt.subplots(1, 1, figsize=(8, 6))
+    
+    for law in ('mpc', 'smc'):
+        if law not in data: continue
+        d = data[law]
+        c = COLORS.get(law, '#333')
+        
+        # We plot X error vs Vx error
+        ax.plot(d['s_err'], d['v_err'], label=f'{law.upper()} Orbit', color=c, lw=1.5, alpha=0.85)
+        
+        # Highlight start point
+        ax.plot(d['s_err'][0], d['v_err'][0], marker='s', markersize=6, color=c, markeredgecolor='black')
+        # Highlight end point
+        ax.plot(d['s_err'][-1], d['v_err'][-1], marker='*', markersize=10, color=c, markeredgecolor='black')
+
+    ax.set_title(r'Horizontal Translation Phase Portrait: $e_x$ vs $\dot{e}_x$', fontsize=12, fontweight='bold')
+    ax.set_xlabel(r'Position Error $e_x$ [m]', fontsize=10)
+    ax.set_ylabel(r'Velocity Error $\dot{e}_x$ [m/s]', fontsize=10)
+    ax.grid(True, linestyle='--', alpha=0.5)
+    ax.axhline(0, color='gray', linestyle=':', lw=0.8)
+    ax.axvline(0, color='gray', linestyle=':', lw=0.8)
+    
+    from matplotlib.lines import Line2D
+    handles, labels = ax.get_legend_handles_labels()
+    handles.append(Line2D([0], [0], marker='s', color='w', markerfacecolor='black', markeredgecolor='black', markersize=6, label='Start'))
+    handles.append(Line2D([0], [0], marker='*', color='w', markerfacecolor='black', markeredgecolor='black', markersize=10, label='End'))
+    ax.legend(handles=handles, loc='upper right', fontsize=9)
+
+    plt.tight_layout()
+    path = os.path.join(out_dir, 'horizontal_phase_portrait.png')
+    plt.savefig(path, dpi=300)
+    plt.close()
+    return path
+
+def plot_imu_accelerations(data, out_dir):
+    """Layout I: IMU 3D Accelerations (Shock and Vibration)."""
+    fig, axes = plt.subplots(3, 1, figsize=(10, 10), sharex=True)
+    
+    for law in ('mpc', 'smc'):
+        if law not in data: continue
+        if law == 'mpc' and 'smc' in data: continue # Avoid clutter
+        d = data[law]
+        c = COLORS.get(law, '#333')
+        
+        axes[0].plot(d['t'], d['accel_x'], label=f'{law.upper()} Accel X (Forward)', color='#e74c3c', lw=1.2)
+        axes[1].plot(d['t'], d['accel_y'], label=f'{law.upper()} Accel Y (Lateral)', color='#2ecc71', lw=1.2)
+        axes[2].plot(d['t'], d['accel_z'], label=f'{law.upper()} Accel Z (Vertical)', color='#3498db', lw=1.2)
+
+    titles = ['Forward Acceleration (X)', 'Lateral Acceleration (Y)', 'Vertical Acceleration (Z)']
+    for i in range(3):
+        axes[i].set_title(titles[i], fontsize=11, fontweight='bold')
+        axes[i].set_ylabel(r'Accel [m/s$^2$]', fontsize=10)
+        axes[i].grid(True, linestyle='--', alpha=0.5)
+        axes[i].legend(loc='upper right')
+        
+    axes[2].set_xlabel('Time [s]', fontsize=10)
+
+    plt.tight_layout()
+    path = os.path.join(out_dir, 'imu_accelerations.png')
+    plt.savefig(path, dpi=300)
+    plt.close()
+    return path
+
+def plot_3d_attitude(data, out_dir):
+    """Layout F: 3D Attitude (Roll & Yaw) for disturbance rejection."""
+    fig, axes = plt.subplots(2, 1, figsize=(10, 8), sharex=True)
+    
+    for law in ('mpc', 'smc'):
+        if law not in data: continue
+        d = data[law]
+        c = COLORS.get(law, '#333')
+        
+        axes[0].plot(d['t'], d['roll'], label=f'{law.upper()} Roll $\phi$', color=c, lw=1.5)
+        axes[1].plot(d['t'], d['yaw'], label=f'{law.upper()} Yaw $\psi$', color=c, lw=1.5)
+        
+    axes[0].set_title('Roll Attitude (Lateral Disturbance Rejection)', fontsize=12, fontweight='bold')
+    axes[0].set_ylabel('Roll [deg]', fontsize=10)
+    axes[0].grid(True, linestyle='--', alpha=0.5)
+    axes[0].legend(loc='upper right')
+    
+    axes[1].set_title('Yaw Attitude (Heading Tracking)', fontsize=12, fontweight='bold')
+    axes[1].set_xlabel('Time [s]', fontsize=10)
+    axes[1].set_ylabel('Yaw [deg]', fontsize=10)
+    axes[1].grid(True, linestyle='--', alpha=0.5)
+    axes[1].legend(loc='upper right')
+
+    plt.tight_layout()
+    path = os.path.join(out_dir, 'attitude_3d.png')
+    plt.savefig(path, dpi=300)
+    plt.close()
+    return path
+
 def generate_plots(run_dir, out_dir=None):
     data = load_run_data(run_dir)
     if not data:
@@ -360,12 +599,30 @@ def generate_plots(run_dir, out_dir=None):
 
     # 3. SMC Sliding Surface & Phase Dynamics
     p3 = plot_smc_sliding_surface(data, out_dir)
+    p4 = plot_ground_reaction_forces_and_joints(data, out_dir)
+    p5 = plot_torque_distribution(data, out_dir)
+    p6 = plot_3d_attitude(data, out_dir)
+    p7 = plot_power_and_energy(data, out_dir)
+    p8 = plot_horizontal_phase_portrait(data, out_dir)
+    p9 = plot_imu_accelerations(data, out_dir)
 
     print(f'Grafici salvati con successo in: {out_dir}')
     print(f'  - {p1}')
     print(f'  - {p2}')
     if p3:
         print(f'  - {p3}')
+    if p4:
+        print(f'  - {p4}')
+    if p5:
+        print(f'  - {p5}')
+    if p6:
+        print(f'  - {p6}')
+    if p7:
+        print(f'  - {p7}')
+    if p8:
+        print(f'  - {p8}')
+    if p9:
+        print(f'  - {p9}')
     return True
 
 
