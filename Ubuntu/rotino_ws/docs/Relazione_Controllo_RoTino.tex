@@ -10,14 +10,28 @@
 \usepackage{hyperref}
 \usepackage{tcolorbox}
 \usepackage{tikz}
+\usetikzlibrary{shapes,arrows,arrows.meta,positioning,calc,fit,backgrounds}
 \usepackage{array}
 \usepackage{fancyhdr}
 
 % Configurazione colori e box didattici
 \definecolor{primary}{RGB}{26, 82, 118}
 \definecolor{secondary}{RGB}{40, 116, 166}
+\definecolor{accentgreen}{RGB}{30, 132, 73}
+\definecolor{accentred}{RGB}{192, 57, 43}
+\definecolor{accentorange}{RGB}{211, 84, 0}
 \definecolor{boxbg}{RGB}{245, 247, 250}
 \definecolor{boxframe}{RGB}{174, 182, 191}
+
+\tikzset{
+    baseblock/.style={draw=primary, fill=blue!6, rounded corners=2pt, align=center, font=\scriptsize},
+    gain/.style={draw=secondary, fill=blue!12, rounded corners=2pt, minimum height=1.8em, minimum width=1.4cm, align=center, font=\scriptsize},
+    sum/.style={draw=primary, fill=white, circle, inner sep=0.5pt, minimum size=4.5mm, font=\scriptsize},
+    sat/.style={draw=accentorange, fill=orange!10, rounded corners=2pt, align=center, font=\tiny},
+    plant/.style={draw=primary, fill=primary!15, line width=1.2pt, rounded corners=4pt, text width=2.6cm, minimum height=4.2cm, align=center, font=\bfseries\scriptsize},
+    fsm/.style={draw=purple!80!black, fill=purple!8, rounded corners=3pt, text width=3.0cm, minimum height=2.4cm, align=center, font=\scriptsize},
+    kf/.style={draw=teal!80!black, fill=teal!10, rounded corners=3pt, text width=6.8cm, minimum height=2.0cm, align=center, font=\scriptsize}
+}
 
 \tcbset{
   colback=boxbg,
@@ -152,6 +166,97 @@ Il nome "PID" è convenzionale, poiché nel codice non vi sono integratori attiv
 
 Tutti e quattro gli stati entrano \textbf{in parallelo} per calcolare la coppia di modo comune sulle ruote. Le gambe sono mosse da PD di giunto indipendenti ad altissima rigidezza ($k_p = 160\text{--}200\text{ N}\cdot\text{m/rad}$, equivalenti a circa $28\text{ kN/m}$ al piede), trattando le gambe come aste rigide.
 
+\subsection{Schema a Blocchi del Controllo PID}
+La Figura~\ref{fig:block_pid} illustra l'architettura dettagliata del controllore implementato nel package \texttt{rotino\_pid}. Si evidenziano i quattro canali paralleli sagittali sommati nella coppia di modo comune $\tau_c$, il ramo di guida laterale per l'imbardata $\tau_d$, la Macchina a Stati Finiti (FSM) a 7 fasi per la sequenza dei salti e, soprattutto, la saturazione selettiva a $\pm 8\text{ N}\cdot\text{m}$ sul termine di smorzamento delle gambe, essenziale per prevenire il bang-bang a 500 Hz.
+
+\begin{figure}[htbp]
+\centering
+\resizebox{0.98\textwidth}{!}{
+\begin{tikzpicture}[>=Latex]
+    % Reference Inputs
+    \node (theta_ref) at (-0.6, 3.4) {\scriptsize $\theta_{ref} = -4.73^\circ$};
+    \node (xref) at (-0.6, 1.2) {\scriptsize $x_{ref}, \dot{x}_{ref}$};
+    
+    % Summing nodes
+    \node[sum] (sum_th) at (1.6, 3.4) {$-$};
+    \node[sum] (sum_x) at (1.6, 1.2) {$-$};
+    
+    % Parallel gain blocks
+    \node[gain] (k_th) at (3.6, 4.0) {$k_\theta = 1.0$};
+    \node[gain] (k_thd) at (3.6, 2.8) {$k_{\dot{\theta}} = 0.08$};
+    \node[gain] (k_x) at (3.6, 1.6) {$-k_x = -0.5$};
+    \node[gain] (k_xd) at (3.6, 0.4) {$-k_{\dot{x}} = -0.8$};
+    
+    % Common summer
+    \node[sum] (sum_u) at (5.4, 2.2) {$+$};
+    
+    % Saturation and gear
+    \node[sat, text width=1.5cm] (sat_u) at (7.0, 2.2) {$\text{sat}_{\pm u_{max}}$\\[-1pt]$[0.12, 0.35]$};
+    \node[gain] (gear) at (8.8, 2.2) {$\times (-18)$\\[-1pt]{\tiny Segno Motore}};
+    \node[sum] (sum_mix_l) at (11.0, 2.7) {$+$};
+    \node[sum] (sum_mix_r) at (11.0, 1.7) {$+$};
+    
+    % Yaw loop
+    \node (yaw_ref) at (6.2, -0.6) {\scriptsize $\psi_{cmd}(e_\perp)$};
+    \node[baseblock, text width=2.4cm] (yaw_pd) at (8.8, -0.6) {$\text{PD}_{\psi}$\\Yaw Tracking};
+    
+    % Leg Control & Jump FSM
+    \node[fsm] (fsm) at (3.5, -3.2) {\textbf{Supervisore Salti (FSM)}\\[1pt]7 Stati: Balance, Preload, Thrust, Flight, Land, ...};
+    \node[baseblock, text width=3.8cm] (leg_pd) at (8.6, -3.2) {\textbf{4$\times$ PD Giunti Gambe}\\[1pt]$\tau_{pos} = \text{sat}_{50}(k_p e_q)$\\[1pt]$\mathbf{\tau_{damp} = sat_{\pm 8}(-k_v \dot{q})}$\\[1pt]{\tiny [Fix Anti Bang-Bang 500 Hz]}};
+    
+    % Plant
+    \node[plant] (plant) at (14.2, 0.8) {\textbf{RoTino Robot}\\[3pt]Dinamica WBR\\Simulatore 500 Hz\\Ruote + 4 Giunti};
+    
+    % Connecting arrows - sagittal
+    \draw[->] (theta_ref) -- node[above, very near start, font=\tiny] {$+$} (sum_th);
+    \draw[->] (xref) -- node[above, very near start, font=\tiny] {$+$} (sum_x);
+    
+    \draw[->] (sum_th) |- (k_th);
+    \draw[->] (sum_x) |- (k_x);
+    
+    \draw[->] (k_th) -| node[above, pos=0.8, font=\tiny] {$+$} (sum_u);
+    \draw[->] (k_thd) -| node[above, pos=0.8, font=\tiny] {$+$} (sum_u);
+    \draw[->] (k_x) -| node[below, pos=0.8, font=\tiny] {$+$} (sum_u);
+    \draw[->] (k_xd) -| node[below, pos=0.8, font=\tiny] {$+$} (sum_u);
+    
+    \draw[->] (sum_u) -- node[above, font=\tiny] {$u_{raw}$} (sat_u);
+    \draw[->] (sat_u) -- (gear);
+    \draw[->] (gear) -- node[above, font=\tiny] {$\tau_c$} (10.0, 2.2) |- (sum_mix_l);
+    \draw[->] (10.0, 2.2) |- (sum_mix_r);
+    
+    % Yaw connections
+    \draw[->] (yaw_ref) -- (yaw_pd);
+    \draw[->] (yaw_pd) -| node[right, pos=0.25, font=\tiny] {$-\tau_d$} (sum_mix_l);
+    \draw[->] (yaw_pd) -| node[right, pos=0.25, font=\tiny] {$+\tau_d$} (sum_mix_r);
+    
+    % To plant
+    \draw[->] (sum_mix_l) -- node[above, font=\tiny] {$\tau_L$} (plant.150);
+    \draw[->] (sum_mix_r) -- node[above, font=\tiny] {$\tau_R$} (plant.165);
+    \draw[->] (leg_pd) -| node[above, pos=0.25, font=\tiny] {$\tau_{gambe} \in \mathbb{R}^4$} (plant.220);
+    
+    % FSM to leg pd
+    \draw[->] (fsm) -- node[above, font=\tiny] {$q^*(t)$} (leg_pd);
+    
+    % Feedback paths
+    \draw[->] (plant.east) -- ++(0.6, 0) |- (5.5, 5.4) -| node[above=2pt, pos=0.2, font=\tiny] {$\theta$ (IMU)} (sum_th.north);
+    \draw[->] (14.8, 5.4) -| node[left, pos=0.5, font=\tiny] {$\dot{\theta}$} (k_thd.north);
+    \draw[->] (plant.east) ++(0.6, 0) |- (5.5, -2.0) -| node[below=2pt, pos=0.2, font=\tiny] {$x, \dot{x}$ (Encoders Ruote)} (sum_x.south);
+    \draw[->] (14.5, -2.0) -| node[left, pos=0.5, font=\tiny] {$\dot{x}$} (k_xd.south);
+    
+    \draw[->] (plant.south) |- node[below=2pt, pos=0.4, font=\tiny] {$F_n$ (Sensori Contatto)} (fsm.south);
+    \draw[->] (plant.south) ++(-0.6, 0) |- node[below=2pt, pos=0.3, font=\tiny] {$q, \dot{q}$} (leg_pd.south);
+
+    % Background box for sagittal loop
+    \begin{scope}[on background layer]
+        \node[draw=primary!50, fill=blue!2, dashed, rounded corners, fit=(sum_th) (k_th) (k_xd) (sum_u) (sat_u) (gear)] (box_sag) {};
+        \node[primary, font=\bfseries\scriptsize, anchor=south west] at (box_sag.north west) {Anello Parallelo Sagittale (Coppia Modo Comune $\tau_c$)};
+    \end{scope}
+\end{tikzpicture}
+}
+\caption{Schema a blocchi dettagliato del controllore PID (\texttt{rotino\_pid}) con 4 anelli sagittali paralleli, anello di imbardata, supervisore dei salti FSM e PD di giunto anti-bang-bang.}
+\label{fig:block_pid}
+\end{figure}
+
 \subsection{Perché Sceglierlo}
 \begin{itemize}
     \item \textbf{Semplicità concettuale}: richiede solo nozioni base di controlli automatici;
@@ -172,23 +277,113 @@ Tutti e quattro gli stati entrano \textbf{in parallelo} per calcolare la coppia 
 
 \subsection{L'Idea Fondamentale: Disaccoppiare per Vincere}
 Controllare tutto il robot con un unico solutore non lineare completo (Whole-Body Model Predictive Control) richiederebbe tempi di calcolo proibitivi per una frequenza di 500 Hz. La genialità dell'approccio proposto da Cui et al. consiste nello \textbf{spezzare il problema in tre livelli gerarchici}:
+\begin{enumerate}
+    \item \textbf{Layer 1: Upper-Body MPC (100 Hz, $N=25$)}: pianifica in anticipo l'offset ottimale del baricentro $\Delta s(t)$ e la forza verticale di supporto $F_z(t)$ rispettando i vincoli di attrito e di spazio di lavoro;
+    \item \textbf{Layer 2: TV-LQR Ruote (500 Hz)}: stabilizza reattivamente il beccheggio e l'avanzamento risolvendo l'equazione di Riccati tempo-variante (VL-WIP) sulla lunghezza istantanea delle gambe $l(t)$;
+    \item \textbf{Layer 3: VMC Gambe (500 Hz)}: converte $\Delta s$ in spostamenti orizzontali virtuali e realizza al 100\% il sostegno tramite il feedforward $F_z$ ($K_{p,z} = 0$).
+\end{enumerate}
 
-\begin{center}
-\begin{tikzpicture}[node distance=1.8cm, auto]
-  \node [draw, fill=blue!10, rounded corners, text width=9cm, text centered] (mpc) 
-    {\textbf{1. Upper-Body MPC (100 Hz)}\\
-     Pianifica lo spostamento orizzontale del CoM $\Delta s$ e la forza verticale $F_z$ considerando i vincoli di attrito e spazio di lavoro.};
-  \node [draw, fill=green!10, rounded corners, text width=7cm, text centered, below left of=mpc, xshift=-0.5cm, yshift=-1cm] (lqr) 
-    {\textbf{2. TV-LQR Ruote (500 Hz)}\\
-     Stabilizza velocemente il pendolo VL-WIP calcolando le coppie ruote ottime.};
-  \node [draw, fill=yellow!10, rounded corners, text width=7cm, text centered, below right of=mpc, xshift=0.5cm, yshift=-1cm] (vmc) 
-    {\textbf{3. VMC Gambe (500 Hz)}\\
-     Realizza $\Delta s$ e genera il sostegno $F_z$ tramite forze virtuali di gamba.};
-     
-  \draw[->, thick] (mpc) -| node[above, pos=0.25] {$\theta^* = \text{atan2}(\Delta s, z)$} (lqr);
-  \draw[->, thick] (mpc) -| node[above, pos=0.25] {$\Delta s, F_z$} (vmc);
+\subsection{Schema a Blocchi dell'Architettura MPC + TV-LQR + VMC}
+La Figura~\ref{fig:block_mpc} riporta lo schema a blocchi ingegneristico dell'architettura gerarchica implementata in \texttt{rotino\_mpc}. Notare il flusso multi-frequenza (pianificazione predittiva lenta a 100 Hz e anelli reattivi a 500 Hz), l'Adattatore CoM per la generazione del riferimento per l'LQR, il disaccoppiamento tra trazione sagittale e imbardata con compensazione dell'attrito di sterzata, e il Filtro di Kalman 3D (EKF) che retroagisce le stime a tutti e tre i livelli.
+
+\begin{figure}[htbp]
+\centering
+\resizebox{0.98\textwidth}{!}{
+\begin{tikzpicture}[>=Latex]
+    % Level 1: Trajectory and Upper-Body MPC (100 Hz)
+    \node[baseblock, text width=2.4cm] (traj) at (-0.6, 4.8) {
+        \textbf{Pianificatore}\\[1pt]
+        $s_{plan}(t), \dot{s}_{plan}(t)$\\[1pt]
+        $z_{ref}(t), \dot{z}_{ref}(t)$\\[1pt]
+        $\psi_{ref}(t), \dot{\psi}_{ref}(t)$
+    };
+    
+    \node[baseblock, fill=blue!10, draw=primary, line width=0.9pt, text width=4.6cm] (mpc) at (4.6, 4.8) {
+        \textbf{Layer 1: Upper-Body MPC (100 Hz)}\\[1pt]
+        2$\times$ QP Condensata ($N=25$, FISTA)\\[1pt]
+        $\mathbf{|\Delta s| \le 0.03\ m} \implies \theta^* \le 10.48^\circ$\\[1pt]
+        $\mathbf{0.3\,mg \le F_z \le 3.0\,mg}$
+    };
+    
+    \node[baseblock, fill=blue!5, text width=2.8cm] (adapt) at (9.8, 4.8) {
+        \textbf{Adattatore CoM}\\[1pt]
+        $\theta_{ref} = \text{atan2}(\Delta s, z_{ref})$\\[1pt]
+        $s_{ref}^{axle} = s_{plan} - \Delta s$\\[1pt]
+        $X_{ref} = [s_{ref}^{axle}, \theta_{ref}, \dots]^T$
+    };
+
+    % Level 2: Fast 500 Hz Controllers (TV-LQR and VMC)
+    \node[baseblock, fill=green!10, draw=accentgreen, line width=0.9pt, text width=5.0cm] (lqr) at (4.6, 0.8) {
+        \textbf{Layer 2: TV-LQR Ruote (500 Hz)}\\[1pt]
+        Guadagno Riccati: $K(l) = R^{-1} B^T P(l)$\\[1pt]
+        $U = -K(l)(X - X_{ref})$\\[1pt]
+        $\tau_c = \frac{1}{2}(U_0 + U_1) \quad \text{[Trazione]}$\\[1pt]
+        $\tau_d = \frac{1}{2}(U_1 - U_0) + \tau_{ff} + \tau_{I,\psi} \quad \text{[Yaw]}$
+    };
+    
+    % Mixers: mix_r to the left, mix_l to the right (ZERO crossings)
+    \node[sum] (mix_r) at (8.4, 0.0) {$+$};
+    \node[sum] (mix_l) at (9.8, 1.2) {$+$};
+    
+    \node[baseblock, fill=yellow!15, draw=accentorange, line width=0.9pt, text width=5.0cm] (vmc) at (4.6, -2.6) {
+        \textbf{Layer 3: VMC Gambe (500 Hz)}\\[1pt]
+        $p_d = [c_b^x - \Delta s, c_b^z - z_{ref}]^T, \ v_d = [0, -\dot{z}_{ref}]^T$\\[1pt]
+        $\mathbf{K_{p,z} = 0} \implies \text{Sostegno 100\% da } F_z$\\[1pt]
+        $F_{task} = K_p e_p + K_d e_v - \frac{1}{2}F_z \hat{z}_b$\\[1pt]
+        $\tau_{gambe} = J^T(q) F_{task} + b_{leg}\dot{q}$
+    };
+
+    % Plant
+    \node[plant] (plant) at (13.0, -0.6) {\textbf{RoTino Robot}\\[3pt]Dinamica WBR\\Simulazione 500 Hz\\Suolo Non Lineare};
+
+    % Estimator (Kalman Filter)
+    \node[kf] (kf) at (4.6, -5.6) {
+        \textbf{Filtro di Kalman 3D (EKF, 500 Hz)}\\[1pt]
+        Fusione Sensoriale: IMU (acc, gyro) + Encoders Ruote + Cinematica Gambe\\[1pt]
+        Stima Completa: $(s_{com}, \dot{s}_{com})$, Stato Pendolo $X$, Quota $Z_C$, Lunghezza $l(t)$
+    };
+
+    % Connections Level 1
+    \draw[->] (traj) -- node[above=2pt, font=\tiny] {$s_{plan}, z_{ref}$} (mpc);
+    \draw[->] (mpc) -- node[above=2pt, font=\tiny] {$\Delta s, F_z$} (adapt);
+    
+    % Level 1 to Level 2/3 connections
+    \draw[->] (adapt.south) -- ++(0, -0.8) -| node[above=2pt, pos=0.25, font=\tiny] {$X_{ref}(t)$} (lqr.north);
+    \draw[->] (mpc.south) -- ++(0, -0.8) -| (1.6, 0.0) |- node[above=2pt, pos=0.4, font=\tiny] {$\Delta s, F_z$} (vmc.west);
+    
+    % TV-LQR to Mixers (zero crossings)
+    \draw[->] (lqr.east) ++(0, 0.4) -- node[above=1pt, font=\tiny] {$\tau_c$} ++(0.6, 0) |- (mix_r.west);
+    \draw[->] (lqr.east) ++(0, 0.4) ++(0.6, 0) |- (mix_l.west);
+    \draw[->] (lqr.east) ++(0, -0.4) -| node[right=1pt, pos=0.7, font=\tiny] {$+\tau_d$} (mix_r.south);
+    \draw[->] (lqr.east) ++(0, -0.4) -| node[right=1pt, pos=0.7, font=\tiny] {$-\tau_d$} (mix_l.south);
+
+    \draw[->] (mix_l) -| node[above=1pt, pos=0.3, font=\tiny] {$\tau_L$} (plant.150);
+    \draw[->] (mix_r) -| node[above=1pt, pos=0.3, font=\tiny] {$\tau_R$} (plant.165);
+    
+    % VMC to Plant
+    \draw[->] (vmc.east) -| node[above=2pt, pos=0.35, font=\tiny] {$\tau_{gambe} \in \mathbb{R}^4$} (plant.215);
+
+    % Plant to Kalman Filter
+    \draw[->] (plant.south) |- node[below=2pt, pos=0.35, font=\tiny] {Misure Grezze: IMU, Encoders, Contatto $F_n$} (kf.east);
+    
+    % Kalman Filter Feedbacks
+    \draw[->] (kf.west) -- ++(-3.0, 0) |- node[left=1pt, pos=0.35, font=\tiny] {$s_{com}, \dot{s}_{com}$} (mpc.west);
+    \draw[->] (kf.west) ++(0, 0.4) -- ++(-2.0, 0) |- node[left=1pt, pos=0.5, font=\tiny] {$X, l(t)$} (lqr.west);
+    \draw[->] (kf.north) -- node[right=1pt, pos=0.4, font=\tiny] {$q, \dot{q}, p_f, v_f$} (vmc.south);
+
+    % Layer bounding boxes
+    \begin{scope}[on background layer]
+        \node[draw=primary!40, fill=blue!2, dashed, rounded corners, fit=(traj) (mpc) (adapt)] (box_l1) {};
+        \node[primary, font=\bfseries\scriptsize, anchor=south west] at (box_l1.north west) {Livello Lento (100 Hz): Pianificazione Ottima Predittiva Upper-Body};
+        
+        \node[draw=accentgreen!50, fill=green!2, dashed, rounded corners, fit=(lqr) (vmc) (mix_l) (mix_r)] (box_l2) {};
+        \node[accentgreen, font=\bfseries\scriptsize, anchor=north west] at (5.6, -3.9) {Livello Veloce (500 Hz): Stabilizzazione Reattiva VL-WIP e VMC};
+    \end{scope}
 \end{tikzpicture}
-\end{center}
+}
+\caption{Schema a blocchi dell'architettura gerarchica disaccoppiata MPC + TV-LQR + VMC (\texttt{rotino\_mpc}) con disaccoppiamento multi-frequenza 100~Hz / 500~Hz, ottimizzatore QP FISTA, controllo LQR con tabella di Riccati CARE e Filtro di Kalman 3D.}
+\label{fig:block_mpc}
+\end{figure}
 
 \subsection{Come Funziona nel Dettaglio}
 
@@ -228,6 +423,132 @@ In appoggio, la rigidezza verticale virtuale è impostata volutamente a zero ($K
 
 \subsection{L'Idea Fondamentale: Controllo Robusto Non Lineare in Forma Chiusa}
 Lo Sliding Mode Control (SMC) sostituisce l'ottimizzazione computazionale con una legge geometrica non lineare in grado di forzare lo stato del robot su una determinata "varietà di scorrimento" e mantenercelo a tempo finito, indipendentemente da incertezze di modello o disturbi esterni.
+
+\subsection{Schema a Blocchi del Controllo in Cascata Sliding Mode}
+La Figura~\ref{fig:block_smc} illustra lo schema a blocchi dell'architettura di controllo in cascata implementata in \texttt{rotino\_smc}. Si evidenziano i due anelli principali:
+\begin{itemize}
+    \item \textbf{Anello Esterno}: calcola l'angolo di inclinazione di riferimento $\theta^*$ a partire dall'errore di posizione e velocità dell'asse ruote ($V_{axle}$, opportunamente filtrata ed escludente la velocità del torso $V_{com}$ per evitare fenomeni di dondolio) attraverso un regolatore PI a guadagni negativi saturato a $\pm 12.03^\circ$;
+    \item \textbf{Anello Interno (500 Hz)}: definisce la superficie di scorrimento $s_1 = \dot{\theta} + c_1 e_\theta$, calcola l'accelerazione equivalente con algoritmo Super-Twisting del $2^\circ$ ordine (provvisto di integratore interno di disturbo $W(t)$), e ricava la coppia di trazione $\tau_c$ invertendo la dinamica non lineare del pendolo a gambe articolate (VL-WIP);
+    \item \textbf{Controllo Gambe nello Spazio Operativo (500 Hz)}: SMC task-space su quota e baricentro con rigidezza verticale virtuale ripristinata a $1200\text{ N/m}$.
+\end{itemize}
+
+\begin{figure}[htbp]
+\centering
+\resizebox{0.98\textwidth}{!}{
+\begin{tikzpicture}[>=Latex]
+    % Outer Loop References
+    \node (s_ref) at (-0.6, 3.8) {\scriptsize $s_{ref}$};
+    \node (sdot_ref) at (-0.6, 2.7) {\scriptsize $\dot{s}_{ref}$};
+    
+    % Outer Loop Elements
+    \node[sum] (sum_pos) at (0.8, 3.8) {$-$};
+    \node[gain] (k_pos) at (2.2, 3.8) {$K_{pos}$};
+    \node[sum] (sum_vref) at (3.6, 3.8) {$+$};
+    \node[sat, text width=1.3cm] (sat_vref) at (5.2, 3.8) {$\text{sat}_{\pm 2.0}$\\[-1pt]Vel. Max};
+    \node[sum] (sum_ev) at (7.2, 3.8) {$-$};
+    \node[baseblock, fill=blue!10, text width=2.6cm] (pi_neg) at (9.8, 3.8) {
+        \textbf{PI Velocità}\\[1pt]
+        $\mathbf{K_P = -0.30}$\\[1pt]
+        $\mathbf{K_I = -0.10}$\\[1pt]
+        {\tiny [Guadagni Negativi]}
+    };
+    \node[sat, text width=1.6cm] (sat_th) at (12.7, 3.8) {$\mathbf{sat_{\pm 12.03^\circ}}$\\[-1pt]Limite $\theta^*$};
+    
+    % Inner Loop: Super-Twisting (500 Hz)
+    \node[sum] (sum_th) at (0.8, 0.6) {$-$};
+    \node[baseblock, text width=2.7cm] (surf) at (3.4, 0.6) {
+        \textbf{Superficie $s_1$}\\[1pt]
+        $s_1 = \dot{\theta} + c_1 e_\theta$\\[1pt]
+        $\sigma_\varepsilon(s_1) = \frac{s_1}{|s_1| + \varepsilon}$
+    };
+    \node[baseblock, fill=red!10, draw=accentred, line width=0.8pt, text width=3.6cm] (st_block) at (7.5, 0.6) {
+        \textbf{Super-Twisting ($2^\circ$ Ordine)}\\[1pt]
+        $\nu = -c_1\dot{\theta} - k_a \sqrt{|s_1|} \sigma_\varepsilon + W$\\[1pt]
+        $\dot{W} = -k_b \sigma_\varepsilon(s_1) \ \text{[Anti-Windup]}$\\[1pt]
+        $\mathbf{W(t)} \to \text{Integratore Disturbo}$
+    };
+    \node[baseblock, fill=green!10, draw=accentgreen, line width=0.8pt, text width=3.2cm] (inv_dyn) at (12.0, 0.6) {
+        \textbf{Inversione Dinamica}\\[1pt]
+        $\tau_{c,raw} = \dfrac{\nu - a_2(l)\theta}{2 b_2(l)}$\\[2pt]
+        {\tiny Modello Non Lineare VL-WIP}
+    };
+    \node[sat, text width=1.4cm] (sat_trac) at (15.2, 0.6) {$\text{sat}_{\mu N r}$\\[-1pt]Aderenza};
+    
+    % Yaw PD
+    \node[baseblock, text width=3.2cm] (yaw_pd) at (12.0, -1.8) {$\text{PD}_{\psi} + \tau_{friction} + \tau_{I,\psi}$\\[1pt]{\tiny Imbardata (Lineare LQR)}};
+    
+    % Mixers: mix_r to the left, mix_l to the right (ZERO crossings)
+    \node[sum] (mix_r) at (17.0, 0.0) {$+$};
+    \node[sum] (mix_l) at (18.6, 1.2) {$+$};
+    
+    % Leg SMC
+    \node[baseblock, fill=yellow!15, draw=accentorange, text width=5.4cm] (leg_smc) at (8.5, -3.4) {
+        \textbf{SMC Gambe in Spazio Operativo (500 Hz)}\\[1pt]
+        $s_{leg} = (v_f - v_d) + c_{leg}(p_f - p_d)$\\[1pt]
+        $F = -K_{lin} s_{leg} - \mathbf{K_{sw} \text{sat}(s/\phi)} + F_{ff}$\\[1pt]
+        $\mathbf{K_z = 1200\ N/m} \implies \text{Rigidezza Ripristinata}$\\[1pt]
+        $\tau_{legs} = J^T(q) F + b_{leg}\dot{q}$
+    };
+    
+    % Plant
+    \node[plant] (plant) at (21.4, 0.6) {\textbf{RoTino Robot}\\[3pt]Dinamica WBR\\Simulazione 500 Hz\\Suolo Non Lineare};
+    
+    % Connections Outer
+    \draw[->] (s_ref) -- node[above=1pt, font=\tiny] {$+$} (sum_pos);
+    \draw[->] (sum_pos) -- (k_pos);
+    \draw[->] (k_pos) -- node[above=1pt, font=\tiny] {$+$} (sum_vref);
+    \draw[->] (sdot_ref) -| node[above=1pt, pos=0.2, font=\tiny] {$+$} (sum_vref);
+    \draw[->] (sum_vref) -- (sat_vref);
+    \draw[->] (sat_vref) -- node[above=1pt, font=\tiny] {$v_{ref}$} (sum_ev);
+    \draw[->] (sum_ev) -- node[above=1pt, font=\tiny] {$e_v$} (pi_neg);
+    \draw[->] (pi_neg) -- (sat_th);
+    
+    % Connect Outer to Inner in open corridor y = 2.3
+    \draw[->] (sat_th.south) -- ++(0, -1.5) -| node[above=2pt, pos=0.15, font=\tiny] {$\theta^*$} (sum_th.north);
+    
+    % Connect Inner
+    \draw[->] (sum_th) -- node[above, font=\tiny] {$e_\theta$} (surf);
+    \draw[->] (surf) -- node[above, font=\tiny] {$s_1, \sigma_\varepsilon$} (st_block);
+    \draw[->] (st_block) -- node[above, font=\tiny] {$\nu$} (inv_dyn);
+    \draw[->] (inv_dyn) -- node[above, font=\tiny] {$\tau_{c,raw}$} (sat_trac);
+    
+    % Common mode torque to staggered mixers
+    \draw[->] (sat_trac.east) -- node[above=1pt, font=\tiny] {$\tau_c$} ++(0.6, 0) |- (mix_r.west);
+    \draw[->] (sat_trac.east) ++(0.6, 0) |- (mix_l.west);
+    
+    % Differential yaw torque from yaw_pd to staggered mixers (ZERO crossings)
+    \draw[->] (yaw_pd.east) -| node[right=1pt, pos=0.7, font=\tiny] {$+\tau_d$} (mix_r.south);
+    \draw[->] (yaw_pd.east) -| node[right=1pt, pos=0.7, font=\tiny] {$-\tau_d$} (mix_l.south);
+    
+    % Mixers to Plant
+    \draw[->] (mix_l) -| node[above=1pt, pos=0.3, font=\tiny] {$\tau_L$} (plant.150);
+    \draw[->] (mix_r) -| node[above=1pt, pos=0.3, font=\tiny] {$\tau_R$} (plant.165);
+    \draw[->] (leg_smc) -| node[above=2pt, pos=0.3, font=\tiny] {$\tau_{gambe} \in \mathbb{R}^4$} (plant.215);
+    
+    % Feedback to Outer: Filtered Axle Velocity & Position (properly branched from plant)
+    \draw[->] (plant.east) -- ++(0.6, 0) coordinate (p_up) |- (7.2, 5.2) -| node[above=2pt, pos=0.3, font=\tiny] {$\mathbf{V_{axle}}$ (Filtro $1^\circ$ Ordine, Esclusione $V_{com}$)} (sum_ev.north);
+    \draw[->] (p_up) |- (0.8, 6.0) -| node[above=2pt, pos=0.3, font=\tiny] {$s$ (Posizione)} (sum_pos.north);
+    
+    % Feedback to Inner: Theta and Theta_dot (via lower corridor at y = -0.8)
+    \draw[->] (plant.west) ++(-0.2, -1.4) -- ++(-20.0, 0) -| node[left=1pt, pos=0.1, font=\tiny] {$\theta$ (IMU)} (sum_th.south);
+    \draw[->] (3.4, -0.8) -- node[left=1pt, font=\tiny] {$\dot{\theta}$} (surf.south);
+    
+    % Feedback to Legs
+    \draw[->] (plant.south) |- node[below=2pt, pos=0.4, font=\tiny] {$q, \dot{q}, p_f, v_f$} (leg_smc.east);
+
+    % Background boxes
+    \begin{scope}[on background layer]
+        \node[draw=primary!50, fill=blue!2, dashed, rounded corners, fit=(sum_pos) (sat_th) (pi_neg)] (box_out) {};
+        \node[primary, font=\bfseries\scriptsize, anchor=south west] at (box_out.north west) {Anello Esterno (Posizione $\to$ Velocità Asse $\to \theta^*$)};
+        
+        \node[draw=accentred!50, fill=red!2, dashed, rounded corners, fit=(sum_th) (st_block) (inv_dyn) (sat_trac)] (box_inn) {};
+        \node[accentred, font=\bfseries\scriptsize, anchor=north west] at (box_inn.south west) {Anello Interno Beccheggio (Super-Twisting $2^\circ$ Ordine + Inversione Dinamica)};
+    \end{scope}
+\end{tikzpicture}
+}
+\caption{Schema a blocchi dell'architettura di controllo in cascata Sliding Mode (\texttt{rotino\_smc}) con regolazione di velocità ad asse isolato, anello di beccheggio Super-Twisting del $2^\circ$ ordine, inversione dinamica VL-WIP e SMC nello spazio operativo delle gambe.}
+\label{fig:block_smc}
+\end{figure}
 
 \subsection{Come Funziona nel Dettaglio}
 
@@ -287,7 +608,7 @@ Se applichiamo un disturbo prolungato nel tempo (es. una forza orizzontale costa
     \item \textbf{Sliding Mode}: la variabile $W(t)$ stima la forza costante e l'anello esterno azzera la posizione, riportando il robot \textbf{esattamente a zero} ($s_{regime} = 0.000\text{ m}$).
 \end{itemize}
 
-\subsection{A Cosa Serve il Piano delle Fasi ($\theta$ vs $\dot{\theta}$)}
+\subsection{A Cosa Serve il Piano delle Fasi (\texorpdfstring{$\theta$ vs $\dot{\theta}$}{theta vs thetadot})}
 Il ritratto di fase non è un semplice vezzo grafico:
 \begin{itemize}
     \item \textbf{Visualizza Reaching Phase e Sliding Phase}: nel grafico si vede l'orbita dello stato che viene scaraventata via dall'impulso, intercetta la retta viola $s_1 = \dot{\theta} + c_1 \theta = 0$ e poi scivola lungo di essa verso l'origine.
@@ -302,6 +623,7 @@ Il ritratto di fase non è un semplice vezzo grafico:
 \centering
 \small
 \renewcommand{\arraystretch}{1.3}
+\resizebox{\textwidth}{!}{%
 \begin{tabular}{lccc}
 \toprule
 \textbf{Caratteristica} & \textbf{PID} & \textbf{MPC + TV-LQR + VMC} & \textbf{SMC (Sliding Mode)} \\
@@ -316,7 +638,8 @@ Il ritratto di fase non è un semplice vezzo grafico:
 \textbf{Disturbo Persistente} & Errore permanente & Errore di posizione ($65\text{ cm}$) & \textbf{Errore nullo ($0.00\text{ cm}$)} \\
 \textbf{Velocità Massima} & $\sim 0.4\text{ m/s}$ & $0.6\text{ m/s}$ & \textbf{2.0 m/s} \\
 \bottomrule
-\end{tabular}
+\end{tabular}%
+}
 \caption{Confronto sintetico tra le tre leggi di controllo implementate in RoTino.}
 \end{table}
 

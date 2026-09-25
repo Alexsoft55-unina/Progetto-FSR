@@ -6,24 +6,27 @@
 \contentsline {section}{\numberline {2}Quadro d'Insieme: Cosa è Stato Fatto nel Progetto}{4}{section.2}%
 \contentsline {section}{\numberline {3}Tecnica 1: Il Controllore PID (PD in Parallelo)}{4}{section.3}%
 \contentsline {subsection}{\numberline {3.1}Come Funziona}{4}{subsection.3.1}%
-\contentsline {subsection}{\numberline {3.2}Perché Sceglierlo}{5}{subsection.3.2}%
-\contentsline {subsection}{\numberline {3.3}Vantaggi e Svantaggi}{5}{subsection.3.3}%
-\contentsline {section}{\numberline {4}Tecnica 2: MPC + TV-LQR + VMC (L'Approccio del Paper Cui et al.)}{5}{section.4}%
-\contentsline {subsection}{\numberline {4.1}L'Idea Fondamentale: Disaccoppiare per Vincere}{5}{subsection.4.1}%
-\contentsline {subsection}{\numberline {4.2}Come Funziona nel Dettaglio}{5}{subsection.4.2}%
-\contentsline {subsubsection}{\numberline {4.2.1}A. L'Upper-Body MPC (100 Hz, Frequenza Lenta)}{5}{subsubsection.4.2.1}%
-\contentsline {subsubsection}{\numberline {4.2.2}B. Il TV-LQR (Time-Varying LQR a 500 Hz, Frequenza Veloce)}{6}{subsubsection.4.2.2}%
-\contentsline {subsubsection}{\numberline {4.2.3}C. Il VMC (Virtual Model Control, 500 Hz)}{6}{subsubsection.4.2.3}%
-\contentsline {subsection}{\numberline {4.3}Vantaggi e Svantaggi}{6}{subsection.4.3}%
-\contentsline {section}{\numberline {5}Tecnica 3: Cascata Sliding Mode (SMC)}{6}{section.5}%
-\contentsline {subsection}{\numberline {5.1}L'Idea Fondamentale: Controllo Robusto Non Lineare in Forma Chiusa}{6}{subsection.5.1}%
-\contentsline {subsection}{\numberline {5.2}Come Funziona nel Dettaglio}{7}{subsection.5.2}%
-\contentsline {subsubsection}{\numberline {5.2.1}A. L'Anello Esterno di Velocità e Posizione (PI a Guadagni Negativi)}{7}{subsubsection.5.2.1}%
-\contentsline {subsubsection}{\numberline {5.2.2}B. L'Anello di Beccheggio: Super-Twisting del Secondo Ordine}{7}{subsubsection.5.2.2}%
-\contentsline {subsubsection}{\numberline {5.2.3}C. Lo Sliding Mode delle Gambe}{7}{subsubsection.5.2.3}%
-\contentsline {subsection}{\numberline {5.3}Vantaggi e Svantaggi}{7}{subsection.5.3}%
-\contentsline {section}{\numberline {6}Il Confronto Chiave: Analisi dei Disturbi e Phase Portrait}{8}{section.6}%
-\contentsline {subsection}{\numberline {6.1}Il Paradosso della Spinta Impulsiva: Perché Rispondono Uguali?}{8}{subsection.6.1}%
-\contentsline {subsection}{\numberline {6.2}Dove lo Sliding Mode Stravince: Disturbi Persistenti}{8}{subsection.6.2}%
-\contentsline {subsection}{\numberline {6.3}A Cosa Serve il Piano delle Fasi ($\theta $ vs $\dot {\theta }$)}{8}{subsection.6.3}%
-\contentsline {section}{\numberline {7}Tabella di Sintesi Comparativa}{8}{section.7}%
+\contentsline {subsection}{\numberline {3.2}Schema a Blocchi del Controllo PID}{5}{subsection.3.2}%
+\contentsline {subsection}{\numberline {3.3}Perché Sceglierlo}{5}{subsection.3.3}%
+\contentsline {subsection}{\numberline {3.4}Vantaggi e Svantaggi}{5}{subsection.3.4}%
+\contentsline {section}{\numberline {4}Tecnica 2: MPC + TV-LQR + VMC (L'Approccio del Paper Cui et al.)}{6}{section.4}%
+\contentsline {subsection}{\numberline {4.1}L'Idea Fondamentale: Disaccoppiare per Vincere}{6}{subsection.4.1}%
+\contentsline {subsection}{\numberline {4.2}Schema a Blocchi dell'Architettura MPC + TV-LQR + VMC}{6}{subsection.4.2}%
+\contentsline {subsection}{\numberline {4.3}Come Funziona nel Dettaglio}{6}{subsection.4.3}%
+\contentsline {subsubsection}{\numberline {4.3.1}A. L'Upper-Body MPC (100 Hz, Frequenza Lenta)}{6}{subsubsection.4.3.1}%
+\contentsline {subsubsection}{\numberline {4.3.2}B. Il TV-LQR (Time-Varying LQR a 500 Hz, Frequenza Veloce)}{6}{subsubsection.4.3.2}%
+\contentsline {subsubsection}{\numberline {4.3.3}C. Il VMC (Virtual Model Control, 500 Hz)}{8}{subsubsection.4.3.3}%
+\contentsline {subsection}{\numberline {4.4}Vantaggi e Svantaggi}{8}{subsection.4.4}%
+\contentsline {section}{\numberline {5}Tecnica 3: Cascata Sliding Mode (SMC)}{8}{section.5}%
+\contentsline {subsection}{\numberline {5.1}L'Idea Fondamentale: Controllo Robusto Non Lineare in Forma Chiusa}{8}{subsection.5.1}%
+\contentsline {subsection}{\numberline {5.2}Schema a Blocchi del Controllo in Cascata Sliding Mode}{8}{subsection.5.2}%
+\contentsline {subsection}{\numberline {5.3}Come Funziona nel Dettaglio}{9}{subsection.5.3}%
+\contentsline {subsubsection}{\numberline {5.3.1}A. L'Anello Esterno di Velocità e Posizione (PI a Guadagni Negativi)}{9}{subsubsection.5.3.1}%
+\contentsline {subsubsection}{\numberline {5.3.2}B. L'Anello di Beccheggio: Super-Twisting del Secondo Ordine}{9}{subsubsection.5.3.2}%
+\contentsline {subsubsection}{\numberline {5.3.3}C. Lo Sliding Mode delle Gambe}{10}{subsubsection.5.3.3}%
+\contentsline {subsection}{\numberline {5.4}Vantaggi e Svantaggi}{10}{subsection.5.4}%
+\contentsline {section}{\numberline {6}Il Confronto Chiave: Analisi dei Disturbi e Phase Portrait}{10}{section.6}%
+\contentsline {subsection}{\numberline {6.1}Il Paradosso della Spinta Impulsiva: Perché Rispondono Uguali?}{10}{subsection.6.1}%
+\contentsline {subsection}{\numberline {6.2}Dove lo Sliding Mode Stravince: Disturbi Persistenti}{11}{subsection.6.2}%
+\contentsline {subsection}{\numberline {6.3}A Cosa Serve il Piano delle Fasi ($\theta $ vs $\dot {\theta }$)}{11}{subsection.6.3}%
+\contentsline {section}{\numberline {7}Tabella di Sintesi Comparativa}{11}{section.7}%
