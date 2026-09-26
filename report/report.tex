@@ -1,0 +1,666 @@
+\documentclass[11pt,a4paper]{article}
+
+% --- Packages ---
+\usepackage[utf8]{inputenc}
+\usepackage[english]{babel}
+\usepackage{amsmath, amssymb, amsfonts, bm}
+\usepackage{geometry}
+\usepackage{graphicx}
+\usepackage{subcaption}
+\usepackage{booktabs}
+\usepackage{hyperref}
+\usepackage{cite}
+\usepackage{float}
+\usepackage{xcolor}
+
+\geometry{a4paper, top=2.5cm, bottom=2.5cm, left=2.5cm, right=2.5cm}
+
+\hypersetup{
+    colorlinks=true,
+    linkcolor=blue!70!black,
+    citecolor=green!50!black,
+    urlcolor=cyan!70!black
+}
+
+% --- Macros ---
+\newcommand{\bq}{\bm{q}}
+\newcommand{\bdq}{\dot{\bm{q}}}
+\newcommand{\bddq}{\ddot{\bm{q}}}
+\newcommand{\btau}{\bm{\tau}}
+\newcommand{\bM}{\bm{M}}
+\newcommand{\bC}{\bm{C}}
+\newcommand{\bG}{\bm{G}}
+\newcommand{\bB}{\bm{B}}
+\newcommand{\Real}{\mathbb{R}}
+
+% ============================================================
+\begin{document}
+
+\begin{titlepage}
+    \centering
+    \vspace*{2cm}
+    {\Large\bfseries Field and Service Robotics --- Final Technical Report\par}
+    \vspace{1.5cm}
+    {\LARGE\bfseries Modeling and Multi-Strategy Control of a\\[6pt]
+    Variable-Length Wheeled Inverted Pendulum Robot\par}
+    \vspace{1cm}
+    {\large RoTino: a Wheeled Biped Balancing Platform\par}
+    \vspace{2cm}
+    {\large Aldo Rosicarelli\par}
+    \vspace{0.5cm}
+    {\large Academic Year 2025--2026\par}
+    \vfill
+    {\large Field and Service Robotics\par}
+\end{titlepage}
+
+% ============================================================
+\tableofcontents
+\newpage
+
+% ============================================================
+\section{Introduction}
+\label{sec:intro}
+
+Wheeled biped robots occupy a particularly interesting niche in the landscape of field and service
+robotics: they combine the high mobility and energy efficiency of wheeled platforms with the
+postural versatility of legged systems, allowing them to adjust their centre of mass (CoM) height
+to negotiate uneven terrain, step over obstacles, or adopt a more compact stance.  The archetype
+is the family of Variable-Length Wheeled Inverted Pendulum (VL-WIP) robots --- two-wheeled
+self-balancing machines whose legs can change length to modulate the height at which the
+upper-body mass is carried.
+
+The project selected for this course is \textbf{RoTino}, a 2D simulation of a wheeled biped
+modelled after the platform described by Cui et al.~\cite{cui2022}.  The choice is motivated by
+several factors:
+
+\begin{itemize}
+    \item \textbf{Rich nonlinear underactuated dynamics.}  A four-DOF planar chain with only
+          three independent actuators (wheel torque, knee, hip) requires careful treatment of
+          the actuation matrix and its singularities.
+    \item \textbf{Cascade control hierarchy.}  The natural time-scale separation between balance
+          (fast) and locomotion (slow) makes the system an ideal testbed for hierarchical control
+          strategies of increasing sophistication.
+    \item \textbf{Comparison across control paradigms.}  Three qualitatively different
+          controllers --- a classical cascade PID, an LQR coupled with a Model Predictive
+          Controller (MPC), and a nonlinear Sliding Mode Controller (SMC) --- are designed,
+          implemented, and benchmarked on the same model, enabling a principled comparison of
+          performance, robustness, and implementation complexity.
+    \item \textbf{Software-in-the-loop validation.}  The MATLAB/Simulink environment is used for
+          controller prototyping, and a ROS~2 + Gazebo pipeline is used for closed-loop
+          simulation of the complete robot, bridging the gap between symbolic derivation and
+          practical deployment.
+\end{itemize}
+
+The report is structured as follows.  Section~\ref{sec:topology} analyses the topology and
+degrees of freedom.  Section~\ref{sec:model} derives the Lagrangian dynamic model.
+Sections~\ref{sec:pid}, \ref{sec:lqr_mpc}, and \ref{sec:smc} describe the three control
+strategies.  Section~\ref{sec:results} presents the simulation results.
+Section~\ref{sec:conclusions} concludes.
+
+% ============================================================
+\section{Topology Analysis and Degrees of Freedom}
+\label{sec:topology}
+
+\subsection{Mechanical Architecture}
+
+The robot (Figure~\ref{fig:architecture}) is a planar kinematic chain comprising four rigid
+bodies:
+
+\begin{enumerate}
+    \item \textbf{Wheel} ($r = 0.127$~m, $m_w = 3.5$~kg, $I_w = 0.1$~kg\,m$^2$): rolling
+          without slipping on the ground; the rolling constraint eliminates one translational DOF.
+    \item \textbf{Shank link} ($l_1 = 0.45$~m, $m_1 = 1.2$~kg): connects the wheel axle to
+          the knee joint.
+    \item \textbf{Thigh link} ($l_2 = 0.45$~m, $m_2 = 5.3$~kg): connects the knee to the hip
+          joint.
+    \item \textbf{Torso} ($l_3 = 0.35$~m, $m_3 = 60.0$~kg, wheel track $d = 0.63$~m): the
+          upper body, connected to the hip; its orientation evolves freely and is
+          \emph{not} independently actuated.
+\end{enumerate}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.38\textwidth]{figures/mechanical_architecture.png}
+    \caption{Schematic of the RoTino platform: torso, hip joint, thigh link, knee joint, shank
+    link, wheel and wheel joint.}
+    \label{fig:architecture}
+\end{figure}
+
+\subsection{Constraint and DOF Count}
+
+A planar system of $n_b = 4$ bodies has $3 n_b = 12$ unconstrained DOFs.  Table~\ref{tab:dof}
+summarises the constraints that reduce this count to 4.
+
+\begin{table}[H]
+    \centering
+    \caption{Constraint analysis for the planar RoTino chain.}
+    \label{tab:dof}
+    \begin{tabular}{llcc}
+        \toprule
+        Constraint & Description & Equations & Holonomic? \\
+        \midrule
+        Wheel--ground contact & Fixed contact height $y = r$ & 1 & Yes \\
+        Pure rolling & $\dot{x} = r\,\dot{\phi}_w$ & 1 & No (Pfaffian) \\
+        Wheel--shank revolute (ankle) & 2 translational DOFs locked & 2 & Yes \\
+        Shank--thigh revolute (knee) & 2 translational DOFs locked & 2 & Yes \\
+        Thigh--torso revolute (hip) & 2 translational DOFs locked & 2 & Yes \\
+        \midrule
+        \textbf{Total constraints} & & \textbf{8} & \\
+        \textbf{Resulting DOF} & & \textbf{4} & \\
+        \bottomrule
+    \end{tabular}
+\end{table}
+
+The generalised coordinates, chosen to match Cui et al.\ (Table~1), are:
+\begin{equation}
+    \bq = \begin{bmatrix} q_w & q_1 & q_2 & q_3 \end{bmatrix}^T
+\end{equation}
+where $q_w$ is the wheel rotation (encoding horizontal displacement $s = R_w q_w$ via the rolling
+constraint), $q_1$ is the absolute shank angle from the vertical, $q_2$ is the absolute thigh
+angle, and $q_3$ is the absolute torso angle.
+
+\subsection{Actuation, Underactuation, and Ankle Constraint}
+
+Three independent actuators are available:
+\begin{itemize}
+    \item $\tau_w$: wheel torque (drives $q_w$, i.e.\ forward displacement);
+    \item $\tau_1$: knee torque (shank-to-thigh);
+    \item $\tau_2$: hip torque (thigh-to-torso).
+\end{itemize}
+
+The torso angle $q_3$ is \textbf{unactuated}: it evolves from the coupled dynamics, making the
+system underactuated with one degree of underactuation.  Controlling $q_3$ indirectly --- via
+the centroidal coupling to the wheel acceleration --- is the fundamental challenge of the balance
+problem.
+
+The ankle angle satisfies the algebraic constraint $q_0 = q_1 - q_2 + q_3$, so it is not
+an independent state but is monitored as a diagnostic variable.
+
+% ============================================================
+\section{Dynamic Model}
+\label{sec:model}
+
+\subsection{Lagrangian Derivation}
+
+The absolute barycentre positions (wheel--ground contact as origin) are:
+\begin{align}
+    x_1 &= s + \tfrac{l_1}{2}\sin\phi_s, \quad
+    y_1 = R_w + \tfrac{l_1}{2}\cos\phi_s \\[3pt]
+    x_2 &= s + l_1\sin\phi_s + \tfrac{l_2}{2}\sin\phi_t, \quad
+    y_2 = R_w + l_1\cos\phi_s + \tfrac{l_2}{2}\cos\phi_t \\[3pt]
+    x_3 &= s + l_1\sin\phi_s + l_2\sin\phi_t + \tfrac{l_3}{2}\sin q_3, \quad
+    y_3 = R_w + l_1\cos\phi_s + l_2\cos\phi_t + \tfrac{l_3}{2}\cos q_3
+\end{align}
+where $\phi_s = q_1 - q_2 + q_3$ and $\phi_t = q_3 - q_2$.
+
+The kinetic and potential energies are:
+\begin{align}
+    T &= \tfrac{1}{2}(m_w + I_w/R_w^2)\dot{s}^2 + \sum_{k=1}^{3}\!\left[\tfrac{1}{2}m_k\|\dot{\bm{r}}_k\|^2 + \tfrac{1}{2}I_k\dot{\phi}_k^2\right] \\
+    V &= m_w g R_w + m_1 g y_1 + m_2 g y_2 + m_3 g y_3
+\end{align}
+
+The Euler--Lagrange equations $\frac{d}{dt}\frac{\partial L}{\partial \bdq} -
+\frac{\partial L}{\partial \bq} = \bB\btau$ give the standard structured form:
+\begin{equation}
+    \bM(\bq)\bddq + \bC(\bq,\bdq)\bdq + \bG(\bq) = \bB\btau
+    \label{eq:eom}
+\end{equation}
+with $\bM \in \Real^{4\times4}$ (symmetric, positive definite), $\btau = [\tau_w; \tau_1;
+\tau_2]$, and:
+\begin{equation}
+    \bB = \begin{bmatrix}
+        -1 & 1 & 0 \\
+         1 & 0 & 0 \\
+         1 & 0 & 1 \\
+        -1 & 0 & 0
+    \end{bmatrix} \in \Real^{4\times3}
+\end{equation}
+The matrices $\bM$, $\bC\bdq$, $\bG$ are derived symbolically in MATLAB via the Symbolic Toolbox
+and exported as optimised numerical functions for real-time evaluation in Simulink and in the
+ROS~2 Python nodes.
+
+\subsection{Equilibrium Verification}
+
+At the upright equilibrium ($\bq = \bm{0}$, $\bdq = \bm{0}$) the gravitational vector vanishes:
+$\bG|_{\bq=\bm{0}} = \bm{0}$, which is verified numerically.
+
+\subsection{Decoupled VL-WIP Model for LQR/MPC}
+
+Treating the upper body as a lumped mass at a variable height $l$ above the wheel axle and
+linearising around the upright, one obtains the VL-WIP state-space model for LQR design:
+\begin{equation}
+    \dot{\bm{x}} = A\bm{x} + B_u\bm{u}, \qquad
+    \bm{x} = [s,\ \theta,\ \phi_w,\ \dot{s},\ \dot{\theta},\ \dot{\phi}_w]^T
+\end{equation}
+
+For the MPC the upper body is further decoupled.  The horizontal subsystem (states $[s, \dot{s},
+\Delta s]$, $\Delta s$ the CoM offset) and the vertical subsystem (states $[z, \dot{z}]$) are
+governed by:
+\begin{equation}
+    A_{MPC} = \begin{bmatrix}
+        0 & 1 & 0 & 0 & 0 \\
+        0 & 0 & 0 & 0 & g/h_0 \\
+        0 & 0 & 0 & 1 & 0 \\
+        0 & 0 & 0 & 0 & 0 \\
+        0 & 0 & 0 & 0 & 0
+    \end{bmatrix},\ 
+    B_{MPC} = \begin{bmatrix}
+        0 & 0 \\ 0 & 0 \\ 0 & 0 \\ 0 & 1/m_b \\ 1 & 0
+    \end{bmatrix}
+\end{equation}
+with inputs $[\dot{\Delta s},\,F_z]^T$, nominal height $h_0 = 0.6$~m, and total upper-body mass
+$m_b = 66.5$~kg.
+
+\subsection{CoM Kinematics and Virtual Model Controller}
+
+The horizontal and vertical CoM coordinates relative to the wheel axle are:
+\begin{align}
+    S_C &= C_a\sin\phi_s + C_b\sin\phi_t + C_c\sin q_3 \\
+    Z_C &= C_a\cos\phi_s + C_b\cos\phi_t + C_c\cos q_3
+\end{align}
+with $C_a = (m_1 l_1/2 + (m_2+m_3)l_1)/m_b$, $C_b = (m_2 l_2/2 + m_3 l_2)/m_b$,
+$C_c = m_3 l_3/(2m_b)$.  The pitch angle of the upper body and its analytic Jacobian are:
+\begin{equation}
+    \theta_b = \arctan2(S_C,\,Z_C), \qquad
+    J_\theta = \frac{Z_C J_S - S_C J_Z}{S_C^2 + Z_C^2}
+\end{equation}
+These expressions are used by the SMC to compute the sliding-surface gradient analytically at
+each timestep, eliminating the need for numerical differentiation.
+
+% ============================================================
+\section{Cascade PID Controller}
+\label{sec:pid}
+
+\subsection{Architecture}
+
+The simplest controller is a two-level cascade PID.
+
+\textbf{Outer loop (velocity controller).}  A PI controller maps the wheel velocity error
+$e_v = \dot{q}_w^* - \dot{q}_w$ to a shank-angle offset $\delta q_1$:
+\begin{equation}
+    \delta q_1 = -(K_{P,v}\,e_v + K_{I,v}\!\int e_v\,dt),
+    \qquad K_{P,v} = 0.08,\ K_{I,v} = 0.06
+\end{equation}
+The negative sign reflects the non-minimum phase nature of the plant: to accelerate forward the
+robot must first tilt its axle backward.
+
+\textbf{Inner loop (balance controller).}  A PD loop stabilises the shank angle to the modified
+reference $q_1^* + \delta q_1$:
+\begin{equation}
+    \tau_w = K_{P,w}(q_1^* + \delta q_1 - q_1) + K_{D,w}(0 - \dot{q}_1),
+    \quad K_{P,w} = 400,\ K_{D,w} = 80\ \text{[Nm/rad]}
+\end{equation}
+
+\textbf{Posture controller.}  Two independent PD loops maintain knee and hip at their
+inverse-kinematic targets (desired CoM height $h_{des} = 0.75$~m, solved via \texttt{fsolve}):
+\begin{equation}
+    \tau_k = K_{P,j}(q_k^* - q_k) + K_{D,j}(0 - \dot{q}_k),
+    \quad K_{P,j} = 800,\ K_{D,j} = 50\ \text{[Nm/rad]}
+\end{equation}
+
+\subsection{Design Choices and Limitations}
+
+Gains are tuned empirically without explicit use of the dynamic model.  The principal limitation
+is the absence of any compensation for the nonlinear coupling between the balance and posture
+loops.  When the robot deviates significantly from the linearisation point the fixed gains can
+no longer prevent divergence, as evidenced in the simulation results.
+
+% ============================================================
+\section{LQR + MPC Controller}
+\label{sec:lqr_mpc}
+
+\subsection{TV-LQR Balance Loop}
+
+The linearised VL-WIP model is scheduled as a function of leg length $l$ (Time-Varying LQR,
+TV-LQR).  The state and input cost matrices are:
+\begin{equation}
+    Q = \operatorname{diag}(30,\ 400,\ 80,\ 15,\ 6,\ 2)
+\end{equation}
+The pitch angle ($Q_{22} = 400$) is penalised most to ensure rapid tilt recovery.  The input
+cost:
+\begin{equation}
+    R = T_{cd}^T \operatorname{diag}(R_{cm},\ R_{diff})\,T_{cd},
+    \quad R_{cm} = 2.0,\quad R_{diff} = 100.0
+\end{equation}
+heavily penalises the differential wheel torque (yaw) relative to the common-mode torque
+(balance), keeping the yaw bandwidth below the $\approx 12.5$~Hz torsional resonance of the
+stance legs.
+
+\subsection{Upper-Body MPC}
+
+A linear MPC with horizon $N = 25$ steps at $\Delta t = 0.02$~s (100~Hz) plans the CoM offset
+$\Delta s$ and vertical force $F_z$ over a 0.5~s window.  The QP is solved at each MPC tick
+using a Python solver.
+
+\subsection{VMC Leg Controller}
+
+The MPC outputs $(\Delta s, z_{ref}, F_z)$ drive hip and knee torques through a Virtual Model
+Controller.  In stance, only a horizontal spring realises $\Delta s$; the vertical DOF is driven
+by the feedforward force $F_z$ from the MPC:
+\begin{equation}
+    K_P = \operatorname{diag}(1500,\ 0),\quad K_D = \operatorname{diag}(40,\ 15)\
+    \text{[N/m, N\,s/m]}
+\end{equation}
+
+\subsection{Kalman State Estimator}
+
+A linear Kalman filter at 500~Hz fuses IMU acceleration, wheel odometry, and leg kinematics to
+produce $(s,\dot{s},\theta,\dot{\theta})$.  Process noise: $Q_{acc} = 0.5$; measurement noise:
+$R_{pos} = 10^{-4}$, $R_{vel} = 10^{-3}$.
+
+% ============================================================
+\section{Sliding Mode Controller}
+\label{sec:smc}
+
+\subsection{Architecture}
+
+The SMC is a nonlinear cascade with two time-scales:
+\begin{enumerate}
+    \item \textbf{Outer loop --- velocity to pitch reference.}  A PI controller with
+          \emph{negative} gains (non-minimum phase correction) maps CoM velocity error to
+          $\theta^*$:
+          \begin{equation}
+              \theta^* = \operatorname{sat}\!\left(K_P e_v + K_I\!\int e_v\,dt,\ \pm\theta_{max}\right),
+              \quad K_P = -0.22,\ K_I = -0.06,\ \theta_{max} = 12^\circ
+          \end{equation}
+          Anti-windup freezes the integrator when saturation is active.
+    \item \textbf{Inner loop --- three SMC channels on} $\bm{y} = [\theta_b;\,q_1;\,q_2]$
+          at 500~Hz, with sliding surfaces:
+          \begin{equation}
+              s_k = \dot{e}_k + c_k e_k, \quad k = 1,2,3
+          \end{equation}
+\end{enumerate}
+
+\subsection{Super-Twisting Pitch Channel}
+
+Channel~1 uses the super-twisting second-order SMC algorithm, which is \emph{continuous} (no
+chattering in the torque signal)~\cite{levant1993, moreno2012}:
+\begin{align}
+    \nu_1 &= -k_a\sqrt{|s_1|}\,\frac{s_1}{|s_1|+\varepsilon} + W \\[4pt]
+    \dot{W} &= -k_b\,\frac{s_1}{|s_1|+\varepsilon}
+\end{align}
+with $c_1 = 6$~s$^{-1}$, $k_a = 3.5$, $k_b = 12.0$, $\varepsilon = 0.01$ (regularisation to
+avoid chattering at the discontinuity).  The integrator state $W$ is frozen when the wheel
+torque saturates, preventing windup under large disturbances.
+
+\subsection{Posture Channels (Knee and Hip)}
+
+Channels~2 and~3 use classical SMC with boundary layer (continuous approximation):
+\begin{equation}
+    \nu_k = -k_k\,\operatorname{sat}\!\left(\tfrac{s_k}{\phi_k}\right) - \eta_k s_k,
+    \quad k = 2,3
+\end{equation}
+with $c_{2,3} = 12$~s$^{-1}$, $k_{2,3} = 60$, $\eta_{2,3} = 20$, $\phi_{2,3} = 0.05$~rad.
+The linear term $\eta_k s_k$ provides exponential attraction inside the boundary layer.
+
+\subsection{Partial Feedback Linearisation Inversion}
+
+The three virtual inputs $\bm{\nu}$ are mapped to actual torques by inverting the decoupled
+output dynamics:
+\begin{equation}
+    A_d = J_y\,\bM^{-1}\bB \in \Real^{3\times3}, \qquad
+    b_d = -J_y\,\bM^{-1}(\bC\bdq + \bG) + h_y
+\end{equation}
+\begin{equation}
+    \btau = A_d^{-1}\!\left(-b_d - c \odot \dot{\bm{e}} + \bm{\nu}\right)
+\end{equation}
+where $J_y = [J_{\theta_b};\,e_1^T;\,e_3^T]$ is the output Jacobian and $h_y$ collects
+Lie-derivative correction terms.  The singularity indicator $\sigma = M_{22} + M_{42}$ is
+monitored at runtime; $\sigma \to 0$ signals that the fully extended leg is approaching a
+kinematic singularity where the wheel loses authority over pitch.
+
+% ============================================================
+\section{Results and Discussion}
+\label{sec:results}
+
+All controllers are benchmarked in two scenarios: (i)~\textbf{free balance} (released from rest,
+$v^* = 0$, 26~s simulation) and (ii)~\textbf{push recovery} (50~N impulsive horizontal force
+at $t = 4$~s, 20~s simulation).
+
+\subsection{Free Balance Benchmark}
+
+Figure~\ref{fig:dashboard} shows the overall dashboard for the free-balance scenario.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\linewidth]{figures/dashboard_overview.png}
+    \caption{Benchmark overview: pitch angle, wheel torque command, linear velocity, and contact
+    normal force for PID (red), MPC/LQR (blue), and SMC (green).}
+    \label{fig:dashboard}
+\end{figure}
+
+The PID controller (red) fails to stabilise the robot.  The pitch grows into a sustained
+oscillation of amplitude $\pm 15^\circ$--$18^\circ$, the wheel torque saturates at $\pm 6$~Nm, and the
+contact force fluctuates between 0 and 42~N, indicating intermittent wheel lift-off.  The
+velocity drifts sinusoidally at up to $\pm 3$~m/s with no tendency to settle.
+
+In contrast, both MPC (blue) and SMC (green) stabilise the robot within $\approx 2$~s and
+maintain pitch within $\pm 0.5^\circ$ thereafter, with wheel torque below 0.15~Nm --- three orders
+of magnitude smaller than the PID effort.
+
+\subsubsection{Position and Velocity Tracking}
+
+Figure~\ref{fig:posvel} confirms that under MPC and SMC the robot stays essentially stationary
+($|x| < 0.02$~m, $|\dot{x}| < 0.05$~m/s), while the PID drifts sinusoidally with amplitude
+$\pm 0.35$~m.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\linewidth]{figures/position_and_speed.png}
+    \caption{Horizontal position $x$ and velocity $\dot{x}$ for the three controllers.}
+    \label{fig:posvel}
+\end{figure}
+
+\subsubsection{Pitch and Torque Comparison}
+
+Figure~\ref{fig:pitchtorque} isolates the pitch and torque channels.  The MPC achieves a
+smoother pitch recovery thanks to the preview capability of the MPC horizon; the SMC is faster
+in the reaching phase but shows a small steady-state chattering residual of $\approx \pm 0.1^\circ$
+inherent in the boundary layer.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\linewidth]{figures/pitch_and_torque.png}
+    \caption{Pitch angle and wheel torque command.  The MPC provides the smoothest torque
+    profile; the SMC shows small chattering from the boundary layer.}
+    \label{fig:pitchtorque}
+\end{figure}
+
+\subsubsection{Full State Tracking and Errors}
+
+Figure~\ref{fig:tracking_balance} provides the full state-vs-reference comparison including
+CoM height.  The MPC maintains $z = 0.220$~m with sub-millimetre error; the SMC settles at
+$z \approx 0.222$~m due to a small offset from the fixed posture set-points and nonlinear
+kinematics; the PID oscillates by $\pm 30$~mm.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\linewidth]{figures/tracking_and_errors.png}
+    \caption{State vs desired reference (left) and tracking errors (right): pitch, position,
+    velocity, and CoM height.}
+    \label{fig:tracking_balance}
+\end{figure}
+
+\subsubsection{CoM Height and Ground Contact Force}
+
+Figure~\ref{fig:comheight} shows the CoM height and contact force.  The SMC produces a
+height ripple of $\approx 3$~mm from chattering in the posture channels; the MPC tracks the
+reference with $< 1$~mm error.  The PID causes repeated wheel lift-off (contact force drops
+repeatedly to 0~N).
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\linewidth]{figures/com_height_and_forces.png}
+    \caption{CoM height $z$ (top) and ground contact normal force $F_n$ (bottom).  The PID
+    causes wheel lift-off; MPC and SMC maintain continuous contact.}
+    \label{fig:comheight}
+\end{figure}
+
+\subsection{Push Recovery Benchmark}
+
+The PID controller is excluded from this test as it was already unstable in the free-balance
+scenario.  Figure~\ref{fig:push_tracking} shows the state trajectory after the push.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\linewidth]{figures/tracking_and_errors.png}
+    \caption{State vs reference trajectory and tracking errors after the impulsive push at
+    $t = 4$~s.  MPC and SMC both recover, with different response characteristics.}
+    \label{fig:push_tracking}
+\end{figure}
+
+The MPC (blue) produces a compliant response: the pitch peaks at $\approx 12^\circ$ and the robot
+recovers in $\approx 3$~s via a smooth oscillatory transient dictated by the LQR cost balance.
+The SMC (green) reacts more aggressively: the super-twisting drives the sliding variable back
+to the chattering band in $\approx 1.5$~s, after which the residual chattering dominates.
+
+\subsubsection{Phase Portrait and Disturbance Rejection}
+
+Figure~\ref{fig:phase_push} shows the $(\theta,\dot\theta)$ phase portrait.  After the push
+the MPC orbit follows a large, smooth arc crossing the sliding manifold; the SMC orbit
+immediately seeks the manifold and slides toward the origin, consistent with second-order SMC
+theory.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\linewidth]{figures/disturbance_and_phase_portrait.png}
+    \caption{Disturbance rejection time history (left) and $(\theta,\dot\theta)$ phase portrait
+    (right).  The dashed purple line is the SMC sliding manifold $s_1 = \dot\theta + c_1\theta = 0$.}
+    \label{fig:phase_push}
+\end{figure}
+
+\subsubsection{Super-Twisting Sliding Variable}
+
+Figure~\ref{fig:smc_surface} shows the sliding variable $s_1(t)$.  Before the push
+($t < 4$~s) it remains within the chattering band $|s_1| < 0.1$~rad/s.  At impact it drops
+sharply to $-3.5$~rad/s and recovers within $\approx 1.5$~s.  The right panel shows the state
+spiralling inward toward the sliding manifold after the push.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\linewidth]{figures/smc_sliding_surface.png}
+    \caption{Super-twisting sliding variable $s_1(t)$ (left) and SMC state trajectory in the
+    $(\theta,\dot\theta)$ phase plane (right).}
+    \label{fig:smc_surface}
+\end{figure}
+
+\subsection{Quantitative Comparison}
+
+\begin{table}[H]
+    \centering
+    \caption{Performance summary --- free balance scenario (26~s simulation).}
+    \label{tab:comparison}
+    \begin{tabular}{lccc}
+        \toprule
+        Metric & PID & LQR+MPC & SMC \\
+        \midrule
+        Settling time (pitch $<0.5^\circ$) & $\infty$ (unstable) & $\approx 2.0$~s & $\approx 1.8$~s \\
+        Steady-state pitch RMS & N/A & $< 0.2^\circ$ & $\approx 0.3^\circ$ \\
+        Max position drift $|x|$ & $\pm 350$~mm & $< 20$~mm & $< 20$~mm \\
+        CoM height error RMS & $\sim 25$~mm & $< 1$~mm & $\approx 2$~mm \\
+        Max wheel torque (steady) & $\pm 6$~Nm (saturated) & $< 0.05$~Nm & $< 0.15$~Nm \\
+        Contact loss events & Many & None & None \\
+        Computational cost & Negligible & Medium (QP at 100~Hz) & Low (analytic at 500~Hz) \\
+        Model knowledge & None & Full linear model & Nonlinear model \\
+        Robustness guarantee & No & Quadratic stability & Finite-time convergence \\
+        \bottomrule
+    \end{tabular}
+\end{table}
+
+\subsection{Discussion}
+
+\paragraph{PID.}  The cascade PID is conceptually simple but lacks any nonlinear model
+knowledge.  Wheel torque saturation occurs because the fixed gains cannot compensate for the
+coupling between the balance and posture loops far from the linearisation point.  A gain
+schedule on leg length could improve the situation, but the fundamental limitation of the linear
+structure remains.
+
+\paragraph{LQR + MPC.}  The decoupled architecture provides a natural separation of concerns:
+the TV-LQR handles fast balance with guaranteed quadratic stability, while the MPC previews the
+CoM trajectory over a 0.5~s horizon.  The main advantage is the smooth torque profile; the main
+limitation is the linear model assumption for large perturbations.
+
+\paragraph{SMC.}  The super-twisting pitch channel provides finite-time convergence to the
+sliding manifold regardless of bounded disturbances and model uncertainties.  The PFL inversion
+ensures exact decoupling at the operating point.  The residual chattering visible in simulation
+is a consequence of the 500~Hz discretisation and unmodelled dynamics (e.g.\ torsional resonance
+of the legs); in hardware, joint compliance would attenuate it further.
+
+The key design contribution of the SMC is precisely the choice of the \textbf{super-twisting}
+algorithm for the pitch channel: it provides a continuous control law while preserving the
+robustness of first-order SMC, and the integrator freeze at saturation prevents the windup that
+would otherwise accumulate after a large push.
+
+% ============================================================
+\section{Contributions with Respect to Class Topics}
+\label{sec:contributions}
+
+\begin{itemize}
+    \item \textbf{Wheeled robot kinematics and dynamics}: the rolling constraint is derived from
+          first principles and incorporated via the actuation matrix $\bB$; the VL-WIP equivalent
+          centroid follows the Lagrange--d'Alembert projection framework.
+    \item \textbf{Balance and underactuated control}: three controllers span the full range from
+          purely reactive (PID) to model-based predictive (MPC) to provably robust nonlinear (SMC).
+    \item \textbf{Sliding mode control}: super-twisting, boundary layer, and partial feedback
+          linearisation are applied to a physically meaningful multi-DOF plant, going beyond
+          standard textbook examples.
+    \item \textbf{Optimal control (LQR/MPC)}: TV-LQR scheduled on leg length; real-time QP at
+          100~Hz in Python.
+    \item \textbf{Software-in-the-loop}: full pipeline from symbolic Lagrangian (MATLAB) to
+          closed-loop ROS~2/Gazebo simulation.
+    \item \textbf{State estimation}: Kalman filter fusing IMU, odometry, and leg kinematics at
+          500~Hz.
+\end{itemize}
+
+% ============================================================
+\section{Conclusions}
+\label{sec:conclusions}
+
+This report presented the modelling and control of RoTino, a simulated VL-WIP wheeled biped
+robot, covering the full pipeline from DOF analysis and Lagrangian derivation to
+multi-controller benchmarking.
+
+Key conclusions:
+\begin{enumerate}
+    \item The Lagrangian model captures the essential nonlinear dynamics and can be evaluated
+          in real time in both MATLAB/Simulink and ROS~2/Python.
+    \item The cascade PID fails to stabilise the robot in simulation due to uncompensated
+          nonlinear coupling and permanent torque saturation.
+    \item Both LQR+MPC and SMC achieve stable balance and disturbance rejection: the MPC gives
+          the smoothest torque profile and most accurate CoM height tracking; the SMC gives
+          faster reaching and stronger robustness guarantees at a lower computational cost.
+    \item The super-twisting second-order SMC is identified as the best practical choice for an
+          embedded real-time implementation: it is continuous, computationally inexpensive, and
+          provides finite-time convergence guarantees independent of model accuracy.
+\end{enumerate}
+
+Future work could extend the model to three dimensions (full 3D yaw dynamics, inertial coupling),
+add joint compliance to filter chattering, and investigate reinforcement-learning-based gain
+scheduling as a function of the robot's current posture.
+
+% ============================================================
+\begin{thebibliography}{9}
+
+\bibitem{cui2022}
+Z.\ Cui, Z.\ Zhao, H.\ Zhu, J.\ Bao, and Z.\ Zhang,
+``Modeling and Control of a Wheeled Biped Robot,''
+\emph{Micromachines}, vol.\ 13, no.\ 5, p.\ 747, 2022.
+
+\bibitem{levant1993}
+A.\ Levant,
+``Sliding order and sliding accuracy in sliding mode control,''
+\emph{International Journal of Control}, vol.\ 58, no.\ 6, pp.\ 1247--1263, 1993.
+
+\bibitem{moreno2012}
+J.\ A.\ Moreno and M.\ Osorio,
+``Strict Lyapunov functions for the super-twisting algorithm,''
+\emph{IEEE Transactions on Automatic Control}, vol.\ 57, no.\ 4, pp.\ 1035--1040, 2012.
+
+\bibitem{rawlings2017}
+J.\ B.\ Rawlings, D.\ Q.\ Mayne, and M.\ Diehl,
+\emph{Model Predictive Control: Theory, Computation, and Design}, 2nd~ed.,
+Nob~Hill~Publishing, 2017.
+
+\end{thebibliography}
+
+\end{document}
