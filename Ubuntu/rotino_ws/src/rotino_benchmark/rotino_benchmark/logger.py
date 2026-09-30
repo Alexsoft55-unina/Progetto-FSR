@@ -17,6 +17,7 @@ from datetime import datetime
 import rclpy
 from ament_index_python.packages import get_package_share_directory
 from rclpy.node import Node
+from nav_msgs.msg import Odometry
 from ros_gz_interfaces.msg import Contacts, EntityWrench
 from sensor_msgs.msg import Imu, JointState
 from std_msgs.msg import Float64MultiArray, String
@@ -45,6 +46,16 @@ HEADER = [
     'xdot_ref_ms', 'xdot_err_ms',
     'com_z_ref_m', 'com_z_err_mm',
     'smc_s1', 'push_force_N',
+    # ground-truth base pose/twist (/rotino/odom) and measured wheel contact points: ZMP study (zmp.py)
+    'base_x_m', 'base_y_m', 'base_z_m', 'base_qx', 'base_qy', 'base_qz', 'base_qw',
+    'base_vx', 'base_vy', 'base_vz', 'base_wx', 'base_wy', 'base_wz',
+    'contact_L_x', 'contact_L_y', 'contact_L_z', 'contact_R_x', 'contact_R_y', 'contact_R_z',
+    # stamps of the odom / joint_states samples in this row: rows repeat the latest message, and the
+    # ZMP needs second derivatives, so the analysis resamples each signal on its own stamps
+    'odom_stamp_s', 'joints_stamp_s',
+    # ZMP-based PID (/rotino/zmp_ctrl, NaN for the other laws): longitudinal ZMP ahead of the CoM, desired
+    # and actual (contact), capture-point error, reference CoM acceleration, lateral lean command
+    'zmp_des_mm', 'zmp_ctrl_mm', 'dcm_err_mm', 'acc_ref_ms2', 'lean_cmd_deg',
 ]
 
 FLUSH_EVERY = 100
@@ -55,9 +66,14 @@ def stamp_to_sec(stamp):
 
 
 def contact_force_from_msg(msg):
-    """Sum of contact-wrench force magnitudes for wheel/ground contacts in this message."""
+    """Sum of contact-wrench force magnitudes and mean contact point for wheel/ground contacts.
+
+    Gazebo Fortress leaves `wrenches` empty, so the force is 0 there: the ZMP study rebuilds the
+    loads from the dynamics instead (zmp.py). The contact positions are filled.
+    """
     total = 0.0
     ground_contact = False
+    points = []
     for contact in msg.contacts:
         if 'ground' not in contact.collision1.name and 'ground' not in contact.collision2.name:
             continue
@@ -65,7 +81,9 @@ def contact_force_from_msg(msg):
         for wrench in contact.wrenches:
             f = wrench.body_1_wrench.force
             total += math.sqrt(f.x * f.x + f.y * f.y + f.z * f.z)
-    return total, ground_contact
+        points += [(p.x, p.y, p.z) for p in contact.positions]
+    point = [sum(c) / len(points) for c in zip(*points)] if points else None
+    return total, ground_contact, point
 
 
 class TestBenchLogger(Node):
@@ -97,13 +115,19 @@ class TestBenchLogger(Node):
         self.roll = 0.0
         self.yaw = 0.0
         self.contact = {'left': (-math.inf, 0.0), 'right': (-math.inf, 0.0)}
+        self.contact_point = {'left': (-math.inf, None), 'right': (-math.inf, None)}
+        self.odom = None
+        self.odom_stamp = float('nan')
+        self.joints_stamp = float('nan')
         self.imu = None
         self.wbr_data = None
+        self.zmp_ctrl = None
         self.push_force = 0.0
         self.last_wrench_stamp = -math.inf
 
         self.create_subscription(Float64MultiArray, '/rotino/debug', self._debug_cb, 10)
         self.create_subscription(Float64MultiArray, '/rotino/wbr_state', self._wbr_cb, 10)
+        self.create_subscription(Float64MultiArray, '/rotino/zmp_ctrl', self._zmp_ctrl_cb, 10)
         self.create_subscription(EntityWrench, '/world/rotino_world/wrench', self._wrench_cb, 10)
         self.create_subscription(String, '/rotino/jump_state', self._jump_state_cb, 10)
         self.create_subscription(JointState, '/joint_states', self._joint_state_cb, 10)
@@ -116,6 +140,7 @@ class TestBenchLogger(Node):
         self.create_subscription(Contacts, '/rotino/right_wheel_contact',
                                  lambda msg: self._contact_cb(msg, 'right'), 10)
         self.create_subscription(Imu, '/rotino/imu', self._imu_cb, 10)
+        self.create_subscription(Odometry, '/rotino/odom', self._odom_cb, 10)
 
         self.get_logger().info(f'Test bench logging to: {self.csv_path}')
 
@@ -131,6 +156,12 @@ class TestBenchLogger(Node):
                 's1_or_ds': msg.data[11],
             }
 
+    def _zmp_ctrl_cb(self, msg):
+        # [t, zmp_des, zmp, xi_err, acc_ref, a_y, lean_cmd, dz, y_zmp, margin, e_long]
+        if len(msg.data) >= 7:
+            d = msg.data
+            self.zmp_ctrl = [1e3 * d[1], 1e3 * d[2], 1e3 * d[3], d[4], math.degrees(d[6])]
+
     def _wrench_cb(self, msg):
         fx = msg.wrench.force.x
         fy = msg.wrench.force.y
@@ -141,6 +172,7 @@ class TestBenchLogger(Node):
         self.jump_state = msg.data
 
     def _joint_state_cb(self, msg):
+        self.joints_stamp = stamp_to_sec(msg.header.stamp)
         for name, pos, vel in zip(msg.name, msg.position, msg.velocity):
             self.joint_pos[name] = pos
             self.joint_vel[name] = vel
@@ -154,17 +186,25 @@ class TestBenchLogger(Node):
             self.leg_cmd = [msg.data[0], msg.data[1], msg.data[2], msg.data[3]]
 
     def _contact_cb(self, msg, side):
-        force, ground_contact = contact_force_from_msg(msg)
+        force, ground_contact, point = contact_force_from_msg(msg)
         if not ground_contact:
             return
-        self.contact[side] = (stamp_to_sec(msg.header.stamp), force)
+        stamp = stamp_to_sec(msg.header.stamp)
+        self.contact[side] = (stamp, force)
+        if point is not None:
+            self.contact_point[side] = (stamp, point)
+
+    def _odom_cb(self, msg):
+        p, q = msg.pose.pose.position, msg.pose.pose.orientation
+        v, w = msg.twist.twist.linear, msg.twist.twist.angular
+        self.odom = [p.x, p.y, p.z, q.x, q.y, q.z, q.w, v.x, v.y, v.z, w.x, w.y, w.z]
+        self.odom_stamp = stamp_to_sec(msg.header.stamp)
 
     def _imu_cb(self, msg):
         self.imu = msg
         q = msg.orientation
         sinr_cosp = 2.0 * (q.w * q.x + q.y * q.z)
         cosr_cosp = 1.0 - 2.0 * (q.x * q.x + q.y * q.y)
-        import math
         self.roll = math.atan2(sinr_cosp, cosr_cosp)
         
         siny_cosp = 2.0 * (q.w * q.z + q.x * q.y)
@@ -174,6 +214,10 @@ class TestBenchLogger(Node):
     def _contact_force(self, side, now_s):
         stamp, force = self.contact[side]
         return force if now_s - stamp <= CONTACT_STALE_TIME else 0.0
+
+    def _contact_xyz(self, side, now_s):
+        stamp, point = self.contact_point[side]
+        return list(point) if point is not None and now_s - stamp <= CONTACT_STALE_TIME else [float('nan')] * 3
 
     # -----------------------------------------------------------------
     def _debug_cb(self, msg):
@@ -241,6 +285,10 @@ class TestBenchLogger(Node):
             math.degrees(self.roll), math.degrees(self.yaw),
             *imu_row,
             *errors_row,
+            *(self.odom if self.odom is not None else [nan] * 13),
+            *self._contact_xyz('left', now_s), *self._contact_xyz('right', now_s),
+            self.odom_stamp, self.joints_stamp,
+            *(self.zmp_ctrl if self.zmp_ctrl is not None else [nan] * 5),
         ]
         self._writer.writerow(row)
         self._row_count += 1

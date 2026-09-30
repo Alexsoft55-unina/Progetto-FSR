@@ -11,6 +11,7 @@ setup(
         ('share/' + package_name, ['package.xml']),
     ],
     install_requires=['setuptools'],
+    tests_require=['pytest'],
     zip_safe=True,
     maintainer='Alessando Prisco',
     maintainer_email='enzogpt55@libero.it',
@@ -22,6 +23,7 @@ setup(
             'campaign = rotino_benchmark.campaign:main',
             'compare = rotino_benchmark.compare:main',
             'plot = rotino_benchmark.plot:main',
+            'zmp = rotino_benchmark.zmp_analysis:main',
         ],
     },
 )

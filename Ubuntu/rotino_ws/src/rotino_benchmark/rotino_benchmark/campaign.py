@@ -17,8 +17,10 @@ import time
 from datetime import datetime
 
 CONTROLLERS = ('pid', 'mpc', 'smc')
+# On Fortress the server runs as "ruby /usr/bin/ign gazebo ...": 'gz sim' alone missed a Gazebo left over
+# from a manual launch, and the next controller attached to that old world (robot already fallen).
 STALE_PATTERNS = ('rotino_pid/controller', 'rotino_mpc/controller', 'rotino_smc/controller',
-                  'rotino_benchmark/logger', 'rotino_dashboard', 'gz sim', 'parameter_bridge',
+                  'rotino_benchmark/logger', 'rotino_dashboard', 'gz sim', 'ign gazebo', 'parameter_bridge',
                   'robot_state_publisher', 'ros_gz_sim')
 
 
@@ -41,11 +43,14 @@ def run_one(law, scenario, duration, out_dir, log_dir):
     with open(os.path.join(log_dir, f'{law}.log'), 'w') as sim_log:
         sim = subprocess.Popen(launch, stdout=sim_log, stderr=subprocess.STDOUT,
                                preexec_fn=os.setsid)
-        time.sleep(6.0)                       # let Gazebo and the controllers come up
+        time.sleep(2.0)                       # let Gazebo come up
+        # Start the logger well before the release: its /joint_states subscription connects ~1.6 s after
+        # /rotino/odom, and when the release came first the ZMP analysis (which needs the joints) lost up
+        # to the first 4 s of the run. Rows are written only from /rotino/debug, i.e. after the release.
         log = subprocess.Popen(logger, stdout=sim_log, stderr=subprocess.STDOUT,
                                preexec_fn=os.setsid)
         try:
-            time.sleep(duration)
+            time.sleep(4.0 + duration)
         finally:
             for proc in (log, sim):
                 try:

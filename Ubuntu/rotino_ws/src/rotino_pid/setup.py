@@ -15,10 +15,11 @@ setup(
         (os.path.join('share', package_name, 'launch'), glob('launch/*.launch.py')),
     ],
     install_requires=['setuptools'],
+    tests_require=['pytest'],
     zip_safe=True,
     maintainer='Alessando Prisco',
     maintainer_email='enzogpt55@libero.it',
-    description='RoTino control law: cascaded PD/PID',
+    description='RoTino control law: cascaded PID on the Zero Moment Point',
     license='TODO: License declaration',
     entry_points={
         'console_scripts': [

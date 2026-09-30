@@ -24,6 +24,9 @@ RATE = 500
 # /rotino/wbr_state:    [t, s, s_ref, theta, theta_ref, phi, phi_ref, s_dot, s_dot_ref, z, z_ref, delta_s, F_z,
 #                        tau_l, tau_r, l, tau_hip_l, tau_knee_l]
 # /rotino/estimation_error: [ex, ey, ez, evx, evy, evz]
+# zmp (computed here, rotino_description.zmp, world frame unless noted):
+#   [zmp_x, zmp_y, lipm_x, lipm_y, com_x, com_y, com_z, cL_x, cL_y, cR_x, cR_y,
+#    y_rel (+1 = on the left wheel), lateral [m], e_long [m], margin [m], Fn_L, Fn_R]
 STREAMS = {
     'debug': 11,
     'wbr': 18,
@@ -34,6 +37,7 @@ STREAMS = {
     'leg_cmd': 4,       # hip_L, hip_R, knee_L, knee_R
     'leg_force': 4,     # force pushing the body, world frame: Fx_L, Fz_L, Fx_R, Fz_R [N]  (F = -J^-T tau)
     'odom': 5,          # x, y, z, pitch, yaw
+    'zmp': 17,
 }
 NAMES = list(STREAMS)
 # status vector: sim time, wall time of that sim time, transport delay, counts..., wall_last...
@@ -159,7 +163,7 @@ def run_ros_process(prefix, commands, events):
     rclpy.init()
     node = Node('rotino_dashboard', parameter_overrides=[Parameter('use_sim_time', value=True)])
     st = shared.status
-    state = {'joint_index': None, 'q': None, 'pitch': 0.0, 'model': None, 'phase': None,
+    state = {'joint_index': None, 'q': None, 'pitch': 0.0, 'model': None, 'zmp': None, 'phase': None,
              'contact': {'left': -math.inf, 'right': -math.inf}}
 
     def now():
@@ -211,6 +215,8 @@ def run_ros_process(prefix, commands, events):
         state['q'] = pos
         store('joints', t, pos + [msg.velocity[i] for i in idx])
         store('contact', t, [float(t - state['contact'][s] <= CONTACT_STALE_TIME) for s in ('left', 'right')])
+        if state['zmp'] is not None:
+            store_zmp(state['zmp'].push_joints(t, dict(zip(JOINTS, pos))))
 
     def on_contact(side, msg):
         if _contact_touching(msg):
@@ -222,7 +228,16 @@ def run_ros_process(prefix, commands, events):
         pitch = math.asin(max(-1.0, min(1.0, 2.0 * (o.w * o.y - o.z * o.x))))
         yaw = math.atan2(2.0 * (o.w * o.z + o.x * o.y), 1.0 - 2.0 * (o.y * o.y + o.z * o.z))
         state['pitch'] = pitch
-        store('odom', msg.header.stamp.sec + msg.header.stamp.nanosec * 1e-9, [p.x, p.y, p.z, pitch, yaw])
+        t = msg.header.stamp.sec + msg.header.stamp.nanosec * 1e-9
+        store('odom', t, [p.x, p.y, p.z, pitch, yaw])
+        if state['zmp'] is not None:
+            store_zmp(state['zmp'].push_base(t, (p.x, p.y, p.z), (o.x, o.y, o.z, o.w)))
+
+    def store_zmp(r):
+        if r is not None:
+            store('zmp', r['t'], [*r['zmp'], *r['lipm'], *r['com'], *r['contact_l'][:2], *r['contact_r'][:2],
+                                  r['y_rel'], r['y_rel'] * 0.5 * r['track'], r['e_long'], r['margin'],
+                                  r['fn_left'], r['fn_right']])
 
     def on_phase(msg):
         if msg.data != state['phase']:
@@ -232,8 +247,10 @@ def run_ros_process(prefix, commands, events):
     def on_description(msg):
         events.put(('description', msg.data))
         try:
-            from rotino_description.wbr_model import WBRModel
+            from rotino_description.model import WBRModel
+            from rotino_description.zmp import ZmpEstimator
             state['model'] = WBRModel(msg.data)
+            state['zmp'] = ZmpEstimator(msg.data, rate=RATE)
         except Exception as exc:
             events.put(('error', f'robot_description: {exc}'))
 
@@ -273,6 +290,8 @@ def run_ros_process(prefix, commands, events):
                 if cmd == 'clear':
                     for b in shared.buffers.values():
                         b.clear()
+                    if state['zmp'] is not None:
+                        state['zmp'].reset()
                     state['phase'] = None
                 elif cmd == 'stop':
                     running[0] = False

@@ -27,6 +27,10 @@ LATENCY_LIMIT_MS = 100.0
 WHEEL_TORQUE_LIMIT = 10.0   # wbr_controller WHEEL_TORQUE_MAX
 LEG_TORQUE_LIMIT = 50.0     # wbr_controller LEG_TORQUE_MAX
 FORCE_SCALE = 0.003         # m per N in the robot sketch
+ZMP_TRAIL_S = 1.5           # s of ZMP history drawn as a fading trail in the top view
+ZMP_TRAIL_POINTS = 90
+ZMP_MARGIN_WARN = 0.4       # fraction of d/2 left before the ZMP reaches a wheel
+ZMP_MARGIN_ALARM = 0.2
 # live command limits: same as wbr_controller CMD_* (the controller clamps anyway)
 CMD_V_MAX = 2.0
 CMD_W_MAX = 1.5
@@ -105,6 +109,12 @@ PLOTS = [
     ('Velocità ruote', 'rad/s', 1.0, [
         ('joints', col(10), 'ruota SX', C['blue'], False),
         ('joints', col(11), 'ruota DX', C['cyan'], False)]),
+    ('ZMP ricostruito (frame robot)', 'mm', 10.0, [
+        ('zmp', lambda a: a[:, 13] * 1e3, 'laterale (+ SX)', C['pink'], False),
+        ('zmp', lambda a: a[:, 14] * 1e3, 'longitudinale', C['cyan'], False)]),
+    ('Carico ruote da ZMP', 'N', 5.0, [
+        ('zmp', col(15), 'ruota SX', C['blue'], False),
+        ('zmp', col(16), 'ruota DX', C['cyan'], True)]),
     ('Errore di stima (Kalman − verità)', 'mm, mm/s', 5.0, [
         ('est', lambda a: np.linalg.norm(a[:, 1:4], axis=1) * 1e3, '|posizione| mm', C['red'], False),
         ('est', lambda a: np.linalg.norm(a[:, 4:7], axis=1) * 1e3, '|velocità| mm/s', C['pink'], True)]),
@@ -216,18 +226,21 @@ class RobotView(pg.PlotWidget):
         self.f_contact = self.plot([], [], pen=pen(C['blue'], 3), connect='pairs')
         self.f_mpc = self.plot([], [], pen=pen(C['orange'], 3), connect='pairs')
         self.f_trac = self.plot([], [], pen=pen(C['green'], 3), connect='pairs')
+        self.zmp = self.plot([], [], pen=None, symbol='t1', symbolSize=13, symbolBrush=C['pink'],
+                             symbolPen=pg.mkPen('#0b0d10', width=1))
         self.text = pg.TextItem('In attesa di /robot_description ...', color=FG, anchor=(0, 0))
         self.text.setPos(-0.25, 0.395)
         self.addItem(self.text)
         legend = pg.TextItem(html=f'<span style="color:{C["blue"]}">▲ reazione suolo</span>  '
                                   f'<span style="color:{C["orange"]}">▲ F_z MPC</span>  '
                                   f'<span style="color:{C["green"]}">▶ trazione</span>  '
-                                  f'<span style="color:#f5d547">+ CoM</span>', anchor=(0.5, 1))
+                                  f'<span style="color:#f5d547">+ CoM</span>  '
+                                  f'<span style="color:{C["pink"]}">▲ ZMP</span>', anchor=(0.5, 1))
         legend.setPos(0, -0.045)
         self.addItem(legend)
 
     def set_model(self, xml):
-        from rotino_description.wbr_model import WBRModel
+        from rotino_description.model import WBRModel
         self.model = WBRModel(xml)
         for v in self.model.robot.link_map['base_link'].visuals:
             if hasattr(v.geometry, 'size'):
@@ -257,7 +270,7 @@ class RobotView(pg.PlotWidget):
             ys += [y0, y1]
         return xs, ys
 
-    def update_robot(self, joints, odom, touching, leg_force, f_z, wheel_tau, phase_text):
+    def update_robot(self, joints, odom, touching, leg_force, f_z, wheel_tau, phase_text, zmp_x=None):
         if self.model is None or joints is None:
             return
         m = self.model
@@ -324,7 +337,133 @@ class RobotView(pg.PlotWidget):
             gx = start + k * 0.1 - x0
             xs += [gx, gx - 0.02]
         self.ticks.setData(xs, [0.0, -0.02] * 10)
+        self.zmp.setData(*(([zmp_x], [0.0]) if zmp_x is not None and abs(zmp_x) < 0.3 else ([], [])))
         self.text.setText(phase_text)
+
+class ZmpView(pg.PlotWidget):
+    """Top view in the robot frame (forward up, left wheel on the left): wheel footprints, support
+    segment, projected CoM, multibody ZMP with a fading trail, LIPM ZMP and load bars per wheel."""
+
+    HALF_W = 0.27
+    FWD = (-0.12, 0.13)
+
+    def __init__(self):
+        super().__init__(background=PANEL)
+        self.setAspectLocked(True)
+        self.setXRange(-self.HALF_W, self.HALF_W, padding=0)
+        self.setYRange(*self.FWD, padding=0)
+        self.hideAxis('left')
+        self.hideAxis('bottom')
+        self.setMouseEnabled(False, False)
+        self.setMenuEnabled(False)
+        self.band = QtWidgets.QGraphicsRectItem()
+        self.band.setPen(pg.mkPen(None))
+        self.band.setBrush(pg.mkBrush(46, 204, 113, 28))
+        self.addItem(self.band)
+        self.wheels = []
+        for _ in range(2):
+            w = QtWidgets.QGraphicsRectItem()
+            w.setPen(pg.mkPen('#e5e7eb', width=2))
+            w.setBrush(pg.mkBrush(60, 66, 76, 200))
+            self.addItem(w)
+            self.wheels.append(w)
+        self.support = self.plot([], [], pen=pg.mkPen('#e5e7eb', width=3))
+        self.loads = [self.plot([], [], pen=pg.mkPen(C['blue'], width=9)),
+                      self.plot([], [], pen=pg.mkPen(C['cyan'], width=9))]
+        self.load_text = [pg.TextItem('', color=FG, anchor=(0.5, 0)) for _ in range(2)]
+        for t in self.load_text:
+            self.addItem(t)
+        self.lean = self.plot([], [], pen=pg.mkPen('#f5d547', width=1.5, style=QtCore.Qt.DashLine))
+        self.trail = pg.ScatterPlotItem(pen=None, size=6)
+        self.addItem(self.trail)
+        self.com = self.plot([], [], pen=None, symbol='+', symbolSize=16, symbolPen=pg.mkPen('#f5d547', width=3))
+        self.lipm = self.plot([], [], pen=None, symbol='o', symbolSize=13, symbolBrush=None,
+                              symbolPen=pg.mkPen(C['cyan'], width=2))
+        self.zmp = self.plot([], [], pen=None, symbol='o', symbolSize=14, symbolBrush=C['pink'],
+                             symbolPen=pg.mkPen('#0b0d10', width=1))
+        self.text = pg.TextItem('ZMP: in attesa di dati ...', color=FG, anchor=(0, 0))
+        self.text.setPos(-self.HALF_W + 0.005, self.FWD[1] - 0.003)
+        self.addItem(self.text)
+        legend = pg.TextItem(html=f'<span style="color:{C["pink"]}">● ZMP</span>  '
+                                  f'<span style="color:{C["cyan"]}">○ LIPM</span>  '
+                                  f'<span style="color:#f5d547">+ CoM</span>  '
+                                  f'<span style="color:#2ecc71">▮ appoggio</span>  '
+                                  f'<span style="color:{C["blue"]}">▮ carico</span>', anchor=(0.5, 1))
+        legend.setPos(0, self.FWD[0] + 0.002)
+        self.addItem(legend)
+        self.r = 0.06
+        self.wheel_width = 0.056
+        self.weight = None
+
+    @staticmethod
+    def to_robot(points, mid, lat, fwd):
+        """World xy (..., 2) -> screen (x = -lateral, y = forward)."""
+        d = np.asarray(points) - mid
+        return np.stack([-(d @ lat), d @ fwd], -1)
+
+    def reset_view(self):  # not clear(): PlotWidget binds PlotItem.clear on the instance
+        for item in (self.support, self.lean, self.com, self.lipm, self.zmp, *self.loads):
+            item.setData([], [])
+        self.trail.setData([], [])
+        self.text.setText('ZMP: in attesa di dati ...')
+
+    def update_zmp(self, last, trail):
+        if last is None:
+            self.reset_view()
+            return
+        zmp, lipm, com = last[1:3], last[3:5], last[5:7]
+        cl, cr = last[8:10], last[10:12]
+        y_rel, lat_m, e_long, margin, fn_l, fn_r = last[12:18]
+        seg = cl - cr
+        d = float(np.linalg.norm(seg))
+        if d < 1e-6:
+            return
+        lat = seg / d
+        fwd = np.array([lat[1], -lat[0]])
+        mid = 0.5 * (cl + cr)
+        h = 0.5 * d
+        clip = lambda p: np.array([np.clip(p[0], -self.HALF_W, self.HALF_W), np.clip(p[1], *self.FWD)])
+
+        self.band.setRect(QtCore.QRectF(-h, -self.r, d, 2 * self.r))
+        for w, x in zip(self.wheels, (-h, h)):
+            w.setRect(QtCore.QRectF(x - self.wheel_width / 2, -self.r, self.wheel_width, 2 * self.r))
+        self.support.setData([-h, h], [0.0, 0.0])
+
+        # load bars behind each wheel, full length = half the weight
+        fz = fn_l + fn_r
+        if self.weight is None and fz > 0:
+            self.weight = fz
+        scale = self.r / self.weight if self.weight else 0.0
+        for bar, text, x, f in ((self.loads[0], self.load_text[0], -h - 0.055, fn_l),
+                                (self.loads[1], self.load_text[1], h + 0.055, fn_r)):
+            bar.setData([x, x], [-self.r, -self.r + max(f, 0.0) * scale * 2.0])   # full wheel height = weight
+            text.setText(f'{f:4.1f} N')
+            text.setPos(x, -self.r - 0.004)
+
+        z_s = self.to_robot(zmp, mid, lat, fwd)
+        c_s = self.to_robot(com, mid, lat, fwd)
+        l_s = self.to_robot(lipm, mid, lat, fwd)
+        self.zmp.setData([clip(z_s)[0]], [clip(z_s)[1]])
+        self.com.setData([clip(c_s)[0]], [clip(c_s)[1]])
+        self.lipm.setData([clip(l_s)[0]], [clip(l_s)[1]])
+        self.lean.setData([clip(c_s)[0], clip(z_s)[0]], [clip(c_s)[1], clip(z_s)[1]])
+
+        if trail is not None and len(trail) > 1:
+            step = max(1, len(trail) // ZMP_TRAIL_POINTS)
+            tr = trail[::step]
+            pts = np.stack([-tr[:, 13], tr[:, 14]], -1)        # each sample relative to its own support
+            pts = np.stack([np.clip(pts[:, 0], -self.HALF_W, self.HALF_W), np.clip(pts[:, 1], *self.FWD)], -1)
+            n = len(pts)
+            brushes = [pg.mkBrush(255, 122, 182, int(20 + 180 * k / max(n - 1, 1))) for k in range(n)]
+            self.trail.setData(pos=pts, brush=brushes)
+        else:
+            self.trail.setData([], [])
+
+        frac = max(0.0, 1.0 - abs(y_rel))
+        colour = (C['green'] if frac > ZMP_MARGIN_WARN else C['yellow'] if frac > ZMP_MARGIN_ALARM else C['red'])
+        self.text.setHtml(
+            f'<span style="color:{FG}">laterale {lat_m * 1e3:+6.1f} mm   longitudinale {e_long * 1e3:+5.1f} mm</span><br>'
+            f'<span style="color:{colour}">margine {margin * 1e3:5.1f} mm ({100 * frac:3.0f} % di d/2)</span>')
 
 
 class Dashboard(QtWidgets.QMainWindow):
@@ -420,7 +559,7 @@ class Dashboard(QtWidgets.QMainWindow):
                            ('contact_l', 'Ruota SX'), ('contact_r', 'Ruota DX'),
                            ('loaded', 'Robot a terra'), ('wheel_sat', 'Saturazione ruote'),
                            ('leg_sat', 'Saturazione gambe'), ('estimate', 'Stima di stato'),
-                           ('fall', 'Caduta'), ('latency', 'Ritardo < 100 ms'),
+                           ('fall', 'Caduta'), ('zmp', 'Margine ZMP'), ('latency', 'Ritardo < 100 ms'),
                            ('teleop', 'Comandi manuali')]:
             self.diag[key] = Led(label, 14)
             dl.addWidget(self.diag[key])
@@ -430,9 +569,16 @@ class Dashboard(QtWidgets.QMainWindow):
         robot_box = group('Vista laterale')
         rl = QtWidgets.QVBoxLayout(robot_box)
         self.robot = RobotView()
-        self.robot.setMinimumHeight(290)
+        self.robot.setMinimumHeight(230)
         rl.addWidget(self.robot)
         lay.addWidget(robot_box, 1)
+
+        zmp_box = group('Vista dall\'alto – ZMP')
+        zl = QtWidgets.QVBoxLayout(zmp_box)
+        self.zmp_view = ZmpView()
+        self.zmp_view.setMinimumHeight(210)
+        zl.addWidget(self.zmp_view)
+        lay.addWidget(zmp_box, 1)
 
         bottom = QtWidgets.QHBoxLayout()
         values_box = group('Valori istantanei')
@@ -640,8 +786,8 @@ class Dashboard(QtWidgets.QMainWindow):
                 self.log.addItem(f'{t:6.2f}s {name}')
 
         # ---- diagnostics
-        dbg, wbr, cnt, wc, lc, est, od, lf = (last[k] for k in ('debug', 'wbr', 'contact', 'wheel_cmd', 'leg_cmd',
-                                                                'est', 'odom', 'leg_force'))
+        dbg, wbr, cnt, wc, lc, est, od, lf, zm = (last[k] for k in ('debug', 'wbr', 'contact', 'wheel_cmd',
+                                                                    'leg_cmd', 'est', 'odom', 'leg_force', 'zmp'))
         touching = (cnt is not None and cnt[1] > 0.5, cnt is not None and cnt[2] > 0.5)
         d = self.diag
         d['sim'].set('ok', lit=fresh['joints'])
@@ -662,6 +808,12 @@ class Dashboard(QtWidgets.QMainWindow):
         fallen = ((dbg is not None and abs(dbg[2]) > math.radians(30))
                   or (od is not None and abs(od[4]) > math.radians(45)))
         d['fall'].set('alarm', lit=bool(fallen))
+        if zm is not None:
+            frac = max(0.0, 1.0 - abs(zm[12]))
+            d['zmp'].set('ok' if frac > ZMP_MARGIN_WARN else 'warn' if frac > ZMP_MARGIN_ALARM else 'alarm',
+                         text=f'Margine ZMP  {100 * frac:3.0f} %  ({zm[16]:4.1f} / {zm[17]:4.1f} N)')
+        else:
+            d['zmp'].set('off', lit=False, text='Margine ZMP')
         age_ms = (wall - wall_last['joints']) * 1e3 if fresh['joints'] else float('nan')
         delay_ms = age_ms + max(b.transport_delay, 0.0) * 1e3 + self.frame_ms
         v_cmd, w_cmd, h_cmd = self._command_values()
@@ -703,7 +855,10 @@ class Dashboard(QtWidgets.QMainWindow):
             self.robot.update_robot(
                 last['joints'], od, touching, lf, wbr[13] if wbr is not None else None,
                 wc[1:3] if wc is not None else None,
-                self.phase_leds[phase][0].label.text() if phase in self.phase_leds else '')
+                self.phase_leds[phase][0].label.text() if phase in self.phase_leds else '',
+                zmp_x=((zm[1] - od[1]) * math.cos(od[5]) + (zm[2] - od[2]) * math.sin(od[5]))
+                if zm is not None and od is not None else None)
+            self.zmp_view.update_zmp(zm, b.buffers['zmp'].window(now - ZMP_TRAIL_S) if zm is not None else None)
 
             # ---- plots
             t_from = now - self.window_s
@@ -730,7 +885,8 @@ class Dashboard(QtWidgets.QMainWindow):
             f'FPS {len(self.frame_times):3d}   periodo frame {self.frame_ms:5.1f} ms   '
             f'aggiornamento {self.render_ms:5.1f} ms   '
             f'topic Hz: debug {self.rates.get("debug", 0):.0f} · wbr_state {self.rates.get("wbr", 0):.0f} · '
-            f'joint_states {self.rates.get("joints", 0):.0f} · odom {self.rates.get("odom", 0):.0f}   '
+            f'joint_states {self.rates.get("joints", 0):.0f} · odom {self.rates.get("odom", 0):.0f} · '
+            f'zmp {self.rates.get("zmp", 0):.0f}   '
             f'ritardo trasporto {max(b.transport_delay, 0) * 1e3:.1f} ms'
             + (f'   {b.error}' if b.error else '') + ('   [PAUSA]' if self.paused else ''))
 

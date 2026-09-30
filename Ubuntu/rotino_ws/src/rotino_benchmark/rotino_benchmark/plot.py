@@ -605,6 +605,12 @@ def generate_plots(run_dir, out_dir=None):
     p7 = plot_power_and_energy(data, out_dir)
     p8 = plot_horizontal_phase_portrait(data, out_dir)
     p9 = plot_imu_accelerations(data, out_dir)
+    try:
+        from rotino_benchmark.zmp_analysis import generate_zmp_plots
+        p_zmp = generate_zmp_plots(run_dir, out_dir)
+    except Exception as exc:   # old logs without base_* columns, or no URDF available
+        print(f'Grafici ZMP non generati: {exc}')
+        p_zmp = []
 
     print(f'Grafici salvati con successo in: {out_dir}')
     print(f'  - {p1}')
@@ -623,6 +629,8 @@ def generate_plots(run_dir, out_dir=None):
         print(f'  - {p8}')
     if p9:
         print(f'  - {p9}')
+    for p_z in p_zmp:
+        print(f'  - {p_z}')
     return True
 
 

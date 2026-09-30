@@ -123,7 +123,21 @@ ROWS = [
     ('wheel_tau_rms_Nm', 'coppia ruote rms [Nm]', '{:.3f}'),
     ('chatter_Nm', 'chattering, d(tau)/campione [Nm]', '{:.4f}'),
     ('airborne_pct', 'tempo senza contatto [%]', '{:.1f}'),
+    ('zmp_margin_min_mm', 'ZMP: margine laterale minimo [mm]', '{:.1f}'),
+    ('wheel_load_min_N', 'ZMP: carico minimo ruota [N]', '{:.1f}'),
+    ('zmp_long_rms_mm', 'ZMP: residuo longitudinale rms [mm]', '{:.2f}'),
 ]
+
+
+def zmp_row_metrics(path):
+    """ZMP metrics (zmp_analysis) when the log has the base_* columns; empty dict otherwise."""
+    try:
+        from rotino_benchmark import zmp_analysis
+        d = zmp_analysis.read_log(path)
+        return zmp_analysis.zmp_metrics(zmp_analysis.analyse(d)) if d is not None else {}
+    except Exception as exc:   # missing URDF/xacro must not break the classic table
+        print(f'  ZMP non calcolato per {os.path.basename(path)}: {exc}')
+        return {}
 
 
 def main(argv=None):
@@ -138,6 +152,7 @@ def main(argv=None):
         if files:
             m = metrics(read_csv(files[-1]))
             if m:
+                m.update(zmp_row_metrics(files[-1]))
                 found[law] = m
     if not found:
         print(f'no CSV found in {args.run_dir}')
@@ -154,8 +169,8 @@ def main(argv=None):
             v = found[law].get(key, float('nan'))
             cells += ('n/d' if math.isnan(v) else fmt.format(v)).rjust(12)
         print('  ' + label.ljust(width) + cells)
-    print('\n  Nota: il PID aziona le gambe con un PD di giunto, MPC e SMC con controllo task-space.')
-    print('  Stesso URDF e stessa attuazione in coppia, ma la struttura del controllo delle gambe differisce.')
+    print('\n  Nota: le gambe sono controllate in task-space da tutte e tre le leggi (PID: PD cartesiano,')
+    print('  MPC: VMC, SMC: sliding mode). Stesso URDF e stessa attuazione in coppia.')
     return 0
 
 

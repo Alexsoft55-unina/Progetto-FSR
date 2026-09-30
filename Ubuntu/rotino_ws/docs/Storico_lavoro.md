@@ -77,15 +77,15 @@ Il PID è stato **portato a coppia** su richiesta, così tutti e tre usano la st
 | `rotino_mpc` in Gazebo | ✅ si bilancia, θ ≈ 0,00° |
 | `rotino_smc` in Gazebo | ✅ ±0,4°, CPU 0,5 ms su 2 ms |
 | `rotino_pid` in Gazebo | ⚠️ **in piedi ma a ~11°**, contro ~5° dell'originale |
-| `rotino_benchmark` | compila, **mai eseguito end-to-end** |
-| `rotino_dashboard` | compila, slider a 2 m/s |
+| `rotino_benchmark` | ✅ eseguito end-to-end il 30/09/2026 (4 campagne × 3 leggi) + studio ZMP, vedi `Studio_ZMP.md` |
+| `rotino_dashboard` | ✅ vista laterale funzionante (import `wbr_model` → `model` corretto) + vista ZMP animata |
 | `FSR_robot/PID` originale | ✅ funziona ancora, ±3–7° |
 
 Risultati SMC misurati in `FSR_robot/SMC` (headless): bilanciamento ±0,26°; quota inseguita a <1 mm su sinusoide ±3 cm; impulso 2,7 N·s → picco 11,4°, recupero ~3,5 s; 1 m/s su 5 m → arresto a 4,99 m.
 
 ---
 
-## 4. Problema aperto: il PID a coppia
+## 4. Il PID a coppia (risolto il 01/10/2026, vedi 4ter)
 
 **Sintomo originale**: entro 0,5 s dal rilascio il robot veniva scagliato.
 
@@ -122,9 +122,34 @@ File di lavoro in `~/rotino_ws/diagnostics/`: i cinque `.diff` normalizzati, `06
 
 ---
 
+## 4bis. Studio ZMP (30/09/2026)
+
+Dettagli in `Studio_ZMP.md`. Fatti non ovvi da ricordare:
+- Gazebo Fortress pubblica `Contacts` **senza wrench**: `fn_left/right` del logger valgono 0 e `fn_total` dei controllori è il ripiego m_b·g. Le `positions` dei contatti sono rade e a volte senza senso (z = −3 m). Lo ZMP va ricostruito dalla dinamica (`rotino_description/zmp.py`).
+- Le righe del logger ripetono l'ultimo messaggio ricevuto: per derivare due volte servono i timestamp (`odom_stamp_s`, `joints_stamp_s`). Odom arriva a circa 484 Hz, non 500.
+- `jump_state` è pubblicato solo ai cambi di fase e il logger, che parte dopo, lo perde.
+- `PlotWidget` di pyqtgraph lega `PlotItem.clear` sull'istanza: non definire un metodo `clear()` in una sottoclasse.
+
+---
+
+## 4ter. PID con lo ZMP nel controllo (01/10/2026)
+
+Dettagli in `PID_ZMP.md`. Il PID è stato riprogettato: PI sul Capture Point → ZMP desiderato → PD sull'offset ZMP alle ruote, con anteprima LIPM dei riferimenti; gambe con un PD cartesiano; imbardata PID con feedforward d'attrito. Adesso è alla pari con MPC e SMC. Fatti non ovvi:
+- **La cascata LIPM a piena autorità è instabile** a 500 Hz con 1–2 campioni di ritardo: il termine ċ/ω diventa retroazione positiva sulla velocità delle ruote. L'autorità ρ = 0,4 è stata scelta sul modello discretizzato (smorzamento minimo 0,69 su ±20 % di massa, altezza, ritardo).
+- **Il ciclo limite delle gambe sparisce passando al PD cartesiano:** in spazio giunti equivale a circa 50 Nm/rad contro 160–200. Il limite solo sullo smorzamento non serve più.
+- **Nelle campagne "spinta" e "trapezio" del 30/09 il PID non eseguiva lo scenario:** non dichiarava `push_enable` né `velocity_enable`. Ora sì.
+- **La coda dei contatti deve essere 1:** il sensore pubblica a circa 2 kHz. Con coda 10 il PID si credeva in volo per il 30–80 % del tempo.
+- **Inclinarsi in curva con le gambe (`zmp_lateral`) peggiora il picco dello ZMP laterale** perché le ruote sono cilindri rigidi larghi 56 mm. In camber appoggiano sullo spigolo e al flesso della S il contatto salta di 55 mm (misurato nei contatti di Gazebo). Per questo è disattivata di default. Servirebbe una collisione di ruota bombata.
+- **Retroazione sullo ZMP laterale misurato:** con guadagno 0,3 dà un ciclo limite di ±175 mm (fase non minima più 25 ms di ritardo dello stimatore). Da non riprovare così.
+
+---
+
 ## 5. Trappole incontrate — costano ore se le ripeti
 
 - **`pkill -f <pattern>` uccide la shell chiamante** se il pattern compare nella sua stessa riga di comando. Mi è successo due volte. Usa il trucco delle parentesi: `pkill -f "[i]nstall/rotino"`.
+  Vale anche per `campaign.py`, che fa `pkill -f` di `rotino_pid/controller`, `gz sim`, `parameter_bridge`… Una riga di comando che contiene questi testi, anche solo come percorso di un file o dentro un heredoc, viene uccisa insieme alla sua campagna, e la campagna può restare orfana e interferire con la successiva. Lancia le campagne da uno script con una riga di comando pulita.
+- **Su Fortress il server Gazebo si chiama `ruby /usr/bin/ign gazebo`**, non `gz sim`. Un Gazebo lanciato a mano sopravviveva alla pulizia e il controllore della campagna successiva si agganciava al mondo vecchio. Il sintomo nel log è `Controller already loaded` / `Failed to configure controller` e un rilascio a t di simulazione alto. `campaign.py` ora pulisce anche `ign gazebo`.
+- **Il logger deve partire prima del rilascio:** la sua sottoscrizione a `/joint_states` si collega circa 1,6 s dopo quella di odom, e senza giunti l'analisi ZMP perde l'inizio della prova. `campaign.py` ora lo avvia 2 s dopo il launch.
 - **Processi orfani falsano le prove.** Una dashboard rimasta viva pubblicava su `/rotino/cmd_vel` e metteva il controllore in teleop: una prova a 3 m/s è risultata completamente invalida. Controlla sempre `grep -c "Live commands received"` nel log.
 - **`setup.cfg` scritto via `printf` in bash**: `\$base` produce un backslash letterale e gli eseguibili non vengono installati. Il sintomo è `libexec directory does not exist` al launch.
 - **`--symlink-install` sui package Python ROS copia, non collega.** Editare `src/` non basta: serve ricompilare (dura <2 s).
@@ -136,6 +161,7 @@ File di lavoro in `~/rotino_ws/diagnostics/`: i cinque `.diff` normalizzati, `06
 
 - Documentazione e commenti del progetto: **in italiano** per i documenti, **in inglese** per i commenti nel codice (segue lo stile preesistente).
 - `/rotino/debug` deve restare a **11 campi** e `/rotino/wbr_state` a **18**: `logger.py` li spacchetta posizionalmente e `ros_bridge.py` valida la lunghezza.
-- Il PID **non** pubblica `wbr_state` (solo MPC e SMC). Il substrato comune del confronto è `/rotino/debug`.
+- Dal 01/10 anche il PID pubblica `wbr_state` a 18 campi, oltre a `/rotino/zmp_ctrl` (11 campi, registrato dal logger in 5 colonne). Il substrato comune del confronto resta `/rotino/debug`.
+- Il `theta` di `/rotino/debug` è per tutte le leggi l'inclinazione del CoM dalla verticale, positiva in avanti. Il PID precedente aveva segno opposto e un offset di 4,73°.
 - I workspace in `FSR_robot` restano **intatti**: non toccarli senza chiedere.
 - Non committare senza richiesta esplicita.

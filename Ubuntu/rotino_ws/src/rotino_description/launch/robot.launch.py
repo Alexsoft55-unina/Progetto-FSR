@@ -44,6 +44,7 @@ SCENARIO_ARGS = [
     ('push_enable', 'false', bool, 'Horizontal impulse on the torso'),
     ('push_time', '4.0', float, 'Seconds after release when the impulse is applied'),
     ('push_impulse', '2.7', float, 'Impulse [N s]'),
+    ('zmp_lateral', 'false', bool, 'PID: lean into turns to keep the lateral ZMP centred (see docs/PID_ZMP.md)'),
 ]
 
 
