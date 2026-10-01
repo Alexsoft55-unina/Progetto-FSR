@@ -86,7 +86,7 @@ Poli nominali ad anello chiuso: −0,5; −2,3 ± 0,2j; −9,8; −52 s⁻¹. **
 
 ## 5. Risultati in Gazebo
 
-Condizioni identiche allo studio ZMP: Gazebo headless, 500 Hz, stessi argomenti e durate. MPC e SMC sono quelli delle campagne del 30/09 (codice invariato).
+Condizioni identiche allo studio ZMP: Gazebo headless, 500 Hz, stessi argomenti e durate. L'MPC è quello delle campagne del 30/09 (codice invariato). Il confronto completo e aggiornato PID–MPC, su otto scenari, è in `Confronto_PID_MPC.md`.
 
 **Prima e dopo, curva a S veloce** (`traj_duration:=5.0 traj_lateral:=1.0`):
 
@@ -103,14 +103,14 @@ Condizioni identiche allo studio ZMP: Gazebo headless, 500 Hz, stessi argomenti 
 
 ![Curva a S veloce: prima e dopo](figure_pid_zmp/curva_S_veloce_prima_dopo.png)
 
-**Confronto con MPC e SMC** (PID / MPC / SMC; in grassetto il migliore):
+**Confronto con l'MPC** (PID / MPC; in grassetto il migliore):
 
 | Campagna | Beccheggio di picco [°] | Recupero [s] | Altre metriche |
 |---|---|---|---|
-| S veloce | **6,6** / 7,2 / 9,6 | **1,1** / 1,7 / 5,7 | ZMP laterale max **11,8** / 16,2 / 25,4 %; carico minimo **18,5** / 17,4 / 15,5 N |
-| Trapezio 1 m/s | **6,1** / 8,5 / 10,1 | **1,3** / 4,6 / 11,8 | velocità di picco (rif. 1,0) **1,06** / 1,13 / 1,34 m/s |
-| Spinta 2,7 N·s | 20,9 / **11,3** / 12,2 | **2,0** / 2,2 / 14,2 | carico minimo 10,0 / 16,0 / **19,2** N |
-| S lenta | 4,7 / 2,8 / **1,5** | 13,5 / 13,1 / **4,3** | errore di beccheggio rms 0,60 / **0,33** / 0,37° |
+| S veloce | **6,6** / 7,2 | **1,1** / 1,7 | ZMP laterale max **11,8** / 16,2 %; carico minimo **18,5** / 17,4 N |
+| Trapezio 1 m/s | **6,1** / 8,5 | **1,3** / 4,6 | velocità di picco (rif. 1,0) **1,06** / 1,13 m/s |
+| Spinta 2,7 N·s | 20,9 / **11,3** | **2,0** / 2,2 | carico minimo 10,0 / **16,0** N |
+| S lenta | 4,7 / **2,8** | 13,5 / 13,1 | errore di beccheggio rms 0,60 / **0,33**° |
 
 ![Trapezio: ZMP desiderato ed effettivo](figure_pid_zmp/trapezio_zmp.png)
 
@@ -157,7 +157,7 @@ Nota per tutte le leggi: anche con le gambe pari il contatto di Gazebo finisce t
 - **`campaign.py` pulisce anche `ign gazebo`.** Su Fortress il server si chiama così, e un Gazebo lanciato a mano restava vivo: la campagna successiva si agganciava al mondo vecchio, con il robot già caduto.
 - **Il logger registra `/rotino/zmp_ctrl`** in 5 colonne nuove in coda (ZMP desiderato ed effettivo, errore DCM, accelerazione di riferimento, inclinazione comandata). Per le altre leggi valgono NaN.
 - **Il PID pubblica `/rotino/wbr_state`** con lo stesso formato a 18 campi dell'MPC: il logger ne ricava riferimenti ed errori.
-- **Il PID accetta i comandi della dashboard** (`/rotino/cmd_vel`, `cmd_height`, `cmd_jump`, `cmd_push`), con la stessa semantica di MPC e SMC. Velocità e imbardata diventano riferimenti ad accelerazione limitata, con timeout di 0,5 s. L'altezza cambia la lunghezza delle gambe. Il salto viene eseguito dopo aver fermato il robot, sul posto e anche più volte. Con comandi manuali non c'è anteprima: il feedforward ZMP usa l'accelerazione corrente del riferimento, filtrata a 0,1 s.
+- **Il PID accetta i comandi della dashboard** (`/rotino/cmd_vel`, `cmd_height`, `cmd_jump`, `cmd_push`), con la stessa semantica dell'MPC. Velocità e imbardata diventano riferimenti ad accelerazione limitata, con timeout di 0,5 s. L'altezza cambia la lunghezza delle gambe. Il salto viene eseguito dopo aver fermato il robot, sul posto e anche più volte. Con comandi manuali non c'è anteprima: il feedforward ZMP usa l'accelerazione corrente del riferimento, filtrata a 0,1 s.
 - **`campaign.py` avvia il logger prima del rilascio:** 2 s dopo il launch invece di 6, con la durata totale invariata. La sottoscrizione del logger a `/joint_states` si collega circa 1,6 s dopo quella di odom. Quando il rilascio arrivava prima, l'analisi ZMP, che ha bisogno dei giunti, perdeva fino ai primi 4 s della prova. Le 12 prove di confronto di questo documento erano comunque coperte dal rilascio (≤ 1,4 s), cioè prima dell'inizio del moto a 2 s. Il difetto ha colpito solo alcune prove dell'esperimento laterale, che sono state rifatte.
 
 ## 8. File e comandi
@@ -180,4 +180,4 @@ ros2 run rotino_benchmark campaign -- --controllers pid --scenario planar_enable
     --duration 25 --name pid_laterale --out <ws>/benchmark_runs            # compensazione laterale
 ```
 
-Le campagne di questo documento stanno in `benchmark_runs/`, che non è versionato: `pidzmp_*` contiene il solo PID, `cmp_zmp_*` il PID nuovo con MPC e SMC del 30/09, `lat_check` e `lat_check_off` l'esperimento laterale. Le figure si rigenerano da questi dati.
+Le campagne di questo documento stanno in `benchmark_runs/archivio_2026-09-30_01/`, che non è versionato: `pidzmp_*` contiene il solo PID, `cmp_zmp_*` il PID nuovo con l'MPC del 30/09, `lat_check` e `lat_check_off` l'esperimento laterale. Le figure si rigenerano con `python3 docs/figure_pid_zmp/genera_figure.py`.

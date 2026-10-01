@@ -109,7 +109,7 @@ ROLL_I_MAX = 0.10            # rad
 LAT_FULL_SPEED = 0.10  # m/s of reference speed at which lateral correction is fully active
 
 # =========================================================
-# Live commands (/rotino/cmd_*, rotino_dashboard): same semantics as the MPC and SMC
+# Live commands (/rotino/cmd_*, rotino_dashboard): same semantics as the MPC
 # =========================================================
 CMD_TIMEOUT = 0.5            # s without /rotino/cmd_vel -> velocity and turn rate go back to zero
 CMD_V_MAX = 1.5              # m/s
@@ -547,7 +547,7 @@ class BalanceJumpController(Node):
         self.get_logger().info(f'Released at sim t={t_abs:.3f}s. Balance controller active.')
 
     def _push(self, t, heading):
-        """Horizontal impulse on the torso, as in the MPC and SMC: push_impulse backwards along the heading."""
+        """Horizontal impulse on the torso, as in the MPC: push_impulse backwards along the heading."""
         c = self.cfg
         if c['push_enable'] and not self.scripted_push_done and t >= c['push_time']:
             self.scripted_push_done = True

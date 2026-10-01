@@ -84,30 +84,33 @@ rotino_ws/
 |   |   |-- rotino_description/
 |   |   |   |-- model.py              <-- Parametri VL-WIP dall'URDF
 |   |   |   |-- kinematics.py         <-- FK analitica e CoM globale
-|   |   |   `-- planar_trajectory.py  <-- Legge oraria S-curve quintica
+|   |   |   |-- planar_trajectory.py  <-- Legge oraria S-curve quintica
+|   |   |   `-- zmp.py                <-- ZMP multicorpo ricostruito
 |   |   `-- urdf/
 |   |       `-- rotino.urdf.xacro     <-- Geometria, masse, giunti
 |   |
 |   |-- rotino_pid/
-|   |   `-- rotino_pid/
-|   |       `-- controller.py         <-- Bilanciamento PD + jump FSM
-|   |
-|   |-- rotino_smc/
-|   |   `-- rotino_smc/
-|   |       |-- controller.py         <-- Super-Twisting + Task-Space VMC
-|   |       `-- estimator.py          <-- Filtro di Kalman lineare
+|   |   |-- rotino_pid/
+|   |   |   |-- controller.py         <-- Nodo ROS 2: riferimenti, gambe, salto
+|   |   |   `-- zmp_balance.py        <-- Cascata ZMP / Capture Point, anteprima LIPM
+|   |   `-- test/                     <-- Verifica sul VL-WIP linearizzato
 |   |
 |   |-- rotino_mpc/
 |   |   `-- rotino_mpc/
 |   |       |-- controller.py         <-- Nodo ROS 2, loop di controllo
-|   |       `-- solvers.py            <-- QP FISTA, LQR, condensazione
+|   |       `-- solvers.py            <-- QP FISTA, LQR, Kalman, condensazione
+|   |
+|   |-- rotino_dashboard/             <-- GUI, teleop, vista ZMP
 |   |
 |   `-- rotino_benchmark/
 |       `-- rotino_benchmark/
-|           |-- campaign.py           <-- Orchestrazione run sequenziali
+|           |-- scenarios.py          <-- Catalogo degli 8 scenari
+|           |-- campaign.py           <-- Uno scenario con PID e MPC
+|           |-- suite.py              <-- Tutti gli scenari + riepilogo
 |           |-- logger.py             <-- Logging sincrono ad alta freq.
-|           |-- plot.py               <-- 9 pannelli di analisi
-|           `-- compare.py            <-- Confronto tra run
+|           |-- compare.py            <-- Metriche, migliore per metrica
+|           |-- plot.py               <-- Grafici PID/MPC sovrapposti
+|           `-- zmp_analysis.py       <-- Metriche e figure ZMP
 `-- docs/
     `-- Architettura_e_Codice.tex     <- Questo documento
 \end{verbatim}
@@ -405,26 +408,27 @@ def sample(self, t):
 \end{lstlisting}
 
 %=============================================================
-\chapter{rotino\_smc: Sliding Mode Control}
+\chapter{rotino\_mpc: Model Predictive Control}
 %=============================================================
 
-\section{Architettura del Controllore}
-Il pacchetto implementa tre leggi di controllo simultanee:
-(1) pitch Super-Twisting sulle ruote,
-(2) leg Task-Space SMC (VMC esteso),
-(3) yaw PD+I con feedforward di attrito.
+\section{Architettura MPC}
+Il controllore MPC separa il problema in due QP indipendenti seguendo
+il modello disaccoppiato di Eq. (9) di Cui et al.: uno orizzontale
+(posizione e velocita' nel piano sagittale) e uno verticale (altezza del
+bacino e forza verticale alle ruote). Questo disaccoppiamento e' possibile
+grazie all'approssimazione del LIP (Linear Inverted Pendulum).
 
 %-------------------------------------------------------------
-\section{File: estimator.py}
+\section{Classe AxisKalman (solvers.py)}
 %-------------------------------------------------------------
 
 \subsection{Ruolo}
-Implementa il \textbf{Filtro di Kalman lineare a due stati} $[p, v]$ per
+Implementa, uno per asse mondo, il \textbf{Filtro di Kalman lineare a due stati} $[p, v]$ per
 stimare posizione e velocita' del corpo superiore, fondendo le misure
 dell'accelerometro IMU (aggiornamento veloce) con l'odometria delle ruote
 combinata alla cinematica delle gambe (correzione lenta e accurata).
 
-\subsection{Riga 26--37: Predizione e Correzione del Filtro di Kalman}
+\subsection{Righe 136--147: Predizione e Correzione del Filtro di Kalman}
 
 \begin{theoryframe}
 \textbf{Teoria (Kalman Discreto):} Per il sistema $\mathbf{x}_{k+1} = F\mathbf{x}_k + Bu_k + w_k$
@@ -435,7 +439,7 @@ Correzione: $K = P^-(P^- + R)^{-1}$, $\hat x = \hat x^- + K(y - \hat x^-)$,
 $P = (I-K)P^-$
 \end{theoryframe}
 
-\begin{lstlisting}[language=Python, caption=estimator.py rr.\ 26-37: Filtro di Kalman (Eqs.\ 20-21 di Cui 2022)]
+\begin{lstlisting}[language=Python, caption=solvers.py rr.\ 136-147: Filtro di Kalman (Eqs.\ 20-21 di Cui 2022)]
 def predict(self, acc, dt):
     # Matrice di transizione cinematica: x=[p,v], input=accelerazione IMU
     F = np.array([[1.0, dt], [0.0, 1.0]])
@@ -457,128 +461,6 @@ def correct(self, p_obs, v_obs, noise_scale=1.0):
 Il termine $q_{acc} \cdot \mathbf{B}_u\mathbf{B}_u^T$ modella un rumore
 sull'accelerazione (random walk in accelerazione), il che e' fisicamente
 appropriato per un MEMS IMU che ha un bias lentamente variabile.
-
-%-------------------------------------------------------------
-\section{File: controller.py (SMC)}
-%-------------------------------------------------------------
-
-\subsection{Riga 576--587: Pitch Super-Twisting (Algoritmo di Levant)}
-
-\begin{theoryframe}
-\textbf{Teoria (Super-Twisting):} L'algoritmo Super-Twisting di Levant e'
-uno SMC del 2$^\circ$ ordine che garantisce convergenza in tempo finito su
-$\sigma=0$ con segnale di controllo \textbf{continuo} (elimina il chattering).
-Data la superficie $\sigma$, la legge e':
-\[u_1 = -\alpha|\sigma|^{1/2}\mathrm{sgn}(\sigma) + u_2, \qquad
-\dot u_2 = -\beta\,\mathrm{sgn}(\sigma)\]
-La funzione di Lyapunov $V = \alpha^2|\sigma| + \frac{1}{2}u_2^2$ dimostra
-la convergenza finita.
-\end{theoryframe}
-
-\begin{lstlisting}[language=Python, caption=controller.py SMC rr.\ 576-587: Pitch Super-Twisting]
-def _pitch_super_twisting(self, theta, theta_ref, l):
-    c = self._vlwip(l)   # coefficienti VL-WIP alla lunghezza l corrente
-
-    # 1. Superficie di scorrimento: su sigma=0, theta -> theta_ref esponenzialmente
-    s1 = self.theta_dot + SMC_C1 * (theta - theta_ref)
-
-    # 2. Approssimazione continua del segno (riduce chattering residuo)
-    sg1 = s1 / (abs(s1) + SMC_EPS1)
-
-    # 3. Legge astratta nu (Super-Twisting di Levant):
-    #    -C1*theta_dot: termine derivativo (mantiene la superficie)
-    #    -KA*sqrt(|s1|)*sgn(s1): termine radice (convergenza finita)
-    #    self.W: integratore (aggiornato nel loop: W -= KB*sg1*dt)
-    nu = -SMC_C1*self.theta_dot - SMC_KA*math.sqrt(abs(s1))*sg1 + self.W
-
-    # 4. Feedback Linearization: theta_ddot = a2*theta + b2*(tau_L+tau_R)
-    #    Invertendo: tau_comune = (nu - a2*theta) / b2 / 2
-    #    (diviso 2: le due ruote erogano la stessa coppia)
-    return 0.5 * (nu - c['a2'] * theta) / c['b2'], s1, sg1
-\end{lstlisting}
-
-\subsection{Righe di Aggiornamento dell'Integratore W nel Loop Principale}
-
-\begin{lstlisting}[language=Python, caption=controller.py SMC: Aggiornamento dell'integratore di Levant]
-# Nel loop di controllo principale, dopo _pitch_super_twisting:
-# Integrazione di W_dot = -KB * sgn(s1) (integratore continuo di Levant)
-# La clip su SMC_W_MAX evita il wind-up dell'integratore
-self.W = float(np.clip(
-    self.W - SMC_KB * sg1 * min(dt, SMC_DT_MAX),
-    -SMC_W_MAX, SMC_W_MAX))
-\end{lstlisting}
-
-\subsection{Riga 555--574: Task-Space VMC (Virtual Model Control)}
-
-\begin{theoryframe}
-\textbf{Teoria (VMC + SMC nel Task Space):} Il VMC di Pratt et al. (1997)
-comanda forze virtuali cartesiane e le mappa nei giunti: $\tau = \mathbf{J}^T \mathbf{F}$.
-In questa implementazione avanzata, $\mathbf{F}$ include una superficie di
-scorrimento cartesiana $\mathbf{s} = (\mathbf{v}_f - \mathbf{v}_d) + c(\mathbf{p}_f - \mathbf{p}_d)$:
-\[\mathbf{F} = -K_{lin}\mathbf{s} - K_{sw}\,\mathrm{sat}\!\left(\frac{\mathbf{s}}{\phi}\right) + \mathbf{F}_{ff}\]
-Il termine $\mathrm{sat}(\mathbf{s}/\phi)$ e' la funzione segno saturata che
-approssima il controllo discontinuo SMC con un segnale continuo.
-\end{theoryframe}
-
-\begin{lstlisting}[language=Python, caption=controller.py SMC rr.\ 555-574: VMC + Sliding Mode nel Task Space]
-def _leg_smc(self, legs, p_d, c, K_lin, F_ff=np.zeros(2), v_d=np.zeros(2)):
-    taus = []
-    for i, ((p_f, J, v_f), qd) in enumerate(zip(legs, self.leg_qd)):
-        # Superficie di scorrimento nel Task Space (errore PD cartesiano)
-        # p_f: posizione FK del centro ruota, p_d: setpoint cartesiano
-        s = (v_f - v_d) + c * (p_f - p_d)
-
-        # Forza virtuale composta:
-        # -K_lin @ s:  termine proporzionale+derivativo (banda passante)
-        # -LEG_KSW*clip(s/PHI,-1,1):  switching saturato (robustezza SMC)
-        # F_ff:        feedforward peso del robot (compensa la gravita')
-        F = -K_lin @ s - LEG_KSW * np.clip(s / LEG_PHI, -1.0, 1.0) + F_ff
-
-        # Feedforward per cancellare lo smorzamento viscoso dell'URDF
-        tau_ff = self.model.p.leg_damping * qd
-
-        # LEGGE VMC: tau = J^T @ F (mappa forze cartesiane in coppie giunturali)
-        taus.append(np.clip(J.T @ F + tau_ff, -LEG_TORQUE_MAX, LEG_TORQUE_MAX))
-
-    # Riordino per il topic ROS: [hip_L, hip_R, knee_L, knee_R]
-    tau = [taus[0][0], taus[1][0], taus[0][1], taus[1][1]]
-    self.leg_pub.publish(Float64MultiArray(data=[float(x) for x in tau]))
-    return tau
-\end{lstlisting}
-
-\subsection{Loop Esterno di Velocita' (Non-Minimum Phase)}
-
-\begin{theoryframe}
-\textbf{Teoria (Sistema a fase non minima):} Il WBR e' un sistema a fase non
-minima: una coppia positiva alle ruote genera inizialmente uno spostamento del
-corpo all'indietro (reazione di Newton) prima di accelerare in avanti.
-Per questo, il loop PI sulla velocita' deve avere guadagni \textbf{negativi}
-$K_v^P, K_v^I < 0$: un errore di velocita' positivo (troppo lento) richiede
-un angolo di pitch negativo (inclinare il robot in avanti) per generare
-l'accelerazione desiderata.
-\end{theoryframe}
-
-\begin{lstlisting}[language=Python, caption=controller.py SMC: Loop esterno PI (non-minimum phase)]
-def _outer_velocity_loop(self, v, v_ref, dt, active):
-    err = v - v_ref
-    if active:
-        # Integrale dell'errore di velocita' (con anti-windup)
-        self.Iv = float(np.clip(self.Iv + V_KI * err * dt, -IV_MAX, IV_MAX))
-    # Riferimento di pitch: negativo perche' il sistema e' a fase non minima
-    theta_star = float(np.clip(V_KP * err + self.Iv, -THETA_REF_MAX, THETA_REF_MAX))
-    return theta_star
-\end{lstlisting}
-
-%=============================================================
-\chapter{rotino\_mpc: Model Predictive Control}
-%=============================================================
-
-\section{Architettura MPC}
-Il controllore MPC separa il problema in due QP indipendenti seguendo
-il modello disaccoppiato di Eq. (9) di Cui et al.: uno orizzontale
-(posizione e velocita' nel piano sagittale) e uno verticale (altezza del
-bacino e forza verticale alle ruote). Questo disaccoppiamento e' possibile
-grazie all'approssimazione del LIP (Linear Inverted Pendulum).
 
 %-------------------------------------------------------------
 \section{File: solvers.py}
@@ -723,79 +605,174 @@ class UpperBodyMPC:
 \end{lstlisting}
 
 %=============================================================
-\chapter{rotino\_pid: Controllore Baseline PD}
+\chapter{rotino\_pid: PID con lo Zero Moment Point}
 %=============================================================
 
-\section{File: controller.py (PID)}
+\section{Architettura del Controllore}
+Il pacchetto separa la legge di controllo dal nodo ROS:
+\begin{itemize}
+    \item \texttt{zmp\_balance.py}: legge pura (numpy, senza ROS), verificata offline da
+          \texttt{test/test\_zmp\_balance.py} sul VL-WIP linearizzato;
+    \item \texttt{controller.py}: nodo a 500~Hz che ricava gli stati dalla ground truth,
+          genera i riferimenti (scenari, traiettoria planare, comandi della dashboard),
+          chiama la legge e comanda gambe e ruote; contiene anche il supervisore del salto.
+\end{itemize}
+Descrizione completa e prove in \texttt{docs/PID\_ZMP.md}.
 
-\subsection{Legge PD di Bilanciamento}
+%-------------------------------------------------------------
+\section{File: zmp\_balance.py}
+%-------------------------------------------------------------
+
+\subsection{Righe 86--123: Capture Point, ZMP desiderato e PD sull'offset ZMP}
 
 \begin{theoryframe}
-\textbf{Teoria (PD sul pendolo inverso):} La legge PD classica per
-bilanciare un pendolo inverso su ruote mappa lo stato
-$[\theta, \dot\theta, \dot x, x]$ in coppia alle ruote:
-$u = K_\theta(\theta-\theta^*) + K_{\dot\theta}\dot\theta
-    - K_{\dot x}(\dot x - \dot x^*) - K_x(x - x^*)$.
-I guadagni sono determinati per tentativi o tramite linearizzazione
-del sistema (VLWIP) e specifica dei poli desiderati.
+\textbf{Teoria (LIPM e Capture Point):} con il modello cart-table
+$\ddot c = \omega^2(c - p)$, $\omega^2 = g/h$, la componente divergente
+$\xi = c + \dot c/\omega$ evolve come $\dot\xi = \omega(\xi - p)$. Imponendo
+$\dot\xi = \dot\xi_{ref} - k_\xi e_\xi - k_i\int e_\xi$ si ricava lo ZMP che serve;
+sulle due ruote lo ZMP longitudinale e' il contatto, quindi l'offset $s = c - p$
+fra baricentro e asse e' la grandezza che la coppia delle ruote deve portare a
+$s_{des}$. L'autorita' $\rho = 0.4$ (\texttt{authority}) tiene conto del fatto che
+l'anello interno non e' infinitamente veloce.
 \end{theoryframe}
 
-\begin{lstlisting}[language=Python, caption=controller.py PID: Legge PD di bilanciamento (righe 644-648)]
-k_th, k_thd, k_xd, k_x, max_wheel_state = balance_gains_for_state(self.jump_state)
-wheel_u_raw = clamp(
-    k_th  * (theta - theta_ref)   # P sull'angolo
-    + k_thd * theta_dot            # D sull'angolo
-    - k_xd  * vel_err              # D sulla velocita' lineare
-    - k_x   * pos_err,             # P sulla posizione
-    -max_wheel_state, max_wheel_state)
+\begin{lstlisting}[language=Python, caption=zmp\_balance.py rr.\ 98-115: cascata ZMP]
+omega = math.sqrt(G / max(h, 0.03))
+s_ff, tau_ff = self.feedforward(acc_ref)          # lean and torque of the reference acceleration
+s_dot_ff = self.lean_per_acc * jerk_ref
+c_err = pos_err + (s - s_ff)                       # CoM error = axle error + lean error
+cd_err = vel_err + (s_dot - s_dot_ff)
+xi_err = c_err + cd_err / omega                    # capture-point error
+if integrate:
+    self.dcm_i = clamp(self.dcm_i + xi_err * dt, -g.dcm_i_max, g.dcm_i_max)
+s_fb = -(cd_err + g.k_dcm * xi_err + g.k_dcm_i * self.dcm_i) / omega
+s_max = g.acc_max / omega ** 2
+s_des = clamp(s_ff + g.authority * outer_scale * s_fb, -s_max, s_max)
+tau = tau_ff + g.k_s * (s - s_des) + g.k_sd * (s_dot - s_dot_ff)
 \end{lstlisting}
 
-\subsection{Servo PD di Posizione per le Gambe}
+\subsection{Righe 139--153: Anteprima LIPM}
 
-\begin{lstlisting}[language=Python, caption=controller.py PID: Servo PD hip/knee (righe 454-468)]
-def _publish_legs(self, targets, q, qd):
-    kps = (HIP_SERVO_KP, HIP_SERVO_KP, KNEE_SERVO_KP, KNEE_SERVO_KP)
-    kvs = (HIP_SERVO_KV, HIP_SERVO_KV, KNEE_SERVO_KV, KNEE_SERVO_KV)
-    tau = [
-        clamp(
-            clamp(kp*(target - q[name]), -LEG_TORQUE_MAX, LEG_TORQUE_MAX)  # P
-            + clamp(-kv * qd[name], -LEG_DAMPING_MAX, LEG_DAMPING_MAX),    # D (saturato)
-            -LEG_TORQUE_MAX, LEG_TORQUE_MAX)
-        for kp, kv, target, name in zip(kps, kvs, targets, LEG_JOINTS)]
-    self.leg_pub.publish(Float64MultiArray(data=[float(x) for x in tau]))
-    return tau
+\begin{theoryframe}
+\textbf{Teoria (soluzione limitata del LIPM):} dato il percorso pianificato
+delle ruote $p_{ref}(t)$, l'unica traiettoria limitata del baricentro che
+soddisfa $\ddot c = \omega^2(c - p_{ref})$ e'
+$c_{ref}(t) = \frac{\omega}{2}\int e^{-\omega|u|}p_{ref}(t+u)\,du$: il percorso
+filtrato con un nucleo simmetrico, quindi anticipativo. Da $c_{ref} - p_{ref}$
+si ottiene l'accelerazione di riferimento $\omega^2(c_{ref} - p_{ref})$.
+\end{theoryframe}
+
+\begin{lstlisting}[language=Python, caption=zmp\_balance.py rr.\ 139-153: nucleo esponenziale simmetrico]
+def smooth(self, signal, t, omega):
+    half = self.horizon_tau / omega
+    u = np.arange(-half, half + 0.5 * self.step, self.step)
+    w = np.exp(-omega * np.abs(u))
+    w /= w.sum()                  # normalised: a constant signal is returned exactly
+    out = signal(t + u)
+    return tuple(float(w @ o) for o in out) if isinstance(out, tuple) else float(w @ out)
+
+def __call__(self, reference, t, omega):
+    c, cd = self.smooth(reference, t, omega)
+    p0, pd0 = reference(np.array([t]))
+    return omega ** 2 * (c - float(p0[0])), omega ** 2 * (cd - float(pd0[0]))
 \end{lstlisting}
 
-Il termine D e' saturato separatamente ($\pm$\texttt{LEG\_DAMPING\_MAX}) per
-evitare cicli limite bang-bang dovuti a picchi di velocita' angolare durante
-transizioni rapide di postura.
+%-------------------------------------------------------------
+\section{File: controller.py (PID)}
+%-------------------------------------------------------------
+
+\subsection{Righe 505--524: PD cartesiano delle gambe}
+
+\begin{theoryframe}
+\textbf{Teoria (controllo in spazio operativo):} $\tau = J^T F$ con
+$F = K_p(p_d - p) - K_d J\dot q + F_{ff}$. Con $K_p = \mathrm{diag}(1500, 5000)$~N/m
+la rigidezza vista dai giunti e' circa 50~N$\cdot$m/rad: un passo da 2~ms non puo'
+piu' scavalcare l'inerzia riflessa della gamba, e il ciclo limite bang-bang del
+PD di giunto a 160--200~N$\cdot$m/rad scompare.
+\end{theoryframe}
+
+\begin{lstlisting}[language=Python, caption=controller.py PID: PD cartesiano delle gambe]
+up_b = self._base_pose()[1].T @ np.array([0.0, 0.0, 1.0])
+f_ff = -support * np.array([up_b[0], up_b[2]])      # share of the weight, 0 in flight
+for side, p_d in zip(('left', 'right'), targets):
+    qs = np.array([q[f'{side}_hip'], q[f'{side}_knee']])
+    qds = np.array([qd[f'{side}_hip'], qd[f'{side}_knee']])
+    p, J = self.wbr.leg_fk(*qs)
+    F = kp @ (np.asarray(p_d) - p) + kd @ (-(J @ qds)) + f_ff
+    taus.append(np.clip(J.T @ F + self.wbr.p.leg_damping * qds, -LEG_TORQUE_MAX, LEG_TORQUE_MAX))
+\end{lstlisting}
 
 %=============================================================
-\chapter{rotino\_benchmark: Infrastruttura di Validazione}
+\chapter{rotino\_benchmark: Il Confronto PID--MPC}
 %=============================================================
+
+\section{Organizzazione}
+Il pacchetto e' costruito per confrontare le due leggi a parita' di tutto il resto:
+stesso mondo, stesso URDF, stessa attuazione e stessi argomenti di scenario.
+
+\begin{center}
+\begin{tabular}{lp{10cm}}
+\toprule
+\textbf{File} & \textbf{Ruolo} \\
+\midrule
+\texttt{scenarios.py} & catalogo degli 8 scenari: argomenti di launch, durata, metriche chiave \\
+\texttt{campaign.py} & un solo scenario con PID e MPC: avvio pulito, logger, terminazione \\
+\texttt{suite.py} & tutti gli scenari, poi il riepilogo della suite \\
+\texttt{logger.py} & CSV a 500~Hz con gli stessi segnali per entrambe le leggi \\
+\texttt{compare.py} & metriche con il loro verso, "migliore" per metrica, \texttt{confronto.md} e \texttt{riepilogo.md} \\
+\texttt{plot.py} & grafici con PID (rosso) e MPC (blu) sempre sovrapposti; figura di riepilogo \\
+\texttt{zmp\_analysis.py} & ZMP multicorpo ricostruito e relative metriche e figure \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\begin{verbatim}
+ros2 run rotino_benchmark suite                 # tutti gli scenari
+ros2 run rotino_benchmark campaign -- spinta    # uno scenario
+ros2 run rotino_benchmark compare -- <cartella> # ricostruisce tabelle e grafici
+
+benchmark_runs/suite_<data>/
+    riepilogo.md / .csv / .png        metriche chiave e bilancio PID-MPC
+    <scenario>/confronto.md           tabella completa e grafici dello scenario
+    <scenario>/plots/*.png            grafici sovrapposti
+    <scenario>/rotino_<legge>_*.csv   log, uno per legge
+\end{verbatim}
 
 %-------------------------------------------------------------
 \section{File: campaign.py}
 %-------------------------------------------------------------
 
-\begin{lstlisting}[language=Python, caption=campaign.py: Ciclo di vita di un run (righe 32-68)]
+\begin{lstlisting}[language=Python, caption=campaign.py: ciclo di vita di un run]
 def run_one(law, scenario, duration, out_dir, log_dir):
-    kill_stale()   # rimuove residui da run precedenti
+    kill_stale()   # nulla di una prova precedente deve pubblicare su /rotino/*
     launch = ['ros2', 'launch', f'rotino_{law}', f'rotino_{law}.launch.py',
               'gui:=false', *scenario]
-    logger = ['ros2', 'run', 'rotino_benchmark', 'logger', '--ros-args',
-              '-p', 'use_sim_time:=true', '-p', f'controller:={law}',
-              '-p', f'output_dir:={out_dir}']
     sim = subprocess.Popen(launch, ...)
-    time.sleep(6.0)        # attesa avvio Gazebo + controllori
-    log = subprocess.Popen(logger, ...)
-    time.sleep(duration)   # durata del run
-    # Terminazione ordinata: SIGINT poi SIGKILL
-    for proc in (log, sim):
-        os.killpg(os.getpgid(proc.pid), signal.SIGINT)
-    time.sleep(3.0)
-    for proc in (log, sim):
-        os.killpg(os.getpgid(proc.pid), signal.SIGKILL)
+    time.sleep(2.0)                    # Gazebo in avvio
+    log = subprocess.Popen(logger, ...)   # prima del rilascio: joint_states arriva ~1.6 s dopo odom
+    time.sleep(4.0 + duration)
+    # Terminazione ordinata: SIGINT poi SIGKILL; il log viene poi controllato
+    # (controller non configurati = Gazebo rimasto da una prova precedente)
+\end{lstlisting}
+
+%-------------------------------------------------------------
+\section{File: compare.py}
+%-------------------------------------------------------------
+
+Ogni metrica dichiara il proprio verso (minore o maggiore e' meglio, oppure solo
+descrittiva) e una risoluzione: sotto la risoluzione, o sotto il 5\% di differenza
+relativa, le due leggi risultano pari.
+
+\begin{lstlisting}[language=Python, caption=compare.py: chi e' migliore su una metrica]
+def better(key, values):
+    direction, tie = METRIC[key][3], METRIC[key][4]
+    a, b = values.get('pid', NAN), values.get('mpc', NAN)
+    if direction == 0 or math.isnan(a) or math.isnan(b):
+        return ''
+    scale = max(abs(a), abs(b))
+    if abs(a - b) <= tie or scale < 1e-9 or abs(a - b) / scale < TIE_REL:
+        return '='
+    return 'pid' if (a - b) * direction > 0 else 'mpc'
 \end{lstlisting}
 
 %-------------------------------------------------------------
@@ -817,51 +794,45 @@ def _imu_cb(self, msg):
 \end{lstlisting}
 
 %-------------------------------------------------------------
-\section{File: plot.py -- I 9 Pannelli di Analisi}
+\section{File: plot.py -- I Grafici del Confronto}
 %-------------------------------------------------------------
 
 \begin{center}
-\begin{tabular}{clp{7cm}}
+\begin{tabular}{clp{8cm}}
 \toprule
-\textbf{N.} & \textbf{File PNG} & \textbf{Contenuto e Rilevanza Teorica} \\
+\textbf{N.} & \textbf{File PNG} & \textbf{Contenuto (PID e MPC sovrapposti)} \\
 \midrule
-1 & tracking\_and\_errors.png  & Errori di tracking di $\theta$, $x$, $z$ per confronto risposta transitoria \\
-2 & disturbance\_and\_phase\_portrait.png & Profilo di disturbo e ritratto di fase $(\theta, \dot\theta)$: dimostra la convergenza a 0 dell'orbita \\
-3 & smc\_sliding\_surface.png  & Superficie $\sigma(t)$: verifica che il controllore SMC raggiunga e mantenga $\sigma=0$ \\
-4 & grf\_and\_joints.png       & Ground Reaction Forces e sforzo dei giunti VMC \\
-5 & torque\_distribution.png   & Ripartizione coppia anca/ginocchio e rapporto $|\tau_{hip}|/|\tau_{knee}|$ \\
-6 & attitude\_3d.png           & Roll e Yaw vs. tempo: robustezza ai disturbi fuori-piano \\
-7 & power\_and\_energy.png     & Potenza meccanica $P = \sum|\tau\omega|$ e energia totale (Joule) \\
-8 & horizontal\_phase\_portrait.png & Piano delle fasi $(e_x, \dot e_x)$: dimostra la convergenza all'origine \\
-9 & imu\_accelerations.png     & Accelerazioni 3D IMU raw: analisi shock e vibrazioni \\
+1 & inseguimento.png & riferimenti e stati di $\theta$, $x$, $v$; errori; altezza e offset CoM desiderato \\
+2 & disturbo\_e\_fase.png & risposta al disturbo e ritratto di fase $(\theta, \dot\theta)$ \\
+3 & coppie\_ruote.png & coppia comune e differenziale \\
+4 & gambe.png & angoli e coppie di anca e ginocchio \\
+5 & assetto.png & rollio e imbardata \\
+6 & potenza\_energia.png & potenza meccanica $\sum|\tau\omega|$ ed energia \\
+7 & fase\_orizzontale.png & piano $(e_x, e_v)$ \\
+8 & imu.png & accelerazioni IMU \\
+9--12 & zmp\_*.png & ZMP laterale e longitudinale, vista dall'alto, impronta \\
 \bottomrule
 \end{tabular}
 \end{center}
 
-\begin{lstlisting}[language=Python, caption=plot.py: Calcolo della potenza meccanica totale istantanea]
-def plot_power_and_energy(data, out_dir):
-    for law in ('mpc', 'smc'):
-        d = data[law]
-        power = []
-        energy = [0.0]
-        dt = 0.002   # 500 Hz
-        for i in range(len(d['t'])):
-            # Potenza ruote: P_wheel = |tau_comune * omega_ruota| * 2 (due ruote)
-            pw = abs(d['u'][i] * d['wheel_v'][i]) * 2.0
-            # Potenza gambe: P_leg = (|tau_hip * omega_hip| + |tau_knee * omega_knee|) * 2
-            pl = (abs(d['hip_u'][i] * d['hip_v'][i])
-                  + abs(d['knee_u'][i] * d['knee_v'][i])) * 2.0
-            power.append(pw + pl)
-            # Integrazione numerica (rettangoli): E(t) = integral_0^t P dt
-            energy.append(energy[-1] + (pw + pl) * dt)
+\begin{lstlisting}[language=Python, caption=plot.py: potenza meccanica ed energia]
+for law in _laws(data):
+    d = data[law]
+    power, energy = [], [0.0]
+    for i in range(len(d['t'])):
+        p = 2.0 * (abs(d['u'][i] * d['wheel_v'][i]) + abs(d['hip_u'][i] * d['hip_v'][i])
+                   + abs(d['knee_u'][i] * d['knee_v'][i]))
+        power.append(0.0 if math.isnan(p) else p)
+        if i:
+            energy.append(energy[-1] + power[-1] * (d['t'][i] - d['t'][i - 1]))
 \end{lstlisting}
 
 %=============================================================
 \chapter{Conclusioni}
 %=============================================================
 
-Questo manuale ha dimostrato che ogni riga del codice del progetto RoTino
-e' la traduzione diretta di un'equazione matematica della teoria del controllo:
+Questo manuale ha mostrato che ogni riga del codice del progetto RoTino
+e' la traduzione diretta di un'equazione della teoria del controllo:
 
 \begin{itemize}
     \item Le \textbf{funzioni di rotazione} in \texttt{kinematics.py} implementano
@@ -870,18 +841,16 @@ e' la traduzione diretta di un'equazione matematica della teoria del controllo:
     \item Il \textbf{modello VL-WIP} in \texttt{model.py} estrae automaticamente
           dall'URDF i parametri del modello lineare di Cui et al. (2022),
           garantendo coerenza tra simulazione e modello analitico.
-    \item Il \textbf{filtro di Kalman} in \texttt{estimator.py} implementa le
-          equazioni (20)-(21) del paper, fondendo IMU e odometria in modo ottimale.
-    \item Il \textbf{Super-Twisting} in \texttt{rotino\_smc} garantisce convergenza
-          in tempo finito con segnale continuo (no chattering), tramite l'algoritmo
-          di Levant con integratore aggiornato a ogni ciclo.
+    \item Il \textbf{filtro di Kalman} (\texttt{AxisKalman} in \texttt{solvers.py})
+          implementa le equazioni (20)-(21) del paper, fondendo IMU e odometria.
+    \item La \textbf{cascata ZMP} in \texttt{zmp\_balance.py} traduce il modello LIPM
+          e il Capture Point in un PID: lo ZMP desiderato e' l'uscita dell'anello
+          esterno, l'anteprima LIPM e' un filtro sul percorso pianificato.
     \item La \textbf{condensazione QP} in \texttt{solvers.py} trasforma un problema
           di programmazione dinamica a orizzonte $N$ in un QP denso di taglia $N$,
           risolvibile in microsecondi con FISTA grazie alla struttura box-constrained.
-    \item Il \textbf{benchmark} (\texttt{campaign.py}, \texttt{logger.py},
-          \texttt{plot.py}) fornisce 9 metriche di validazione che coprono
-          tracking, robustezza ai disturbi, consumo energetico e dinamica di
-          assetto tridimensionale.
+    \item Il \textbf{benchmark} esegue gli stessi otto scenari con PID e MPC e
+          produce, per ogni metrica, la legge migliore e i grafici sovrapposti.
 \end{itemize}
 
 \end{document}

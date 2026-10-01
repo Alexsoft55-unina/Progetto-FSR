@@ -1,8 +1,8 @@
 # Tecniche di controllo di RoTino
 
-Documento tecnico sulle tre leggi di controllo del workspace `~/rotino_ws`: **PID** (`rotino_pid`), **MPC + TV-LQR + VMC** (`rotino_mpc`) e **cascata sliding mode** (`rotino_smc`). Tutte e tre agiscono sullo stesso URDF, con la stessa attuazione in coppia a 500 Hz e la stessa libreria di modello (`rotino_description`). Il documento descrive il modello dinamico su cui poggiano, la struttura di ogni anello, l'origine numerica dei guadagni e delle costanti, e chiude con un'analisi del comportamento ai disturbi di MPC e SMC.
+Documento tecnico sulle due leggi di controllo del workspace `rotino_ws`: **PID con lo ZMP** (`rotino_pid`) e **MPC + TV-LQR + VMC** (`rotino_mpc`). Entrambe agiscono sullo stesso URDF, con la stessa attuazione in coppia a 500 Hz e la stessa libreria di modello (`rotino_description`). Il documento descrive il modello dinamico su cui poggiano, la struttura di ogni anello, l'origine numerica dei guadagni e delle costanti, e chiude con una sintesi comparativa. Il confronto misurato in Gazebo si rigenera con la suite di benchmark (`rotino_benchmark`, Appendice C).
 
-Scritto il 24/09/2026 sul codice presente in quel momento nel workspace.
+Scritto il 24/09/2026; aggiornato il 01/10/2026: PID riprogettato con lo ZMP (§3) e rimozione della cascata sliding mode dal progetto.
 
 ## Come leggere le affermazioni
 
@@ -31,7 +31,7 @@ Riferimento bibliografico principale: Z. Cui, Y. Xin, S. Liu, X. Rong, Y. Li, *M
 - $\theta$: inclinazione del pendolo equivalente, cioè del baricentro del corpo superiore rispetto all'asse, positiva quando il baricentro è **davanti** all'asse [rad];
 - $\varphi$: imbardata [rad].
 
-**Segno delle coppie.** Una coppia positiva sul giunto ruota (asse $+y$) fa ruotare la ruota in avanti: il centro ruota avanza con velocità $\omega r$, perché $\omega\hat y \times r\hat z = \omega r\,\hat x$. La reazione sul corpo è una coppia $-\tau$ attorno a $+y$. Una rotazione positiva attorno a $+y$ porta $\hat z$ verso $+\hat x$, cioè inclina il baricentro in avanti. Ne segue che una coppia positiva alle ruote **accelera l'asse in avanti e fa ruotare il pendolo all'indietro**: nel modello linearizzato $b_1 > 0$ e $b_2 < 0$. MPC e SMC inviano le coppie senza inversioni di segno. Il PID lavora in unità normalizzate con un segno motore `WHEEL_MOTOR_SIGN = -1` e un angolo di inclinazione definito con segno opposto; la conversione è nel §3.2.
+**Segno delle coppie.** Una coppia positiva sul giunto ruota (asse $+y$) fa ruotare la ruota in avanti: il centro ruota avanza con velocità $\omega r$, perché $\omega\hat y \times r\hat z = \omega r\,\hat x$. La reazione sul corpo è una coppia $-\tau$ attorno a $+y$. Una rotazione positiva attorno a $+y$ porta $\hat z$ verso $+\hat x$, cioè inclina il baricentro in avanti. Ne segue che una coppia positiva alle ruote **accelera l'asse in avanti e fa ruotare il pendolo all'indietro**: nel modello linearizzato $b_1 > 0$ e $b_2 < 0$. PID e MPC inviano le coppie in N·m senza inversioni di segno, e pubblicano l'inclinazione con la stessa convenzione (positiva con il baricentro davanti all'asse).
 
 **Modo comune e differenziale.** Con $\tau_l, \tau_r$ le coppie delle due ruote:
 $$\tau_c = \tfrac12(\tau_l+\tau_r), \qquad \tau_d = \tfrac12(\tau_r-\tau_l), \qquad \tau_l = \tau_c-\tau_d,\ \ \tau_r = \tau_c+\tau_d .$$
@@ -65,7 +65,7 @@ Tre aspetti del robot pesano sul controllo:
 
 1. **Rapporto di massa.** Le ruote sono l'18% della massa totale e, soprattutto, $2I_w/r^2 = 1{,}44$ kg: l'inerzia rotazionale delle ruote, riportata alla traslazione, vale il 41% di $m_b$. Per questo il termine in $I_w$ nei coefficienti (eq. 14) non è trascurabile.
 2. **Baricentro del torso avanzato.** La zavorra è montata a $(+0{,}045;\ 0;\ -0{,}045)$ m rispetto alla `base_link` e il box del torso ha il baricentro a $x = +0{,}025$ m. Il baricentro del torso sta a $(+0{,}0275;\ -0{,}0055)$ m dall'anca.
-3. **Inerzia del corpo superiore piccola rispetto alla Tabella 1 del paper.** Il paper assume $I_y = \tfrac13 m_b l^2$ (asta omogenea incernierata all'estremo). Per RoTino l'inerzia reale attorno al baricentro, calcolata dai tensori dell'URDF, è $I_y = 0{,}0174$ kg·m² nella posa nominale, contro $\tfrac13 m_b l^2 = 0{,}0311$ kg·m². Il valore della Tabella 1 sarebbe 1,8 volte troppo grande. MPC e SMC usano il valore reale (§1.5).
+3. **Inerzia del corpo superiore piccola rispetto alla Tabella 1 del paper.** Il paper assume $I_y = \tfrac13 m_b l^2$ (asta omogenea incernierata all'estremo). Per RoTino l'inerzia reale attorno al baricentro, calcolata dai tensori dell'URDF, è $I_y = 0{,}0174$ kg·m² nella posa nominale, contro $\tfrac13 m_b l^2 = 0{,}0311$ kg·m². Il valore della Tabella 1 sarebbe 1,8 volte troppo grande. L'MPC e il feedforward del PID usano il valore reale (§1.5).
 
 ### 1.2 Cinematica sagittale della gamba
 
@@ -75,9 +75,9 @@ Ogni gamba è una catena planare di due link con giunti rotoidali attorno a $y$.
 $$p_f(q) = p_{hip} + R_y(q_{hip})\,p_{k} + R_y(q_{hip}+q_{knee})\,p_{w}, \qquad J = \frac{\partial p_f}{\partial q} .$$
 Nella posa nominale **[C]**:
 $$J_0 = \begin{bmatrix} -0{,}1838 & -0{,}0919 \\ 0 & -0{,}0919\end{bmatrix}, \qquad \det J_0 = 0{,}01689\ \text{m}^2, \qquad J_0^{-T} = \begin{bmatrix} -5{,}44 & 0 \\ 5{,}44 & -10{,}88\end{bmatrix}\ \text{m}^{-1}.$$
-$J_0^{-T}$ converte coppie di giunto in forze al centro ruota: 1 N·m al ginocchio corrisponde a circa 10,9 N verticali. Il numero serve per dimensionare il termine robusto dello SMC delle gambe (§5.5).
+$J_0^{-T}$ converte coppie di giunto in forze al centro ruota: 1 N·m al ginocchio corrisponde a circa 10,9 N verticali.
 
-**Vincolo $q_{hip} = -q_{knee}/2$.** Con questo vincolo la ruota resta sulla verticale dell'anca e il torso resta orizzontale. La tabella dell'altezza usata da MPC e SMC per schedulare i guadagni e per il salto campiona 25 pose con $q_{hip} \in [-0{,}45;\ 0{,}45]$ e $q_{knee} = -2q_{hip}$ (`controller.py:169-175` in entrambi i package).
+**Vincolo $q_{hip} = -q_{knee}/2$.** Con questo vincolo la ruota resta sulla verticale dell'anca e il torso resta orizzontale. La tabella dell'altezza usata dall'MPC per schedulare i guadagni e per il salto campiona 25 pose con $q_{hip} \in [-0{,}45;\ 0{,}45]$ e $q_{knee} = -2q_{hip}$ (`controller.py:169-175` in entrambi i package).
 
 ### 1.3 Centroide equivalente (eq. 2-3)
 
@@ -97,7 +97,7 @@ $$ {}^wP_C = \frac{\sum_i m_i\,{}^wP_{Ci}(q)}{\sum_i m_i} = [S_C,\ Z_C]^T, \qqua
 
 $z_b$ è la distanza verticale anca-asse. La colonna $\theta$ è l'inclinazione **a torso orizzontale**: con il robot in quella posa il baricentro sta 1,0-1,8 cm davanti all'asse. Il robot in equilibrio non può quindi avere il torso orizzontale. In equilibrio $\theta = 0$, cioè il torso è ruotato all'indietro di circa 4,7° nella posa nominale. Questo spiega il `PITCH_OFFSET` del PID (§3.2).
 
-**Equivalenza fra baricentro totale e baricentro del corpo superiore.** Il PID misura l'inclinazione del baricentro dell'**intero** robot, MPC e SMC quella del **solo corpo superiore**. Le due coincidono. I baricentri delle ruote giacciono sull'asse, quindi rispetto al punto medio dell'asse $m_{tot}\,\Delta x_{tot} = m_b S_C$ e $m_{tot}\,\Delta z_{tot} = m_b Z_C$. Il rapporto $\Delta x/\Delta z$ e quindi l'angolo sono identici. **[D]**
+**Equivalenza fra baricentro totale e baricentro del corpo superiore.** Il PID misura l'inclinazione del baricentro dell'**intero** robot, l'MPC quella del **solo corpo superiore**. Le due coincidono. I baricentri delle ruote giacciono sull'asse, quindi rispetto al punto medio dell'asse $m_{tot}\,\Delta x_{tot} = m_b S_C$ e $m_{tot}\,\Delta z_{tot} = m_b Z_C$. Il rapporto $\Delta x/\Delta z$ e quindi l'angolo sono identici. **[D]**
 
 ### 1.4 Il VL-WIP non lineare (eq. 4-5)
 
@@ -140,7 +140,7 @@ Coefficienti lungo la griglia di pose, con $I_y$ reale **[C]**:
 
 $b_3 = 34{,}88$ rad/(s²·N·m) con $I_z = 0{,}0227$ kg·m² della posa nominale, tenuto costante.
 
-Con l'$I_y$ della Tabella 1 ($\tfrac13 m_b l^2$), in posa nominale si otterrebbe $a_2 = 84{,}0$ e $b_2 = -39{,}8$: 20% di instabilità in meno e 21% di autorità in meno rispetto al robot reale. Un super-twisting che inverte $b_2$ (§5.3) sbaglierebbe la coppia di quel fattore.
+Con l'$I_y$ della Tabella 1 ($\tfrac13 m_b l^2$), in posa nominale si otterrebbe $a_2 = 84{,}0$ e $b_2 = -39{,}8$: 20% di instabilità in meno e 21% di autorità in meno rispetto al robot reale. Un controllore che inverte $b_2$ sbaglierebbe la coppia di quel fattore.
 
 ### 1.6 Proprietà strutturali
 
@@ -154,7 +154,7 @@ In termini fisici: per accelerare in avanti a regime il baricentro deve stare da
 
 **Guadagno statico inclinazione → accelerazione.** Se il pendolo è tenuto a inclinazione costante ($\ddot\theta = 0$), la coppia necessaria è $u = -a_2\theta/b_2$ e l'asse accelera con
 $$\ddot s = \Big(a_1 - \frac{b_1a_2}{b_2}\Big)\theta \equiv g_{st}\,\theta,\qquad g_{st} = 6{,}14\ \mathrm{m/(s^2\cdot rad)}\ \text{in posa nominale}.$$
-**[D]+[C]** È il meccanismo su cui si reggono l'anello esterno dello SMC (§5.2) e l'MPC (§4.5): **l'inclinazione è l'ingresso effettivo della traslazione**. Il suo limite superiore fissa la massima accelerazione ottenibile. Per inclinazioni costanti di 10,48° e 12,03°, che sono i limiti di MPC e SMC, $g_{st}\tan\theta$ vale rispettivamente 1,13 e 1,31 m/s². La formula usa la tangente perché così è definito $\theta_{ref}$ nell'MPC; per angoli piccoli coincide con $g_{st}\theta$.
+**[D]+[C]** È il meccanismo su cui si reggono il PID, che comanda l'offset fra baricentro e ZMP (§3.2), e l'MPC (§4.5): **l'inclinazione è l'ingresso effettivo della traslazione**. Il suo limite superiore fissa la massima accelerazione ottenibile. Per l'inclinazione costante di 10,48°, il limite dell'MPC, $g_{st}\tan\theta$ vale 1,13 m/s². Il PID limita l'accelerazione comandata a 3 m/s². La formula usa la tangente perché così è definito $\theta_{ref}$ nell'MPC; per angoli piccoli coincide con $g_{st}\theta$.
 
 **Disaccoppiamento.** $A$ e $B$ sono a blocchi: sagittale $(s, \theta, \dot s, \dot\theta)$ su $\tau_l+\tau_r$, imbardata $(\varphi, \dot\varphi)$ su $\tau_r-\tau_l$. Nel modello lineare il bilanciamento e la sterzata sono indipendenti.
 
@@ -171,14 +171,14 @@ I due modelli si completano. Il VL-WIP descrive come le ruote tengono in equilib
 ### 1.8 Tempo discreto, filtri e ritardi
 
 - **Frequenze.** Fisica a 2 kHz (`max_step_size` 0,5 ms), `controller_manager` a 500 Hz, odometria a 500 Hz. I tre nodi eseguono un passo per ogni messaggio di `/joint_states`: $\Delta t = 2$ ms, misurato costante **[E]**. L'MPC gira ogni cinque passi (100 Hz).
-- **Filtri del primo ordine** $y_k = \alpha y_{k-1} + (1-\alpha)x_k$ a 500 Hz. La costante di tempo equivalente è $\tau = -\Delta t/\ln\alpha$: con $\alpha = 0{,}8$ (su $\dot\theta$ e $\dot s$ in MPC e SMC) $\tau = 8{,}96$ ms; con $\alpha = 0{,}9$ (su $\Delta s$ nell'MPC) $\tau = 19{,}0$ ms. **[D]** Alla frequenza del polo instabile (10,3 rad/s) il filtro su $\dot\theta$ introduce 5,3° di ritardo di fase. A 70 rad/s ne introduce 32°. Il secondo valore è rilevante per il ciclo limite dello SMC (§6.7).
+- **Filtri del primo ordine** $y_k = \alpha y_{k-1} + (1-\alpha)x_k$ a 500 Hz. La costante di tempo equivalente è $\tau = -\Delta t/\ln\alpha$: con $\alpha = 0{,}8$ (su $\dot\theta$ e $\dot s$ nell'MPC) $\tau = 8{,}96$ ms; con $\alpha = 0{,}9$ (su $\Delta s$ nell'MPC) $\tau = 19{,}0$ ms. **[D]** Alla frequenza del polo instabile (10,3 rad/s) il filtro su $\dot\theta$ introduce 5,3° di ritardo di fase. A 70 rad/s ne introduce 32°.
 - **$\dot\theta$** è ottenuta per differenza finita di $\theta$ (calcolato dalla cinematica e dall'IMU) e poi filtrata. Nessun controllore usa direttamente la velocità di beccheggio del giroscopio per $\dot\theta$: $\theta$ è l'angolo del baricentro rispetto all'asse, che cambia anche per il moto delle gambe.
 
 ---
 
-## 2. Stima dello stato (MPC e SMC)
+## 2. Stima dello stato (MPC)
 
-MPC e SMC usano lo stesso stimatore, riga per riga (`rotino_mpc/controller.py:504-574`, `rotino_smc/controller.py:583-650`). Il PID **non** lo usa: legge posa e velocità del torso dalla ground truth del simulatore (`/rotino/odom`) e ne deriva stati senza filtro. Nel confronto è una differenza di condizioni, non di legge di controllo, e va tenuta presente.
+L'MPC usa lo stimatore descritto qui (`rotino_mpc/controller.py:504-574`). Il PID **non** lo usa: legge posa e velocità del torso dalla ground truth del simulatore (`/rotino/odom`) e ne deriva stati senza filtro. Nel confronto è una differenza di condizioni, non di legge di controllo, e va tenuta presente.
 
 ### 2.1 Grandezze misurate
 
@@ -222,130 +222,78 @@ Gli autovalori di $(I-K_\infty)F$ sono 0,9929 e 0,9567, cioè costanti di tempo 
 - $\theta$, $l$: dal centroide equivalente (§1.3), usando $R$ per portare in terna mondo il vettore asse→baricentro.
 - $\dot\theta$: differenza finita filtrata (§1.8).
 
-L'MPC usa in più la velocità del **baricentro** $V_{com} = V_b + \omega_w\times(Rc_b)$ come stato del proprio modello orizzontale (`rotino_mpc/controller.py:570-572`). Lo SMC non la usa. Il perché è nel §5.2.
+L'MPC usa in più la velocità del **baricentro** $V_{com} = V_b + \omega_w\times(Rc_b)$ come stato del proprio modello orizzontale (`rotino_mpc/controller.py:570-572`).
 
 ### 2.4 Stato di appoggio
 
 Isteresi sulla forza normale totale (spegnimento sotto 1,5 N, accensione sopra 6 N) con conferma temporale (4 ms per la perdita, 10 ms per il ritorno) e scarto dei messaggi più vecchi di 6 ms. Il sensore di Gazebo pubblica solo mentre c'è contatto, quindi l'assenza di messaggi significa assenza di contatto. L'asimmetria dei tempi di conferma rileva in fretta il decollo e scarta i rimbalzi all'atterraggio.
 
-**La forza di contatto in Gazebo non è misurata.** In tutte le prove eseguite per questo documento (MPC e SMC, 33.000 campioni) la forza normale totale pubblicata su `/rotino/debug` vale sempre esattamente 34,629 N **[S-G]**. È $2\cdot\tfrac12 m_bg$, il valore di ripiego che `_contact_cb` assegna quando un messaggio di contatto non contiene wrench (MPC riga 283-284, SMC riga 316-317). Non è il peso totale (42,1 N), che è quello che un sensore reale riporterebbe. Il sensore di contatto di Gazebo, con questa configurazione, segnala quindi la presenza del contatto ma non la sua intensità. Ne seguono due fatti:
+**La forza di contatto in Gazebo non è misurata.** In tutte le prove eseguite per questo documento (33.000 campioni) la forza normale totale pubblicata su `/rotino/debug` vale sempre esattamente 34,629 N **[S-G]**. È $2\cdot\tfrac12 m_bg$, il valore di ripiego che `_contact_cb` assegna quando un messaggio di contatto non contiene wrench (MPC riga 283-284). Non è il peso totale (42,1 N), che è quello che un sensore reale riporterebbe. Il sensore di contatto di Gazebo, con questa configurazione, segnala quindi la presenza del contatto ma non la sua intensità. Ne seguono due fatti:
 - le soglie di 1,5 N e 6 N si riducono a "messaggio presente o assente";
-- ogni grandezza calcolata dalla forza normale è di fatto costante in appoggio: in particolare il limite di aderenza dello SMC (§5.3) vale 1,83 N·m per ruota.
+- ogni grandezza calcolata dalla forza normale è di fatto costante in appoggio. Per questo lo ZMP va ricostruito dalla dinamica (`rotino_description/zmp.py`, `docs/Studio_ZMP.md`).
+- Il sensore pubblica a circa 2 kHz: la sottoscrizione deve avere coda 1, altrimenti i messaggi arrivano già vecchi e il robot risulta in volo (`docs/PID_ZMP.md` §7).
 
 ---
 
-## 3. Controllore PID
+## 3. Controllore PID con lo ZMP
 
-`src/rotino_pid/rotino_pid/controller.py`. È il porting a ROS 2 di un controllore MuJoCo (`RoTino_Ctrl_BalJumpAchieve.py`) nato come bilanciamento con salto verticale. Le gambe erano servo di posizione dentro il simulatore; nel workspace sono state **portate a coppia** perché le tre leggi usino la stessa attuazione (`docs/Storico_lavoro.md` §2.4).
+`src/rotino_pid/rotino_pid/controller.py` (nodo ROS) e `zmp_balance.py` (legge di controllo pura, testata offline). Nasce dal porting di un controllore MuJoCo (`RoTino_Ctrl_BalJumpAchieve.py`, bilanciamento con salto verticale). Il 01/10/2026 è stato riprogettato attorno allo **Zero Moment Point**. Progetto, prove e confronto con la versione precedente sono in `docs/PID_ZMP.md`; qui si riassume la struttura.
 
 ### 3.1 Struttura degli anelli
 
-Il nome "PID" è storico. Nel codice non ci sono termini integrali: ci sono quattro gruppi di anelli proporzionali-derivativi coordinati da un supervisore a stati.
-
 ```
-                        ┌───────────────────────────── supervisore del salto (7 stati) ─────────────────────────────┐
-                        │  sceglie: guadagni ruote per fase, riferimenti di giunto, x_ref dopo l'atterraggio          │
-                        └───────┬───────────────────────────────┬───────────────────────────────────────────────────┘
-                                │                               │
-   x_ref, ẋ_ref ──►  (A) retroazione di stato sagittale    (D) PD di giunto ×4  ◄── q_ref(t) (profili smoothstep)
-   θ_ref=4,73° ──►      θ, θ̇, x, ẋ  →  wheel_u (modo comune)        │
-                                │                                   ▼
-   traiettoria planare ──► (C) guida laterale → ψ_cmd ──► (B) PD di rotta → yaw_u (modo differenziale)
-                                │                                   │
-                                └──────► τ_l = 18·clamp(u − yaw_u),  τ_r = 18·clamp(u + yaw_u) ◄──┘
+ percorso pianificato ──► anteprima LIPM ──► c_ref, c̈_ref ─────────────┐
+ (S, trapezio, va e vieni, teleop)                                    ▼
+ CoM, contatto ──► errore Capture Point ──► PI (DCM) ──► ZMP desiderato ──► PD sull'offset ZMP ──► τ_c (modo comune)
+                   ξ = c + ċ/ω                ρ = 0,4      p_des = c − s_des     + feedforward di modello
+ traiettoria planare ──► (C) guida laterale → ψ_cmd ──► (B) PID di rotta + attrito ──► τ_d (modo differenziale)
+ gambe ◄── (D) PD cartesiano ruota→anca + peso in feedforward ◄── altezza, salto (supervisore a 7 stati)
+                                              τ_l = τ_c − τ_d,   τ_r = τ_c + τ_d
 ```
 
-- **(A) Bilanciamento e posizione**, modo comune. Una sola legge statica su quattro stati. Non è una cascata: posizione e velocità dell'asse entrano **in parallelo** all'inclinazione nella stessa somma.
-- **(B) Rotta**, modo differenziale. PD sull'errore di rotta. Attivo **solo** con la traiettoria planare; nel bilanciamento semplice e nel salto l'imbardata è ad anello aperto (`yaw_u = 0`, riga 639).
-- **(C) Guida laterale**, esterno a (B). Trasforma l'errore laterale in una correzione della rotta di riferimento. Insieme a (B) forma l'unica vera cascata del controllore.
-- **(D) Gambe.** Quattro PD di giunto indipendenti (anca e ginocchio, due lati) in spazio giunti, con riferimenti generati dal supervisore.
+**Sensori.** Come prima, tutto viene dalla ground truth: posa del torso da `/rotino/odom`, baricentro e ruote dalla cinematica diretta sull'URDF. `/joint_states` e `/rotino/odom` sono accoppiati per timestamp (`_try_control`). Le derivate sono differenze finite non filtrate. È una differenza di condizioni rispetto all'MPC, che usa IMU e Kalman (§2), e va tenuta presente nel confronto.
 
-Le gambe e le ruote non si scambiano informazioni se non attraverso la dinamica del robot: (A) assume gambe rigide nella posa comandata.
+### 3.2 Anello (A): lo ZMP come ingresso
 
-**Sensori.** Tutto viene dalla ground truth: posa del torso da `/rotino/odom`, baricentro e posizione delle ruote dalla cinematica diretta sull'URDF. `/joint_states` e `/rotino/odom` vengono accoppiati per timestamp (`_try_control`, riga 399) perché a 500 Hz uno sfasamento di un passo fra posa e giunti rende rumorosa la derivata dell'inclinazione. Le derivate ($\dot\theta$, $\dot x$) sono differenze finite **non filtrate**.
+Su due ruote lo ZMP longitudinale non può muoversi dentro un appoggio: sta sulla linea dei contatti, e sono le ruote a spostarla. Con il modello *cart-table* del LIPM
+$$\ddot c = \omega^2 (c - p),\qquad \omega^2 = g/h,$$
+dove $c$ è il baricentro, $p$ lo ZMP (cioè il contatto) e $h$ l'altezza del baricentro, lo ZMP è la leva con cui si governa il baricentro.
 
-### 3.2 Anello (A): bilanciamento
+- **Anello esterno, PI sul Capture Point.** $\xi = c + \dot c/\omega$ evolve come $\dot\xi = \omega(\xi - p)$. Imponendo $\dot\xi = \dot\xi_{ref} - k_\xi e_\xi - k_i\!\int e_\xi$ si ottiene l'offset desiderato fra baricentro e ZMP:
+$$s_{des} = c - p_{des} = s_{ff} - \rho\,\big[\dot e_c/\omega + (k_\xi/\omega)\,e_\xi + (k_i/\omega)\!\textstyle\int e_\xi\big],\qquad |s_{des}| \le a_{max}/\omega^2 .$$
+- **Anello interno, PD sull'offset ZMP:** $\tau_c = \tau_{ff} + K_s(s - s_{des}) + K_{sd}(\dot s - \dot s_{ff})$.
+- **Feedforward.** $s_{ff}$ e $\tau_{ff}$ sono l'inclinazione e la coppia che mantengono l'accelerazione di riferimento a regime, dal VL-WIP linearizzato (§1.5): 21,8 mm di offset per m/s².
+- **Anteprima LIPM.** Il riferimento del baricentro è la soluzione limitata di $\ddot c = \omega^2(c - p_{ref})$: il percorso delle ruote filtrato con il nucleo simmetrico $(\omega/2)e^{-\omega|u|}$. Il robot si inclina **prima** del gradino di accelerazione, come richiede un sistema a fase non minima. Con comandi da dashboard il futuro non è noto: si usa l'accelerazione corrente del riferimento.
 
-**Definizione dell'angolo.** Il PID definisce
-$$\theta_{PID} = -\operatorname{atan2}\big(\Delta x - x_0,\ \Delta z\big)$$
-con $\Delta x, \Delta z$ la posizione del baricentro totale rispetto al punto medio delle ruote lungo la direzione di marcia, e $x_0$ = `com_x_ref` = 0,01096 m, il valore di $\Delta x$ nella posa a giunti nulli e torso orizzontale (righe 240-243). $\theta_{PID} = 0$ corrisponde quindi alla posa a torso orizzontale, **non** all'equilibrio.
+**Guadagni** (per ruota): $K_s = 60$ N·m/m, $K_{sd} = 5$ N·m·s/m, $\rho = 0{,}4$, $k_\xi = 1{,}5$ s⁻¹, $k_i = 0{,}5$ s⁻², $a_{max} = 3$ m/s², saturazione 10 N·m.
 
-**Offset di equilibrio.** In equilibrio il baricentro sta sulla verticale dell'asse, $\Delta x = 0$, e $\theta_{PID} = -\operatorname{atan2}(-x_0, \Delta z_0) = \operatorname{atan}(0{,}01096/0{,}13343) = 4{,}694°$. `PITCH_OFFSET` = 4,73° (riga 69) coincide con l'equilibrio statico entro 0,036°. **[C]** Per il §1.3 lo stesso angolo vale per il solo corpo superiore (4,69° in tabella). Il riferimento $\theta_{ref} = 4{,}73°$ significa quindi "baricentro sopra l'asse". L'errore residuo di 0,036° è compensato a regime da un piccolo spostamento di posizione, perché la legge ha un termine in $x$.
-
-**Legge.** Con i guadagni in unità normalizzate e $u\in[-1,1]$ scalato per `WHEEL_GEAR` = 18 N·m:
-$$u_{raw} = k_\theta(\theta_{PID}-\theta_{ref}) + k_{\dot\theta}\dot\theta_{PID} - k_{\dot x}(\dot x - \dot x_{ref}) - k_x(x-x_{ref}),\qquad \tau_c = 18\cdot(-u_{raw}) .$$
-Posto $\theta_{PID} - \theta_{ref} \simeq -\theta$, con $\theta$ l'inclinazione fisica del §0, la coppia per ruota diventa
-$$\tau_c = 18\,\big[k_\theta\theta + k_{\dot\theta}\dot\theta + k_{\dot x}(\dot x-\dot x_{ref}) + k_x(x-x_{ref})\big].$$
-Ha la stessa struttura e gli stessi segni della riga sagittale dell'LQR ($U = -KX$ con $K$ negativo, §4.3). **[D]**
-
-**Guadagni in unità fisiche e confronto con l'LQR dell'MPC** (per ruota, posa nominale) **[C]**:
-
-| | $x$ [N·m/m] | $\theta$ [N·m/rad] | $\dot x$ [N·m·s/m] | $\dot\theta$ [N·m·s/rad] | saturazione |
-|---|---|---|---|---|---|
-| PID (`K_X`, `K_THETA`, `K_X_D`, `K_THETA_D`) × 18 | 14,4 | 23,4 | 2,88 | 3,06 | 6,3 N·m (`MAX_WHEEL` 0,35) |
-| TV-LQR dell'MPC, $l = 0{,}163$ m | 3,87 | 20,28 | 5,64 | 2,78 | 10 N·m |
-
-I guadagni su $\theta$ e $\dot\theta$ sono vicini: la stabilizzazione del pendolo è simile. Sulla traslazione il PID è molto diverso: rigidezza di posizione 3,7 volte più alta e smorzamento di velocità la metà.
-
-**Poli ad anello chiuso** sul VL-WIP linearizzato in posa nominale, sagittale, a tempo continuo **[C]**:
-
-| | poli |
-|---|---|
-| PID | $-253$; $-7{,}62$; $\mathbf{-0{,}149\pm 2{,}137j}$ |
-| TV-LQR | $-179$; $-8{,}13$; $-1{,}08\pm0{,}68j$ |
-
-Il PID ha una coppia di poli lenti con smorzamento $\zeta = 0{,}069$ e periodo di 2,9 s: il modo di traslazione è quasi non smorzato. È la conseguenza diretta del rapporto $k_x/k_{\dot x}$. Il modello lineare, da solo, prevede un'oscillazione di avanti-indietro lenta e persistente, in cui l'inclinazione segue l'accelerazione. È coerente con le oscillazioni di ±3-7° dell'originale MuJoCo **[E]**, ma quella misura include anche le gambe cedevoli, che il modello a gambe rigide non contiene.
-
-**Guadagni per fase** (`balance_gains_for_state`, riga 173), in N·m per ruota **[C]**:
-
-| Fase | $k_\theta$ | $k_{\dot\theta}$ | $k_{\dot x}$ | $k_x$ | sat. |
-|---|---|---|---|---|---|
-| BALANCE | 23,4 | 3,06 | 2,88 | 14,4 | 6,3 |
-| PRELOAD | 23,4 | 3,96 | 3,60 | 7,2 | 6,3 |
-| THRUST | 23,4 | 4,50 | 3,24 | 1,44 | 6,3 |
-| FLIGHT | 23,4 | 1,80 | 0 | 0 | 1,8 |
-| LANDING | 23,4 | 3,24 | 1,80 | 0 | 3,96 |
-| RECOVERY | 23,4 | 3,60 | 2,16 | 2,88 | 5,04 |
-| SETTLE | 23,4 | 3,06 | 3,96 | 2,16 | 6,3 |
-
-Logica della tabella:
-- $k_\theta$ non cambia mai: la stabilizzazione dell'instabile non si negozia.
-- Durante lo squat e la spinta (PRELOAD, THRUST) si aumenta lo smorzamento di $\dot\theta$ e si riduce il richiamo in posizione. Il moto verticale delle gambe perturba $\theta$, e un richiamo di posizione rigido convertirebbe quel disturbo in accelerazioni orizzontali.
-- In volo la coppia è limitata a 1,8 N·m e non c'è richiamo di traslazione: le ruote non toccano terra e ogni coppia si scarica sul beccheggio del corpo in aria.
-- In atterraggio si azzera $k_x$ e si ammette lo scivolamento. Il riferimento di posizione viene poi riallineato al punto di atterraggio (`x_ref_active = x`, riga 716), così il robot non cerca di tornare dove ha spiccato il salto.
-- In SETTLE si alza lo smorzamento di velocità e si abbassa la rigidezza di posizione, cioè si lavora sul modo lento poco smorzato individuato sopra.
+**Perché $\rho < 1$.** La cascata LIPM "pura" presuppone un anello interno infinitamente veloce. A 500 Hz, con 1–2 campioni di ritardo e il modo pendolo-ruote a circa 10 rad/s, il termine $\dot c/\omega$ a piena autorità diventa retroazione positiva sulla velocità delle ruote. I guadagni sono stati scelti per posizionamento robusto dei poli sul modello discretizzato, su dieci casi: massa ±20 %, anca ±0,3 rad, ritardo 1 o 2 campioni. Poli nominali: $-0{,}5$; $-2{,}3\pm0{,}2j$; $-9{,}8$; $-52$ s⁻¹. **Smorzamento minimo 0,69** su tutti i casi **[C]**.
 
 ### 3.3 Anelli (B) e (C): rotta e guida planare
 
-Solo con `planar_enable` (`_planar_tracking`, riga 500). La traiettoria è una curva a S cubica $y(x) = Y(3u^2 - 2u^3)$, $u = x/X$, percorsa con una legge oraria quintica in ascissa curvilinea, per cui velocità e accelerazione sono nulle agli estremi (`planar_trajectory.py`).
-
-**(C) Guida laterale.** Con $e_\perp$ l'errore laterale dell'asse rispetto al punto di riferimento:
+**(C) Guida laterale** (solo con `planar_enable`). Con $e_\perp$ l'errore laterale dell'asse:
 $$\psi_{cmd} = \psi_{ref} - \operatorname{atan}(K_{lat}\,e_\perp)\cdot\min\!\big(1,\ |v_{ref}|/0{,}10\big),\qquad K_{lat} = 2\ \text{rad/m}.$$
-L'arcotangente limita la correzione a ±90° e per errori piccoli dà 2 rad di rotta per metro di errore. Il fattore di velocità azzera la correzione da fermo: un veicolo differenziale annulla l'errore laterale solo muovendosi (vincolo anolonomo), e da fermo girare sul posto per inseguire un punto laterale non riduce l'errore.
+Il fattore di velocità azzera la correzione da fermo, perché un veicolo differenziale annulla l'errore laterale solo muovendosi.
 
-**(B) Rotta.** PD in unità normalizzate, saturato a `MAX_YAW` = 0,15 (2,7 N·m):
-$$u_{yaw} = K_\psi(\psi_{cmd}-\psi) + K_\omega(\dot\psi_{ref}-\dot\psi),\qquad K_\psi\cdot18 = 1{,}8\ \mathrm{N\cdot m/rad},\quad K_\omega\cdot 18 = 0{,}45\ \mathrm{N\cdot m\cdot s/rad}.$$
-Con $\ddot\varphi = 2b_3\tau_d$ i poli sono le radici di $\sigma^2 + 2b_3\cdot0{,}45\,\sigma + 2b_3\cdot1{,}8$: **$-26{,}7$ e $-4{,}7$ rad/s**, cioè un anello sovrasmorzato **[C]**. Il commento alla riga 82 dichiara che l'attrito di strisciamento delle ruote in curva richiede circa 5 volte il guadagno calcolato sulla sola inerzia **[E]**. Il modello (§1.4) non contiene questo attrito; MPC e SMC lo compensano con un feedforward esplicito (§4.4).
+**(B) Rotta.** PID sempre attivo: mantiene la rotta anche da fermo e nei moti rettilinei.
+$$\tau_d = 1{,}8\,(\psi_{cmd}-\psi) + 0{,}45\,(\dot\psi_{ref}-\dot\psi) + 0{,}25\tanh(\dot\psi_{ref}/0{,}01) + 0{,}10\,\dot\psi_{ref} + 0{,}6\!\textstyle\int(\psi_{cmd}-\psi),$$
+saturato a 2,7 N·m. I termini d'attrito e l'integrale sono quelli identificati in Gazebo per l'MPC (§4.5). Senza di essi il robot girava a scatti per lo stick-slip delle ruote, e lo ZMP laterale seguiva quegli scatti.
 
-L'errore lungo la traiettoria e l'errore di velocità sostituiscono $x - x_{ref}$ e $\dot x - \dot x_{ref}$ in (A).
+### 3.4 Anello (D): gambe in spazio cartesiano
 
-### 3.4 Anello (D): gambe in spazio giunti
+$$\tau = J^T\big[K_p(p_{des} - p) - K_d\,J\dot q + F_{ff}\big] + b\,\dot q,\qquad F_{ff} = -\tfrac12 m_bg\,\hat z_b,$$
+dove $p$ è il centro ruota rispetto all'anca in `base_link` (`leg_fk`) e $b\dot q$ compensa lo smorzamento dei giunti dell'URDF.
+- **In appoggio:** $K_p = \operatorname{diag}(1500, 5000)$ N/m, $K_d = \operatorname{diag}(40, 80)$ N·s/m.
+- **Nel salto:** (3000, 4000) / (60, 80).
+- **In volo:** (800, 800) / (20, 20), senza sostegno.
 
-Per ciascun giunto (`_publish_legs`, riga 454):
-$$\tau = \operatorname{sat}_{60}\Big(\operatorname{sat}_{60}\big(k_p(q_{ref}-q)\big) + \operatorname{sat}_{8}\big(-k_v\dot q\big)\Big)$$
-con $k_p$ = 160 (anca), 200 (ginocchio) N·m/rad e $k_v$ = 12, 14 N·m·s/rad.
+In spazio giunti la rigidezza di appoggio vale circa 51 N·m/rad all'anca e 55 N·m/rad al ginocchio, con circa 1 N·m·s/rad di smorzamento. Un passo da 2 ms non può più scavalcare l'inerzia riflessa della gamba. Il **ciclo limite bang-bang** del PD di giunto precedente (160–200 N·m/rad, `diagnostics/06_diagnosi.txt`) scompare, e con esso la saturazione ad hoc dello smorzamento.
 
-**Rigidezza equivalente al piede.** Nella posa nominale $K_x = J^{-T}\operatorname{diag}(160, 200)J^{-1}$ vale, in N/m per gamba **[C]**:
-$$K_x = \begin{bmatrix} 4736 & -4736\\ -4736 & 28417\end{bmatrix}.$$
-In verticale è circa 24 volte più rigida della molla virtuale dello SMC (1200 N/m, §5.5). Le gambe del PID sono pensate come quasi rigide: il PID muove il robot per **posizioni di giunto**, non per forze.
-
-**Perché lo smorzamento è saturato a ±8 N·m.** Nel controllore MuJoCo originale questo PD girava dentro il simulatore a ogni passo di fisica (2 kHz). Portato nel nodo gira a 500 Hz. La diagnosi (`diagnostics/06_diagnosi.txt`) ha stabilito la causa del "calcio" al rilascio **[E]**. Con la coppia massima di 60 N·m e un'inerzia riflessa al ginocchio di circa $7\cdot10^{-3}$ kg·m² (gamba scarica: stinco più ruota attorno al ginocchio), l'accelerazione massima è $\alpha = 8570$ rad/s². In un periodo di campionamento la velocità può crescere di $\alpha\Delta t$: 17,1 rad/s a 500 Hz contro 4,3 rad/s a 2 kHz. In pochi campioni si arriva a 70 rad/s, dove $k_v\dot q = 840$ N·m, 14 volte il limite. Il termine di smorzamento satura e cambia segno a ogni campione: è un **bang-bang a tempo discreto**, non un'instabilità dei guadagni in tempo continuo.
-
-Il rimedio limita l'energia che un picco di velocità può iniettare in un periodo senza togliere autorità al termine proporzionale. La scansione riportata nella diagnosi **[E]** mostra che abbassare $k_v$ peggiora sempre (fino alla caduta) e che la saturazione del solo smorzamento a 8 N·m dà il risultato migliore (11,5° medi). Il robot resta comunque a un'inclinazione media di circa 11° contro i circa 5° dell'originale. La diagnosi attribuisce il residuo all'anello (A), tarato assumendo gambe servoassistite a 2 kHz: con gambe più cedevoli il sistema visto dalle ruote cambia. Questa ipotesi non è verificata.
+**Inclinazione in curva (opzionale).** `zmp_lateral:=true` accorcia la gamba interna e allunga quella esterna, portando il CoM verso l'interno di $h a_y/g$ ($\sin\varphi = a_y/g$), con la stessa anteprima LIPM. È disattivata di default: con le ruote cilindriche dell'URDF il contatto salta da uno spigolo all'altro quando il camber si inverte (`PID_ZMP.md` §6).
 
 ### 3.5 Supervisore del salto
 
-Sette stati: BALANCE → PRELOAD → THRUST → FLIGHT → LANDING → RECOVERY → SETTLE → BALANCE.
+Sette stati: BALANCE → PRELOAD → THRUST → FLIGHT → LANDING → RECOVERY → SETTLE → BALANCE. I riferimenti di giunto sono quelli del controllore MuJoCo e vengono convertiti in posizioni cartesiane della ruota con `leg_fk`.
 
 | Stato | Riferimenti di giunto (anca, ginocchio) | Uscita |
 |---|---|---|
@@ -356,9 +304,9 @@ Sette stati: BALANCE → PRELOAD → THRUST → FLIGHT → LANDING → RECOVERY 
 | RECOVERY | ritorno a (0, 0) in 2,0 s | dopo 2,0 s |
 | SETTLE | (0, 0) | assestamento per 0,30 s o 12 s di attesa |
 
-- **Profili.** Lo smoothstep $3\tau^2-2\tau^3$ ha velocità nulla agli estremi e non chiede coppie a gradino. Il profilo di spinta $1-(1-\tau)^3$ ha velocità **massima all'inizio**: l'estensione più rapida possibile nel tempo di spinta.
-- **Decollo.** È confermato solo se valgono insieme quattro condizioni: contatto perso (isteresi), forza normale sotto soglia, distacco geometrico della ruota (sia assoluto > 0,5 mm sia relativo alla quota di inizio salto > 3 mm) e velocità verticale del baricentro > 0,08 m/s. La congiunzione esclude i falsi decolli dovuti a rimbalzi o a scarichi momentanei.
-- **Assestamento.** Tutte le condizioni devono valere per 0,30 s: |errore di inclinazione| < 2°, |velocità di beccheggio| < 8°/s, |velocità| < 0,04 m/s, |comando ruote| < 0,06 e |errore di posizione| < 1,5 cm.
+- **Ruote nelle fasi di salto.** La correzione del Capture Point è scalata: 0,5 in PRELOAD, 0,1 in THRUST, 0,3 in LANDING e 0,5 in RECOVERY. L'integrale è congelato. In volo le ruote sono solo smorzate.
+- **Decollo.** È confermato solo se valgono insieme quattro condizioni: contatto perso, forza sotto soglia, distacco geometrico della ruota e velocità verticale del baricentro sopra 0,08 m/s.
+- **Salto a comando.** Il salto parte anche da `/rotino/cmd_jump`: il robot si ferma, salta sul posto e al termine riprende il comando da dove è atterrato.
 
 ---
 
@@ -407,14 +355,14 @@ Quanto segue deriva dal codice, non dal paper.
 
 **(a) Anticipo sui riferimenti in un sistema a fase non minima.** L'MPC riceve i riferimenti $s(t_i), \dot s(t_i), z(t_i), \dot z(t_i)$ per tutti i 25 nodi dell'orizzonte (`_run_mpc`, riga 703). Il robot deve inclinarsi *prima* di accelerare (§1.6) e l'inclinazione ha un limite (§4.5). Vedere il riferimento con 0,5 s di anticipo permette di distribuire lo spostamento del baricentro e di iniziarlo prima della variazione del riferimento. L'LQR, da solo, reagisce solo all'errore presente. Con un profilo di velocità noto la differenza è strutturale.
 
-**(b) Vincoli rispettati nel piano, non solo nel comando.** Il limite su $\Delta s$ entra nella QP. Il piano che l'MPC restituisce, cioè la traiettoria predetta del baricentro, rispetta quindi il limite su tutto l'orizzonte. L'LQR insegue quel piano (`s_plan`, righe 642-647) e non il riferimento grezzo: il riferimento dell'anello veloce è già compatibile con i limiti fisici. Lo SMC invece satura $\theta^*$ a posteriori (§5.2) e deve gestire il windup con logica ad hoc.
+**(b) Vincoli rispettati nel piano, non solo nel comando.** Il limite su $\Delta s$ entra nella QP. Il piano che l'MPC restituisce, cioè la traiettoria predetta del baricentro, rispetta quindi il limite su tutto l'orizzonte. L'LQR insegue quel piano (`s_plan`, righe 642-647) e non il riferimento grezzo: il riferimento dell'anello veloce è già compatibile con i limiti fisici. Il PID invece satura l'offset ZMP desiderato a posteriori (§3.2) e protegge l'integrale con un anti-windup.
 
 **(c) Un'unica sintesi per la forza verticale.** $F_z$ viene pianificata con lo stesso modello e con limiti che dipendono dalla fase: in spinta il tetto sale da 3 a 6 volte il peso. Lo stesso blocco gestisce appoggio, variazione di quota e spinta del salto.
 
 **(d) Separazione dei tempi.** 100 Hz bastano: il tempo caratteristico del modello orizzontale è $\sqrt{h/g} = 0{,}13$ s, cioè 13 intervalli dell'MPC. La parte instabile e veloce resta all'LQR a 500 Hz.
 
 **Costi e limiti:**
-- **Nessuna azione integrale.** Né l'LQR né l'MPC hanno stati integrali o un modello del disturbo. Sul modello ridotto, un disturbo persistente lascia al solo TV-LQR un errore di posizione a regime: 0,65 m con 3 N costanti sul torso, 0,08 m con 0,3 N·m di bias per ruota **[S-R]**, §6.6. Per l'MPC completo non l'ho misurato, ma nulla nella sua formulazione annulla quell'errore.
+- **Nessuna azione integrale.** Né l'LQR né l'MPC hanno stati integrali o un modello del disturbo. Sul modello ridotto, un disturbo persistente lascia al solo TV-LQR un errore di posizione a regime: 0,65 m con 3 N costanti sul torso, 0,08 m con 0,3 N·m di bias per ruota **[S-R]**. Per l'MPC completo non l'ho misurato, ma nulla nella sua formulazione annulla quell'errore. Il PID ha invece un integrale sul Capture Point (§3.2).
 - **Modello di predizione povero.** Il corpo superiore è un punto, senza dinamica di beccheggio. L'MPC non sa che per spostare il baricentro di $\Delta s$ il pendolo deve prima essere portato all'angolo corrispondente: lo delega all'LQR.
 - **Costo di calcolo.** Due QP a 25 variabili ogni 10 ms, risolte con 60 iterazioni di gradiente accelerato.
 
@@ -526,300 +474,22 @@ Macchina a stati: BALANCE → PRELOAD → THRUST → FLIGHT → LANDING → BALA
 
 ---
 
-## 5. Cascata sliding mode
+## 5. Sintesi comparativa
 
-`src/rotino_smc/rotino_smc/controller.py`. Sostituisce MPC, TV-LQR e VMC con una cascata in cui la parte sliding mode agisce sul beccheggio e sulle gambe, mentre traslazione e imbardata restano lineari. Stimatore, macchina a stati, riferimenti e teleoperazione sono identici all'MPC (§2, §4.8).
-
-### 5.1 Struttura
-
-```
- s_ref, ṡ_ref ─► v_ref = ṡ_ref + K_POS(s_ref − s) ─► PI a guadagni negativi ─► θ* (saturato a ±12°)
-                                                                                   │
- θ, θ̇, l ───────────────────────────────────► super-twisting su s₁ = θ̇ + c₁(θ − θ*) ─► τ_c
- φ, φ̇, φ_ref ────────────────────────────────► PD + attrito + integrale ─────────────► τ_d
-                                                         τ_l = τ_c − τ_d,  τ_r = τ_c + τ_d
- z_ref, ż_ref, z̈_ref ─► F_z = m_b(g + z̈_ref) ─► SMC task-space per gamba ─► τ_hip, τ_knee
-```
-
-**Un solo controllore di beccheggio, due controllori di gamba.** Il beccheggio del pendolo equivalente è un unico grado di libertà, azionato dalla somma delle coppie delle ruote. Due controllori sliding mode indipendenti, uno per ruota, avrebbero la **stessa** superficie di scorrimento e due integratori $W$ che si contendono lo stesso errore. Le due gambe invece sono catene cinematiche distinte, ciascuna con il proprio Jacobiano. L'ipotesi di simmetria della Sez. 3 del paper serve a ridurre il robot a un modello sagittale unico, non a duplicare il controllore dell'equilibrio (`docs/Storico_lavoro.md` §2.2).
-
-### 5.2 Anello esterno: posizione → velocità → inclinazione
-
-**Legge** (`_outer_velocity_loop`, riga 503):
-$$v_{ref} = \operatorname{sat}_{2}\big(\dot s_{ref} + K_{pos}(s_{ref}-s)\big),\qquad \theta^* = \operatorname{sat}_{\theta_{max}}\Big(K_P(\dot s - v_{ref}) + K_I\!\int(\dot s - v_{ref})\,dt\Big)$$
-con $K_{pos} = 1{,}2$ s⁻¹, $K_P = -0{,}30$ rad·s/m, $K_I = -0{,}10$ rad/m, $\theta_{max} = 0{,}21$ rad (12,03°).
-
-**Perché i guadagni sono negativi.** Si assume che l'anello interno sia molto più veloce ($\theta\simeq\theta^*$). Allora, per il §1.6, l'asse accelera con $\ddot s = g_{st}\theta^*$. Con $e_v = \dot s - v_{ref}$:
-$$\dot e_v \simeq g_{st}\big(K_Pe_v + K_I{\textstyle\int} e_v\big) - \dot v_{ref}.$$
-È stabile solo se $g_{st}K_P < 0$ e $g_{st}K_I < 0$. Dato che $g_{st} > 0$, **servono $K_P, K_I < 0$**. Detto fisicamente: per accelerare in avanti ($e_v < 0$) serve un'inclinazione in avanti ($\theta^* > 0$). Il docstring del codice attribuisce il segno alla fase non minima. Più esattamente, il segno viene dal guadagno statico inclinazione→accelerazione e dalla convenzione $e_v = \dot s - v_{ref}$. La fase non minima (§1.6) è il motivo per cui la velocità si comanda **attraverso** l'inclinazione: una coppia diretta sulle ruote muove l'asse inizialmente nel verso sbagliato rispetto al moto a regime. **[D]**
-
-**Banda.** Con $g_{st} = 6{,}14$: $g_{st}|K_P| = 1{,}84$ rad/s, il valore dichiarato nel commento di riga 49. **[C]** Poli dell'anello quasi statico **[C]**:
-- solo PI di velocità: $-1{,}40$ e $-0{,}44$ rad/s;
-- con il termine di posizione ($e_v = \dot s + K_{pos}s$ per $s_{ref} = 0$): $-0{,}76\pm1{,}33j$ e $-0{,}31$ rad/s.
-
-Il polo lento a $-0{,}31$ (3,2 s) è quello che domina il ritorno in posizione dopo una spinta (§6.5). È circa 3,5 volte più lento della coppia $-1{,}08\pm0{,}68j$ dell'LQR.
-
-**Saturazione a 12°.** Oltre i 15° circa il VL-WIP linearizzato perde validità (commento riga 51), e l'inversione esatta del super-twisting usa proprio quel modello. Il limite su $\theta^*$ fissa anche la massima accelerazione a regime: $g_{st}\tan 12{,}03° = 1{,}31$ m/s². Anti-windup per integrazione condizionata: si integra solo se $\theta^*$ non è saturo.
-
-**Perché la velocità dell'asse e non del baricentro.** La velocità orizzontale del baricentro differisce da quella dell'asse per la derivata di $S_C$:
-$$\dot s_{com} - \dot s_{axle} = \frac{d}{dt}\big(l\sin\theta\big) \simeq l\,\dot\theta\quad(\dot l\approx 0).$$
-Durante un'oscillazione di beccheggio questo termine è della stessa grandezza della velocità di marcia: lo storico riporta circa 0,4 m/s in un ciclo di ±6° **[E]**. $\dot\theta$ risponde a $\theta^*$ con i tempi dell'anello **interno**, quindi usare $\dot s_{com}$ crea un percorso veloce dall'uscita dell'anello esterno alla sua stessa misura, che il progetto quasi statico non prevede. Sperimentalmente, con $\dot s_{com}$ il robot entrava oltre circa 0,7 m/s in un ciclo limite permanente che scompariva usando $\dot s_{axle}$ **[E]**. Anche il TV-LQR ha nel suo stato la velocità dell'asse. L'MPC continua invece a usare $V_{com}$ per il proprio modello (§2.3). Nell'MPC la velocità massima teleoperata è 0,6 m/s; nello SMC arriva a 2 m/s, verificato fino a 2 m/s **[E]**.
-
-### 5.3 Beccheggio: super-twisting
-
-**Superficie.**
-$$s_1 = \dot\theta + c_1(\theta - \theta^*),\qquad c_1 = 10\ \text{s}^{-1} .$$
-Su $s_1 = 0$ l'errore di inclinazione decade come $e^{-c_1t}$, con costante di tempo 0,1 s. È confrontabile con il polo di inclinazione dell'LQR ($-8{,}13$).
-
-**Inversione esatta.** Dal modello linearizzato, $\ddot\theta = a_2\theta + b_2(\tau_l+\tau_r) + d$, con $d$ l'insieme di tutto ciò che il modello non contiene. Imponendo $\tau_l + \tau_r = (\nu - a_2\theta)/b_2$ si ottiene $\ddot\theta = \nu + d$. Nel codice (`_pitch_super_twisting`, riga 520):
-$$\tau_c = \frac{\nu - a_2(l)\,\theta}{2\,b_2(l)},\qquad \nu = -c_1\dot\theta - k_a\sqrt{|s_1|}\,\sigma_\varepsilon(s_1) + W,\qquad \dot W = -k_b\,\sigma_\varepsilon(s_1),\qquad \sigma_\varepsilon(s) = \frac{s}{|s|+\varepsilon}.$$
-$a_2(l)$ e $b_2(l)$ si ricalcolano a ogni passo con l'$I_y$ della posa, interpolato sulla griglia (§1.5). Il fattore 2 viene da $\tau_c = (\tau_l+\tau_r)/2$. Con $b_2 < 0$ il segno si inverte automaticamente.
-
-**Dinamica della variabile di scorrimento.** Derivando $s_1$ e sostituendo:
-$$\dot s_1 = -k_a\sqrt{|s_1|}\,\sigma_\varepsilon(s_1) + W + \underbrace{d - c_1\dot\theta^*}_{\rho(t)} .$$
-**[D]** La perturbazione $\rho$ contiene:
-- i termini non lineari trascurati ($\sin\theta$ contro $\theta$, termini centripeti);
-- i termini in $\dot l$;
-- l'errore su $a_2$ e $b_2$;
-- l'errore di stima e il ritardo del filtro su $\dot\theta$;
-- ogni disturbo esterno che agisce sul beccheggio;
-- la derivata del riferimento $\dot\theta^*$, che la legge non compensa.
-
-**Cosa garantisce l'algoritmo ideale.** Con $\sigma_\varepsilon$ sostituita dalla funzione segno, $\dot s_1 = -k_a|s_1|^{1/2}\operatorname{sign}(s_1) + W + \rho$ con $\dot W = -k_b\operatorname{sign}(s_1)$ è il super-twisting di Levant. Se $|\dot\rho|\le L$ e i guadagni soddisfano condizioni sufficienti note, $s_1$ e $\dot s_1$ vanno a zero in tempo finito, qualunque sia $\rho$ entro quella classe. Una condizione **necessaria** è $k_b > L$: se il termine integrale varia più lentamente della perturbazione, $W$ non può inseguirla. Con $k_b = 250$ il controllore può quindi tollerare al più $|\dot\rho| < 250$ rad/s³. Levant (1998) propone per il differenziatore robusto, che ha la stessa struttura, la taratura $\lambda_1 = 1{,}1L$, $\lambda_0 = 1{,}5\sqrt L$. La coppia $(k_a, k_b) = (25, 250)$ corrisponde a $L\approx 227$ da $k_b$ e $L\approx 278$ da $k_a$, due valori coerenti fra loro. **[D]** Non ho trovato nel workspace una stima di $L$ per RoTino: il dimensionamento resta implicito.
-
-**Cosa garantisce la versione implementata.** Due scostamenti dall'algoritmo ideale:
-1. **Segno regolarizzato** in **entrambi** i termini, compreso l'integratore. La legge diventa continua. In assenza di ritardi non converge in tempo finito a $s_1 = 0$, ma in un intorno di ampiezza dell'ordine di $\varepsilon = 0{,}02$ rad/s. È la tecnica dello strato limite: si scambia l'esattezza con l'assenza di discontinuità. Con il ritardo del filtro su $\dot\theta$ questo non basta: in Gazebo $s_1$ ha un rms di 3,7 $\varepsilon$ e il controllore oscilla a circa 10 Hz (§6.7).
-2. **Guadagno equivalente decrescente.** Il termine proporzionale $k_a\sqrt{|s_1|}\sigma_\varepsilon(s_1)$, diviso per $s_1$, dà un guadagno lineare equivalente che **diminuisce** con l'errore **[C]**:
-
-| $\lvert s_1\rvert$ [rad/s] | 0,02 | 0,1 | 1 | 4 | 7,6 |
-|---|---|---|---|---|---|
-| $k_a\sqrt{\lvert s_1\rvert}/(\lvert s_1\rvert+\varepsilon)$ [s⁻¹] | 88 | 66 | 24,5 | 12,4 | 9,0 |
-
-Per errori grandi il super-twisting è **meno** aggressivo di un anello lineare tarato per piccoli errori. Il vantaggio della radice sta nella convergenza finale, non nella reazione ai grandi scostamenti. Nella spinta da 4,5 N·s $s_1$ arriva a $-7{,}6$ rad/s **[S-G]**, dove il guadagno equivalente è 9 s⁻¹.
-
-**Parametri.**
-
-| Costante | Valore | Ruolo e origine |
+| | PID con ZMP | MPC + TV-LQR + VMC |
 |---|---|---|
-| $c_1$ | 10 s⁻¹ | pendenza della superficie; il commento (righe 62-65) riporta che sul modello linearizzato l'anello regge fino a $c_1 = 40$ anche con rumore e ritardo **[E]**, e indica come limite reale la risonanza delle gambe a 12,5 Hz **[E]** |
-| $k_a$ | 25 | tempo di raggiungimento: con il solo termine in radice, da $s_1(0)$ si arriva a zero in $t = 2\sqrt{\lvert s_1(0)\rvert}/k_a$, cioè 0,08 s da $s_1 = 1$ **[D]** |
-| $k_b$ | 250 rad/s³ | termine integrale; $L < 250$ (vedi sopra) |
-| $\varepsilon$ | 0,02 rad/s | strato limite |
-| $W_{max}$ | 60 rad/s² | limite di sicurezza sull'integratore; equivale a 0,6 N·m per ruota in posa nominale ($60/(2\cdot50{,}15)$). Lo storico riporta che oltre 2 m/s $W$ si incolla a ±60 e il beccheggio diverge **[E]** |
-| $\Delta t_{max}$ | 4 ms | un passo in ritardo non integra $k_b$ su tutto l'intervallo |
-
-**Saturazione e aderenza.** Il comando comune è limitato per ruota a
-$$|\tau_c|\le\min\big(10,\ 0{,}8\,\mu\,N_{ruota}\,r\big) - |\tau_d|,\qquad N_{ruota} = \max\big(\tfrac12 F_n,\ 0{,}35\,m_bg\big).$$
-Il limite è la coppia che la ruota può trasmettere senza slittare, con un margine del 20%. Con la forza di contatto di Gazebo, che è costante (§2.4), vale 1,83 N·m. È circa cinque volte meno dei 10 N·m dell'attuatore: il commento a riga 715 dice correttamente che è l'aderenza, non il motore, a limitare. Nelle spinte eseguite per questo documento il limite non è mai stato raggiunto: la coppia massima dello SMC è 0,95 N·m con 2,7 N·s e 1,38 N·m con 4,5 N·s **[S-G]**. L'MPC non ha questo limite e con 4,5 N·s chiede fino a 3,73 N·m per ruota **[S-G]**, cioè più di quanto l'aderenza nominale consenta ($\mu N r = 2{,}78$ N·m con il peso totale).
-
-**Protezione dell'integratore.** $W$ viene congelato quando $\tau_c$ satura, azzerato in volo e azzerato a ogni cambio di fase (`_set_phase`, riga 379), insieme all'integrale dell'anello esterno. Porta infatti la memoria di una condizione di contatto diversa, e trascinarla nella fase successiva produrrebbe un gradino di coppia.
-
-### 5.4 Imbardata
-
-$$\tau_d = \operatorname{sat}_{2,5}\Big(-0{,}89\,e_\varphi - 0{,}21\,(\dot\varphi - \dot\varphi_{ref}) + \text{feedforward attrito} + \text{integrale}\Big)$$
-Il feedforward d'attrito, l'integrale con zona morta e la saturazione dell'errore sono identici all'MPC (§4.5).
-
-**I guadagni PD sono la riga d'imbardata del TV-LQR, arrotondata**: l'LQR dà $0{,}894$ e $0{,}214$ **[C]**. Con $\ddot\varphi = 2b_3\tau_d$ i poli sono $-7{,}33\pm2{,}90j$, contro $-7{,}45\pm2{,}62j$ dell'LQR; lo scarto viene dall'arrotondamento di 0,2136 a 0,21 **[C]**. La scelta di **non** usare lo sliding mode qui è motivata dalla stessa risonanza torsionale citata per l'LQR (§4.4) **[E]**: un termine commutante sul modo differenziale la eccita in un ciclo limite.
-
-### 5.5 Gambe: sliding mode in spazio operativo
-
-Per ciascuna gamba (`_leg_smc`, riga 484), nella terna `base_link`:
-$$s_{leg} = (v_f - v_d) + c\,(p_f - p_d),\qquad F = -K_{lin}\,s_{leg} - K_{sw}\,\operatorname{sat}\!\big(s_{leg}/\phi\big) + F_{ff},\qquad \tau = J^TF + b_{leg}\dot q .$$
-
-**Equivalenza con il VMC.** Senza il termine commutante:
-$$-K_{lin}\big[\dot e + c\,e\big] = -K_{lin}c\,e - K_{lin}\dot e,$$
-cioè un VMC con $K_p = K_{lin}c$ e $K_d = K_{lin}$. I parametri riproducono esattamente i guadagni del VMC già validati **[C]**:
-
-| Fase | $c$ [s⁻¹] | $K_{lin}$ [N·s/m] | $K_p = K_{lin}c$ [N/m] | VMC dell'MPC |
-|---|---|---|---|---|
-| HOLD | 37,5; 40 | 40; 50 | 1500; 2000 | 1500; 2000 |
-| Appoggio | 37,5; **48** | 40; **25** | 1500; **1200** | 1500; **0** |
-| Volo | 40; 40 | 20; 20 | 800; 800 | 800; 800 |
-
-**L'unica differenza reale è la rigidezza verticale in appoggio**: 1200 N/m con 25 N·s/m, contro 0 e 15 dell'MPC. Nell'MPC la quota è regolata dall'MPC stesso tramite $F_z$. Qui $F_z = m_b(g + \ddot z_{ref})$ è un feedforward in anello aperto, e senza molla verticale la quota non avrebbe alcuna retroazione (`docs/Storico_lavoro.md` §2.2). Ordine di grandezza con $m_b/2$ per gamba: $\omega_n = 26$ rad/s e $\zeta = 0{,}27$ **[C]**. Il valore 25 N·s/m smorza più dei 15 dell'MPC, ma l'anello verticale resta sottosmorzato.
-
-**Il termine robusto e lo strato limite.** $K_{sw} = 8$ N corrisponde a circa 0,74 N·m al ginocchio ($8/10{,}9$, §1.2). Fuori dallo strato limite ($|s_{leg}| > \phi = 0{,}03$ m/s) aggiunge una forza costante di 8 N che si oppone a $s_{leg}$: è il termine che il VMC non aveva e che, nell'ipotesi sliding mode, respinge perturbazioni di forza limitate. **Dentro** lo strato limite il termine è lineare con guadagno $K_{sw}/\phi = 267$ N·s/m e si somma a $K_{lin}$ **[C]**:
-
-| | $K_d$ effettivo [N·s/m] | $K_p$ effettivo [N/m] |
-|---|---|---|
-| appoggio, $\lvert s_{leg}\rvert > \phi$ | 40; 25 | 1500; 1200 |
-| appoggio, $\lvert s_{leg}\rvert < \phi$ | 307; 292 | 11500; 14000 |
-
-Per piccoli scostamenti la gamba dello SMC è quindi circa dieci volte più rigida e smorzata del VMC di cui riproduce i guadagni. L'equivalenza con il VMC vale solo per errori grandi. È una proprietà strutturale della saturazione con strato limite, non un errore. Va però tenuta presente quando si confrontano i due controllori sulle gambe.
-
-### 5.6 Differenze nel salto
-
-Stessa macchina a stati e stessi profili di quota dell'MPC (§4.8). Cambia la forza verticale: nello SMC è $F_z = \operatorname{sat}\big(m_b(g+\ddot z_{ref})\big)$ fra $0{,}3\,m_bg$ e $\{3; 6\}\,m_bg$, senza ottimizzazione. L'inseguimento della quota durante spinta e atterraggio è affidato alla molla verticale da 1200 N/m (o 14000 N/m dentro lo strato limite) e al termine robusto.
-
----
-
-## 6. Disturbi: perché SMC e MPC rispondono allo stesso modo
-
-Lo sliding mode è stato scelto per la sua fama nella reiezione dei disturbi. Alla prova di spinta, però, SMC e MPC reagiscono quasi allo stesso modo. Questa sezione stabilisce **perché** succede e **se è giusto** che succeda.
-
-### 6.1 L'osservazione, ripetuta in Gazebo
-
-Spinta orizzontale all'indietro sul torso, 4 s dopo il rilascio, applicata come forza costante per 25 passi di fisica (12,5 ms). Campagna `rotino_benchmark`, 18 s per prova **[S-G]**:
-
-| Metrica | MPC 2,7 N·s | SMC 2,7 N·s | MPC 4,5 N·s | SMC 4,5 N·s |
-|---|---|---|---|---|
-| Picco di beccheggio in avanti (recupero) | **11,36°** | **12,09°** | **11,75°** | **12,23°** |
-| Oscillazione iniziale all'indietro (primi 0,4 s) | −0,59° | −6,45° | −0,94° | −12,68° |
-| Velocità di picco [m/s] | 0,98 | 1,11 | 1,92 | 2,69 |
-| Spazio percorso [m] | 0,37 | 0,56 | 0,91 | 1,49 |
-| Coppia di modo comune massima [N·m] | 3,22 | 0,95 | 3,66 | 1,37 |
-| Recupero entro ±0,5° [s] | 2,22 | 8,72 | 2,45 | 10,70 |
-| Beccheggio rms a regime | 0,001° | 0,141° | 0,004° | 0,137° |
-| Chattering, $\lvert\Delta\tau\rvert$ medio per campione [N·m] | 0,0000 | 0,0254 | 0,0000 | 0,0250 |
-
-Il picco in avanti, cioè la grandezza che di solito si guarda, differisce di meno di 1°. Su tutto il resto lo SMC non è migliore:
-- nei primi 100 ms lascia ruotare il pendolo all'indietro molto di più (fino a −12,7° contro −0,9°);
-- percorre più strada e impiega più tempo;
-- a regime ha un'attività di coppia che l'MPC non ha.
-
-Il tempo di recupero dello SMC è gonfiato dal suo rumore a regime (0,14° rms contro una banda di ±0,5°), ma anche guardando le traiettorie il ritorno è più lento (§6.5). Il comparatore del benchmark riporta come "picco" il massimo in valore assoluto, che per lo SMC con 4,5 N·s è l'oscillazione all'indietro (12,68°): per questo la tabella li separa.
-
-### 6.2 Che cosa promette davvero lo sliding mode
-
-La robustezza dello sliding mode è una proprietà precisa, con tre condizioni:
-
-1. **Vale sulla superficie.** Una volta raggiunta $s = 0$, il moto è invariante rispetto ai disturbi che rispettano le ipotesi (Utkin). Durante la **fase di raggiungimento** non c'è invarianza: il sistema si comporta come un qualsiasi controllore non lineare.
-2. **Vale per disturbi adattati** (*matched*), cioè che entrano nel sistema attraverso lo stesso canale dell'ingresso di controllo, nel range della matrice $B$. Per il super-twisting la condizione è sulla derivata: $|\dot\rho|\le L$.
-3. **Vale per disturbi limitati** entro la classe per cui i guadagni sono dimensionati ($k_b > L$).
-
-La spinta viola tutte e tre le condizioni, per ragioni fisiche e non di taratura.
-
-### 6.3 Anatomia di una spinta
-
-**È un impulso.** La forza agisce per 12,5 ms: un ottavo della costante di tempo del polo instabile (97 ms) e meno di un decimo di qualunque costante di tempo ad anello chiuso. Il suo effetto è un salto quasi istantaneo delle velocità. Dal VL-WIP, con la forza applicata alla `base_link`, a quota $z_b$ sopra l'asse, le forze generalizzate sono $Q_s = F$ e $Q_\theta = F z_b\cos\theta$, e la variazione di velocità è $\Delta\dot\phi = M^{-1}[J,\ Jz_b]^T$ **[D]+[C]**:
-
-| Impulso $J$ | $\Delta\dot s$ | $\Delta\dot\theta$ | $\ddot\theta$ medio durante la spinta |
-|---|---|---|---|
-| 2,7 N·s | −0,046 m/s | **−4,24 rad/s** | −339 rad/s² |
-| 4,5 N·s | −0,077 m/s | **−7,07 rad/s** | −565 rad/s² |
-
-La spinta, applicata sopra il baricentro, fa soprattutto **ruotare** il pendolo all'indietro. La traslazione diretta è piccola.
-
-**La superficie viene abbandonata.** $s_1 = \dot\theta + c_1(\theta-\theta^*)$ salta di circa $\Delta\dot\theta$. In Gazebo si misura $s_1 = -5{,}0$ rad/s con 2,7 N·s e $-7{,}6$ rad/s con 4,5 N·s **[S-G]**: 250-380 volte lo strato limite. Lo SMC entra in fase di raggiungimento, dove non ha alcuna garanzia di invarianza (condizione 1).
-
-**Il disturbo non è adattato, nemmeno per l'anello di beccheggio.** Rispetto al sottosistema $\theta$ la forza entra nello stesso canale di $b_2u$, ma entra anche in $\ddot s$, dove l'ingresso produce $b_1u$ in una proporzione diversa. Per il sistema completo il vettore dei disturbi $[F,\ Fz_b]$ non è parallelo a $B = [1/r,\ -1]$. Il robot è sottoattuato: una coppia di ruota non può annullare contemporaneamente gli effetti su $s$ e su $\theta$ (condizione 2).
-
-**Annullare l'effetto sul beccheggio è fisicamente impossibile.** Per tenere $s_1 = 0$ durante la spinta, la coppia dovrebbe produrre $b_2(\tau_l+\tau_r) = +339$ rad/s², cioè **3,38 N·m per ruota** con 2,7 N·s e **5,64 N·m** con 4,5 N·s **[C]**. L'aderenza nominale è $\mu Nr = 2{,}78$ N·m per ruota con il peso totale, e il limite prudenziale dello SMC è 1,83 N·m. Nessun controllore, sliding mode o no, può rigettare la spinta sul beccheggio senza far slittare le ruote. La derivata della perturbazione, infine, è un fronte di centinaia di rad/s² in meno di un passo di controllo, fuori da qualunque $L$ compatibile con $k_b = 250$ (condizione 3).
-
-**Conseguenza.** Per entrambi i controllori la spinta equivale a una **condizione iniziale**: $\dot\theta\approx-4$ o $-7$ rad/s, con il robot che comincia a muoversi all'indietro. Da lì il recupero è un problema di **regolazione da stato iniziale sotto vincoli**, in cui la reiezione dei disturbi non gioca più alcun ruolo.
-
-### 6.4 Il picco lo decide la saturazione del riferimento di inclinazione
-
-Per fermare un moto all'indietro il robot deve inclinarsi in avanti (§1.6), e per recuperare in fretta deve inclinarsi il più possibile. Entrambi i controllori limitano l'inclinazione **per progetto**:
-
-| | Limite | Angolo | Decelerazione massima a regime |
-|---|---|---|---|
-| MPC | $\lvert\Delta s\rvert\le$ `DS_MAX_CAP` = 0,03 m | $\operatorname{atan}(0{,}03/0{,}162) = 10{,}48°$ | 1,13 m/s² |
-| SMC | $\lvert\theta^*\rvert\le$ `TH_MAX` = 0,21 rad | 12,03° | 1,31 m/s² |
-
-Registrando `/rotino/wbr_state` durante le spinte **[S-G]**:
-- **MPC**: $\theta_{ref}$ salta a **+10,48°** al primo aggiornamento dell'MPC dopo la spinta e ci resta 0,9 s (2,7 N·s) o 1,6 s (4,5 N·s). $\theta$ lo raggiunge e sul plateau lo supera al più di 1,1°.
-- **SMC**: $\theta^*$ arriva a **+12,03°** in 30-40 ms e ci resta. Con 4,5 N·s $\theta$ vi si appoggia con un plateau fra 12,0° e 12,2° che dura 1,2 s. Sul plateau lo scarto da $\theta^*$ è al più 0,2°.
-
-In entrambi i casi il picco in avanti è **il limite di inclinazione del progetto più un piccolo sorpasso**. La differenza di picco (0,5-0,7°) è più piccola della differenza fra i limiti (1,55°) perché l'MPC supera il proprio limite di circa 1°, mentre lo SMC quasi non lo supera. Il picco in avanti non è quindi un indicatore di reiezione dei disturbi: misura i valori scelti per `DS_MAX_CAP` e `TH_MAX`.
-
-Anche la frenata è simile. La decelerazione media, dal minimo della velocità fino all'arresto, vale 1,33 m/s² (MPC) e 1,28 m/s² (SMC) con 4,5 N·s, e 1,54 m/s² per entrambi con 2,7 N·s **[S-G]**. È dello stesso ordine delle decelerazioni a regime ammesse dai due limiti (1,13 e 1,31 m/s², §1.6). Non coincide con esse perché il tratto misurato comprende il transitorio iniziale e il sorpasso di $\theta$. Una volta che l'inclinazione è saturata, la distanza di arresto è fissata dalla cinematica, circa $v_0^2/(2a_{max})$, e non dalla legge di controllo.
-
-**Dove i due controllori differiscono davvero: i primi 100 ms.** Subito dopo la spinta il pendolo ruota all'indietro con $\dot\theta\approx-4$ o $-7$ rad/s. L'MPC risponde con 3,2-3,7 N·m di modo comune e contiene la rotazione sotto 1°. Lo SMC risponde con 0,95-1,37 N·m e il pendolo arriva a −6,5° e −12,7° **[S-G]**. La coppia dello SMC si ricostruisce dalla legge del §5.3. Con $\dot\theta\approx-4{,}2$ rad/s e $\theta^*$ già a +0,21 rad, $s_1\approx-4{,}2 - 10\cdot0{,}21 = -6{,}3$ rad/s. Allora $\nu\approx -c_1\dot\theta + k_a\sqrt{6{,}3} = 42 + 63 = 105$ rad/s² e $\tau_c\approx 105/(2\cdot(-50)) = -1{,}05$ N·m **[D]**, in accordo con quanto misurato. Il guadagno equivalente del termine in radice, a quell'errore, è circa 10 s⁻¹ (§5.3): per errori grandi il super-twisting è **più morbido** di un anello lineare. È l'unico tratto della risposta in cui la legge sliding mode conta, e va a svantaggio dello SMC.
-
-**Riprova sul modello ridotto.** Sul VL-WIP non lineare, un TV-LQR **senza** l'MPC, quindi senza limite su $\theta_{ref}$, ha il picco che cresce con l'impulso: 10,8° con 2,7 N·s e 17,9° con 4,5 N·s. Lo SMC resta a 12,0° e 13,8° **[S-R]**. Senza il tetto dell'MPC l'LQR si inclinerebbe di più, con coppie fino a 9,8 N·m per ruota, più di tre volte l'aderenza disponibile.
-
-### 6.5 Il recupero lo decidono gli anelli esterni lineari
-
-Dopo il plateau il ritorno alla posizione è governato:
-- nell'MPC, dall'MPC stesso e dalla coppia lenta dell'LQR $-1{,}08\pm0{,}68j$;
-- nello SMC, dall'**anello esterno PI**, che è lineare e ha un polo a $-0{,}31$ rad/s (§5.2).
-
-Lo sliding mode dello SMC agisce solo sull'anello interno di beccheggio. Una volta passato il transitorio iniziale, in entrambi i controllori quell'anello insegue bene il riferimento: sul plateau lo scarto è al più 1,1° per l'MPC e 0,2° per lo SMC **[S-G]**. La parte del sistema che determina il recupero, cioè come l'inclinazione viene usata per riportare il robot in posizione, è lineare in entrambi. Lo SMC è anche più lento, per scelta di banda.
-
-### 6.6 Dove lo SMC dovrebbe distinguersi: disturbi persistenti
-
-Il vantaggio atteso dell'architettura SMC riguarda i disturbi **persistenti**, che una legge proporzionale-derivativa trasforma in errori a regime. Simulazione sul modello ridotto, disturbo applicato a $t = 1$ s e osservato per 9 s **[S-R]**:
-
-| Disturbo | Grandezza | TV-LQR | SMC |
-|---|---|---|---|
-| Forza costante −3 N sul torso | $s$ a regime | **−0,654 m** | **−0,023 m** (in convergenza) |
-| | $\theta$ a regime | +7,41° | +7,36° |
-| Bias di coppia +0,3 N·m per ruota (adattato) | $s$ a regime | **−0,077 m** | **0,000 m** |
-| | picco di $\theta$ | −0,70° | −2,57° |
-| Momento costante 0,35 N·m sul pendolo (baricentro spostato di circa 1 cm) | $s$ a regime | **+0,325 m** | **+0,011 m** |
-| | $\theta$ a regime | −3,56° | −3,51° |
-
-Con una forza o un momento costante l'inclinazione a regime è la stessa per i due controllori, ed è quella richiesta dalla fisica: per stare fermo contro 3 N il robot **deve** inclinarsi di 7,4°. La differenza sta nella **posizione**. Il TV-LQR non ha azione integrale e si assesta lontano dal riferimento; lo SMC riporta il robot in posizione.
-
-Il merito, però, non è della commutazione. Lo SMC annulla l'errore di posizione grazie a due integratori:
-- $W$, che nel super-twisting stima e compensa la perturbazione costante sul beccheggio;
-- l'integrale $\int e_v$ dell'anello esterno. Con $e_v = \dot s + K_{pos}s$, un valore finito di $\int e_v$ a regime impone $s\to 0$.
-
-Un LQR con azione integrale sulla posizione (LQI) o un MPC con modello del disturbo otterrebbero lo stesso risultato. Il bias adattato mostra anche il prezzo: lo SMC ha un transitorio di beccheggio più ampio (2,57° contro 0,70°) perché il suo anello esterno lento lascia derivare la velocità prima di correggere.
-
-**Sensibilità all'errore di modello** (spinta di 2,7 N·s con $m_b$ reale diverso da quello del modello, **[S-R]**):
-
-| $m_b$ reale / modello | picco $\theta$ LQR | picco $\theta$ SMC | $\lvert s\rvert_{max}$ LQR | $\lvert s\rvert_{max}$ SMC |
-|---|---|---|---|---|
-| 0,7 | 14,4° | 12,1° | 0,44 m | 0,73 m |
-| 1,0 | 10,8° | 12,0° | 0,31 m | 0,42 m |
-| 1,3 | 8,6° | 11,6° | 0,24 m | 0,28 m |
-
-Il picco di beccheggio dello SMC è quasi insensibile alla massa, perché è inchiodato a `TH_MAX`, mentre quello dell'LQR varia di ±30%. È l'unico indicatore in cui lo SMC mostra una robustezza parametrica maggiore, e anche qui il meccanismo principale è la saturazione di $\theta^*$, non l'invarianza sulla superficie.
-
-### 6.7 Il costo: chattering a circa 10 Hz
-
-A regime lo SMC ha un'attività di coppia che l'MPC non ha: 0,056 N·m rms con una frequenza dominante fra 9 e 10 Hz in Gazebo, contro 0,0003 N·m dell'MPC **[S-G]**. $|s_1|$ supera lo strato limite il 75% del tempo (rms 0,074 rad/s, 3,7 volte $\varepsilon$) **[S-G]**, quindi il controllore lavora per lo più nella zona in cui $\sigma_\varepsilon$ si comporta come un segno.
-
-**Causa, verificata sul modello ridotto** **[S-R]**. Dopo una piccola perturbazione (0,3 N·s), lo SMC entra in un **ciclo limite autosostenuto a 10,8 Hz** con 0,027 N·m rms. L'LQR, nelle stesse condizioni, si assesta a $2\cdot10^{-6}$ N·m. Togliendo **solo** il filtro su $\dot\theta$ ($\alpha$ da 0,8 a 0), il ciclo scende a $5\cdot10^{-5}$ N·m. Il chattering nasce quindi dall'interazione fra la commutazione quasi discontinua del super-twisting e il ritardo di 9 ms del filtro su $\dot\theta$ (32° di fase a 70 rad/s, §1.8). È il meccanismo classico del chattering da dinamiche non modellate in serie alla superficie. Il modello ridotto non contiene le gambe, quindi la risonanza torsionale a 12,5 Hz non è necessaria per spiegare il fenomeno; in Gazebo potrebbe contribuire, ma non l'ho isolata.
-
-### 6.8 Verdetto: è giusto che rispondano allo stesso modo?
-
-**Sì, e non è un difetto di implementazione.** Le ragioni, in ordine di peso:
-
-1. **La prova misura la cosa sbagliata.** Una spinta di 12,5 ms è un impulso: per qualunque controllore diventa una condizione iniziale. L'invarianza dello sliding mode non si applica in fase di raggiungimento, e la spinta porta $s_1$ a centinaia di volte lo strato limite.
-2. **Nessun controllore può rigettare quella spinta.** Tenere fermo il beccheggio richiederebbe 3,4-5,6 N·m per ruota contro un'aderenza di circa 2,8 N·m. Il limite è fisico.
-3. **Il picco è fissato dalla saturazione dell'inclinazione di riferimento**, che entrambi i progetti impongono e che ha valori vicini (10,48° e 12,03°). Stesso vincolo, stesso picco.
-4. **Il recupero è affidato ad anelli lineari in entrambi.** Nello SMC la parte sliding mode stabilizza il beccheggio, che anche l'LQR stabilizza bene. La traslazione è comandata da un PI lineare più lento della controparte LQR.
-5. **La banda dell'anello di beccheggio è simile**: superficie a $-10$ s⁻¹ nello SMC, polo a $-8{,}1$ nell'LQR. A parità di banda e di saturazione, la risposta a una condizione iniziale è simile qualunque sia la legge che la realizza.
-6. **L'unica fase in cui la legge sliding mode fa differenza, i primi 100 ms, va a svantaggio dello SMC.** Il termine in radice ha un guadagno equivalente che cala con l'errore, per cui lo SMC contrasta la rotazione iniziale con circa un terzo della coppia dell'MPC e lascia oscillare il pendolo di 6-13° all'indietro invece di meno di 1°.
-
-**Dove l'aspettativa era sbagliata.** "Lo sliding mode rigetta meglio i disturbi" è vero per disturbi **adattati, limitati e persistenti**, a superficie raggiunta. In un pendolo inverso su ruote sottoattuato i disturbi che contano (spinte, pendenze, carichi decentrati) non sono adattati rispetto al sistema completo, e la parte non adattata è gestita da un anello esterno che nello SMC è lineare. Quanto al vantaggio che lo SMC mostra sui disturbi persistenti (§6.6), viene dall'azione integrale, non dalla natura sliding mode della legge.
-
-**Come rendere visibile la differenza.** Le prove che distinguono le due architetture sono quelle con disturbi persistenti o con errori di modello. Nessuna di queste è oggi implementata nel banco di prova:
-- una forza orizzontale costante sul torso, applicata per secondi e non per millisecondi, cioè una pendenza equivalente;
-- una massa aggiuntiva decentrata sul torso, cioè un momento costante sul pendolo;
-- un bias di coppia su una o entrambe le ruote;
-- un errore volontario su $m_b$ o su $I_y$ nel modello usato dal controllore.
-
-Su queste prove il modello ridotto prevede errore di posizione a regime per l'MPC e nessun errore per lo SMC. Per non attribuire il risultato allo sliding mode, il confronto andrebbe fatto anche con un TV-LQR con azione integrale.
-
-**Come migliorare lo SMC, se l'obiettivo è la risposta alle spinte:**
-- aggiungere un termine lineare proporzionale su $s_1$ (per esempio $-k_ls_1$ accanto al termine in radice), così la reazione ai grandi scostamenti non è più debole di quella di un LQR. È il super-twisting "generalizzato" di Moreno, che conserva la convergenza in tempo finito aggiungendo termini lineari;
-- alzare `TH_MAX` entro la validità del modello, per aumentare la decelerazione disponibile. Va fatto con attenzione: l'inversione esatta usa il modello linearizzato;
-- alzare la banda dell'anello esterno, oggi 3,5 volte più lento dell'LQR sul modo di posizione;
-- ridurre il chattering riducendo il ritardo su $\dot\theta$, per esempio usando il giroscopio più la derivata della cinematica delle gambe invece della differenza finita filtrata, oppure allargando $\varepsilon$.
-
----
-
-## 7. Sintesi comparativa
-
-| | PID | MPC + TV-LQR + VMC | SMC |
-|---|---|---|---|
-| Stato per il bilanciamento | ground truth, derivate non filtrate | Kalman + cinematica | Kalman + cinematica |
-| Legge sulle ruote | retroazione statica su 4 stati, guadagni per fase | LQR schedulato su $l$ | PI esterno + super-twisting con inversione del modello |
-| Uso del modello | nessuno (tarato a mano) | LQR (VL-WIP) + MPC (massa concentrata) | inversione di $a_2, b_2$; $g_{st}$ per la banda esterna |
-| Traslazione | termini paralleli $k_x$, $k_{\dot x}$ | MPC con anteprima + LQR sul piano | PI lineare con integrale |
-| Limite di inclinazione | nessuno esplicito (saturazione coppia 6,3 N·m) | $\Delta s\le$ 3 cm → 10,48° | $\theta^*\le$ 12,03° |
-| Imbardata | PD solo in modalità planare | LQR ($R_d = 100$) + attrito + integrale | PD = riga LQR + attrito + integrale |
-| Gambe | PD di giunto, rigidezza verticale ~28 kN/m | VMC, $K_{p,z} = 0$, sostegno da $F_z$ | SMC task-space, 1200 N/m (14 kN/m nello strato limite) |
-| Azione integrale | no | solo sull'imbardata | beccheggio ($W$), velocità, imbardata |
-| Reazione iniziale a 4,5 N·s **[S-G]** | n/m | −0,9° all'indietro, 3,7 N·m | −12,7° all'indietro, 1,4 N·m |
-| Picco in avanti a 4,5 N·s **[S-G]** | n/m | 11,75° (limite 10,48°) | 12,23° (limite 12,03°) |
-| Poli sagittali (posa nominale) | $-0{,}149\pm2{,}14j$ (poco smorzati) | $-8{,}13$; $-1{,}08\pm0{,}68j$ | superficie $-10$; esterno $-0{,}76\pm1{,}33j$, $-0{,}31$ |
-| Velocità massima (teleop) | n/d | 0,6 m/s | 2,0 m/s |
-| Stato **[E]** | in piedi a circa 11° (problema aperto) | θ ≈ 0,00° | ±0,4°, 0,5 ms di CPU per ciclo |
+| Stato per il bilanciamento | ground truth, derivate non filtrate | IMU + Kalman + cinematica |
+| Legge sulle ruote | PI sul Capture Point → ZMP desiderato → PD sull'offset ZMP | LQR schedulato su $l$ |
+| Uso del modello | feedforward VL-WIP, anteprima LIPM, guadagni per poli robusti | LQR (VL-WIP) + MPC (massa concentrata) |
+| Traslazione | anteprima LIPM del percorso + integrale sul Capture Point | MPC con anteprima + LQR sul piano |
+| Limite di inclinazione | offset ZMP ≤ $a_{max}/\omega^2$ (3 m/s²) | $\Delta s\le$ 3 cm → 10,48° |
+| Imbardata | PID + attrito (Coulomb e viscoso) | LQR ($R_d = 100$) + attrito + integrale |
+| Gambe | PD cartesiano, 1500 / 5000 N/m, peso in feedforward | VMC, $K_{p,z} = 0$, sostegno da $F_z$ |
+| Azione integrale | Capture Point, imbardata | solo sull'imbardata |
+| Poli sagittali (posa nominale) | $-0{,}5$; $-2{,}3\pm0{,}2j$; $-9{,}8$; $-52$ | $-8{,}13$; $-1{,}08\pm0{,}68j$ |
+| Comandi da dashboard | sì (1,5 m/s) | sì (0,6 m/s) |
+
+Il confronto misurato, scenario per scenario, si ottiene con `ros2 run rotino_benchmark suite` (Appendice C): per ogni scenario una tabella PID | MPC con la legge migliore su ogni metrica e i grafici sovrapposti.
 
 ---
 
@@ -840,49 +510,33 @@ Sono le espressioni dell'eq. 14 e di `vlwip_coefficients`. Imbardata: $M_{33}\dd
 |---|---|---|---|
 | `LQR_Q` | diag(30, 400, 80, 15, 6, 2) | `rotino_mpc/controller.py:41` | taratura; lettura alla Bryson §4.4 |
 | `LQR_R_COMMON` / `_DIFF` | 2 / 100 | `rotino_mpc/controller.py:45-46` | $R = I$ sul comune; differenziale sotto la risonanza **[E]** |
-| `WHEEL_TORQUE_MAX` | 10 N·m | MPC :49, SMC :66 | margine sui 18 N·m dell'URDF |
-| `DIFF_TORQUE_MAX` | 2,5 N·m | MPC :50, SMC :76 | priorità al bilanciamento |
-| `YAW_FRICTION` / `VISCOUS` | 0,25 N·m / 0,10 N·m·s | MPC :53-54, SMC :79-80 | identificati in Gazebo **[E]** |
-| `YAW_KI`, `YAW_I_MAX`, `YAW_I_DEADBAND` | 0,6; 0,6; 0,035 | MPC :56-58, SMC :82-84 | integrale lento, anti stick-slip |
-| `THETA_DOT_FILTER`, `S_DOT_FILTER` | 0,8 (τ = 9 ms) | MPC :60-61, SMC :86-87 | causa del chattering SMC §6.7 |
+| `WHEEL_TORQUE_MAX` | 10 N·m | MPC :49, PID :56 | margine sui 18 N·m dell'URDF |
+| `DIFF_TORQUE_MAX` | 2,5 N·m | MPC :50 | priorità al bilanciamento |
+| `YAW_FRICTION` / `VISCOUS` | 0,25 N·m / 0,10 N·m·s | MPC :53-54, PID `YAW_FRICTION` | identificati in Gazebo **[E]** |
+| `YAW_KI`, `YAW_I_MAX`, `YAW_I_DEADBAND` | 0,6; 0,6; 0,035 | MPC :56-58, PID `YAW_KI` | integrale lento, anti stick-slip |
+| `THETA_DOT_FILTER`, `S_DOT_FILTER` | 0,8 (τ = 9 ms) | MPC :60-61 | ritardo di fase 5,3° a 10 rad/s |
 | `MPC_HORIZON`, `MPC_DT` | 25, 0,02 s | `rotino_mpc/controller.py:66-67` | orizzonte 0,5 s ≈ 4 $\sqrt{h/g}$ |
 | `MPC_S_H`, `MPC_W_H` | (50, 20), 200 | :68-69 | 1 cm di Δs ≈ 2 cm di errore |
 | `MPC_S_V`, `MPC_W_V` | (5000, 150), 2e-3 | :70-71 | quota rigida (nessuna molla verticale) |
 | `DS_MAX_CAP` | 0,03 m | :72 | **vincolo sempre attivo**, θ ≤ 10,48° |
 | `F_MIN/MAX(_THRUST)_RATIO` | 0,3 / 3 / 6 × $m_bg$ | :73-75 | contatto garantito; spinta |
 | `VMC_KP/KD` (appoggio) | (1500, 0) / (40, 15) | :81-82 | quota affidata a $F_z$ |
-| `KF_Q_ACC`, `KF_R_POS`, `KF_R_VEL` | 0,5; 1e-4; 1e-3 | MPC :89-91, SMC :112-114 | τ di fusione 45 / 280 ms |
-| `SMC_KP`, `SMC_KI` | −0,30, −0,10 | `rotino_smc/controller.py:49-50` | banda 1,84 rad/s; segno §5.2 |
-| `TH_MAX` | 0,21 rad | :51 | validità del linearizzato; θ ≤ 12,03° |
-| `K_POS`, `V_REF_MAX` | 1,2 s⁻¹, 2 m/s | :52-53 | |
-| `SMC_C1`, `SMC_KA`, `SMC_KB`, `SMC_EPS1` | 10, 25, 250, 0,02 | :56-59 | §5.3 |
-| `SMC_W_MAX`, `SMC_DT_MAX` | 60, 4 ms | :60-61 | protezioni dell'integratore |
-| `MU_SAFE`, `N_WHEEL_MIN_RATIO` | 0,8, 0,35 | :67-68 | limite di aderenza 1,83 N·m |
-| `YAW_KP`, `YAW_KD` | 0,89, 0,21 | :74-75 | riga d'imbardata dell'LQR arrotondata |
-| `LEG_C_*`, `LEG_KLIN_*` | v. §5.5 | :100-105 | riproducono il VMC |
-| `LEG_KSW`, `LEG_PHI` | 8 N, 0,03 m/s | :106-107 | termine robusto; 267 N·s/m nello strato |
-| `PITCH_OFFSET` | 4,73° | `rotino_pid/controller.py:69` | equilibrio statico (4,694° calcolato) |
-| `K_THETA`, `K_THETA_D`, `K_X_D`, `K_X` | 1,3; 0,17; 0,16; 0,8 (× 18 N·m) | :71-74 | tarati in MuJoCo con gambe servo a 2 kHz |
-| `MAX_WHEEL` | 0,35 (6,3 N·m) | :70 | |
-| `HIP/KNEE_SERVO_KP/KV` | 160/200, 12/14 | :44-50 | servo di posizione dell'originale |
-| `LEG_DAMPING_MAX` | 8 N·m | :57 | diagnosi del bang-bang a 500 Hz **[E]** |
-| `K_PSI`, `K_OMEGA`, `K_LAT` | 0,10; 0,025; 2,0 | :82-84 | poli di imbardata −26,7, −4,7 |
+| `KF_Q_ACC`, `KF_R_POS`, `KF_R_VEL` | 0,5; 1e-4; 1e-3 | MPC :89-91 | τ di fusione 45 / 280 ms |
+
+| `SagittalGains` (K_s, K_sd, ρ, k_ξ, k_i) | 60, 5, 0,4, 1,5, 0,5 | `rotino_pid/zmp_balance.py` | poli robusti sul VL-WIP discretizzato, §3.2 |
+| `acc_max` | 3 m/s² | `rotino_pid/zmp_balance.py` | offset ZMP ≤ 59 mm |
+| `LEG_KP_STAND`, `LEG_KD_STAND` | (1500, 5000), (40, 80) | `rotino_pid/controller.py` | nessun ciclo limite a 500 Hz, §3.4 |
+| `K_PSI`, `K_OMEGA`, `K_LAT` | 1,8 N·m/rad; 0,45 N·m·s/rad; 2,0 | `rotino_pid/controller.py` | poli di imbardata −26,7, −4,7 |
 
 ## Appendice C. Riproducibilità
 
-Script in `docs/verifiche/`:
+Gli script `docs/verifiche/` citati nella prima versione di questo documento non sono nel repository: i numeri **[C]**, **[S-R]** e **[S-G]** di quella versione non sono quindi ripetibili così come sono. Per le parti aggiornate:
 
-| File | Cosa produce |
+| Comando | Cosa produce |
 |---|---|
-| `numeri.py` | tutti i numeri **[C]**: coefficienti lungo la griglia, zeri, $g_{st}$, $K$ e poli di LQR, PID e imbardata, Kalman a regime, equivalenze delle gambe, profilo di salto, effetto della spinta, verifica simbolica dell'eq. 14 |
-| `dist_sim.py` | simulazioni **[S-R]** del §6.4, §6.6 e dei parametri del modello ridotto |
-| `chattering_sim.py` | ciclo limite dello SMC con e senza filtro su $\dot\theta$ (§6.7) |
-| `record_push.sh`, `rec.py` | lancia un controllore con la spinta e registra `/rotino/wbr_state` (§6.4) |
-
-Esecuzione dalla radice del workspace, con l'ambiente ROS caricato: `python3 docs/verifiche/numeri.py`. Le campagne **[S-G]** si ripetono con
-
-```
-ros2 run rotino_benchmark campaign -- --scenario push_enable:=true push_impulse:=2.7 --controllers mpc,smc --duration 18
-```
+| `cd src/rotino_pid && python3 -m pytest -q test` | verifica della legge del PID sul VL-WIP lineare: robustezza, trapezio, spinta, anteprima LIPM |
+| `ros2 run rotino_benchmark suite` | tutti gli scenari con PID e MPC in Gazebo, poi `benchmark_runs/suite_<data>/riepilogo.md` |
+| `ros2 run rotino_benchmark campaign -- spinta` | un solo scenario, con `confronto.md` e grafici |
+| `ros2 run rotino_benchmark suite -- --list` | l'elenco degli scenari |
 
 Nota: su questa macchina `scipy` è incompatibile con NumPy 2.2; gli script non lo usano.

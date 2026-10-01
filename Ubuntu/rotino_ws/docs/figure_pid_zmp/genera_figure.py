@@ -8,10 +8,10 @@ matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 import numpy as np
 
-RUNS = 'benchmark_runs'
+RUNS = 'benchmark_runs/archivio_2026-09-30_01'
 OUT = 'docs/figure_pid_zmp'
 os.makedirs(OUT, exist_ok=True)
-COL = {'pid': '#d62728', 'old': '#7f7f7f', 'mpc': '#1f77b4', 'smc': '#2ca02c'}
+COL = {'pid': '#d62728', 'old': '#7f7f7f', 'mpc': '#1f77b4'}
 HALF_TRACK_MM = 147.0
 
 
@@ -41,12 +41,12 @@ lp = log('cmp_zmp_velocity', 'pid')
 t = lp['time_s']
 fig, ax = plt.subplots(3, 1, figsize=(9, 8), sharex=True)
 ax[0].plot(t, lp['xdot_ref_ms'], 'k--', lw=1.2, label='riferimento')
-for law in ('pid', 'mpc', 'smc'):
+for law in ('pid', 'mpc'):
     lg = lp if law == 'pid' else log('cmp_zmp_velocity', law)
     ax[0].plot(lg['time_s'], lg['xdot_ms'], color=COL[law], lw=1.1, label=law.upper())
     ax[2].plot(lg['time_s'], lg['theta_deg'], color=COL[law], lw=1.1, label=law.upper())
 ax[0].set_ylabel('velocità [m/s]')
-ax[0].legend(ncol=4, fontsize=8)
+ax[0].legend(ncol=3, fontsize=8)
 ax[1].plot(t, lp['zmp_des_mm'], color='k', lw=1.1, ls='--', label='ZMP desiderato (PID)')
 ax[1].plot(t, lp['zmp_ctrl_mm'], color=COL['pid'], lw=1.1, label='ZMP = contatto (PID)')
 ax[1].plot(t, -1e3 * 0.193 / 9.81 * lp['acc_ref_ms2'], color='0.6', lw=1.0, label='-h a_ref / g (anteprima LIPM)')
@@ -54,7 +54,7 @@ ax[1].set_ylabel('ZMP davanti al CoM [mm]')
 ax[1].legend(fontsize=8)
 ax[2].set_ylabel('inclinazione CoM [deg]')
 ax[2].set_xlabel('tempo dal rilascio [s]')
-ax[2].legend(ncol=3, fontsize=8)
+ax[2].legend(ncol=2, fontsize=8)
 ax[0].set_xlim(1.0, 9.0)
 for a in ax:
     a.grid(alpha=0.3)

@@ -1,14 +1,17 @@
-"""Runs one scenario against several control laws, headless, and collects a CSV per law.
+"""Runs one scenario with the PID and the MPC, headless, and collects a CSV per law, then compares them.
 
 Every run uses the same world, the same URDF and the same scenario arguments; only the controller
 package changes. Runs are sequential and each one starts from a clean process table, because a
 leftover node from a previous run keeps publishing on /rotino/* and silently corrupts the next
 result (a stale dashboard publishing /rotino/cmd_vel put a controller into teleop once).
 
-    ros2 run rotino_benchmark campaign -- --scenario push_enable:=true --duration 25
+    ros2 run rotino_benchmark campaign -- spinta                        # a scenario of scenarios.py
+    ros2 run rotino_benchmark campaign -- --scenario push_enable:=true push_impulse:=4.0 --duration 20
+    ros2 run rotino_benchmark suite                                     # every scenario (suite.py)
 """
 
 import argparse
+import json
 import os
 import signal
 import subprocess
@@ -16,12 +19,16 @@ import sys
 import time
 from datetime import datetime
 
-CONTROLLERS = ('pid', 'mpc', 'smc')
+from rotino_benchmark.common import LAWS, default_out
+from rotino_benchmark.scenarios import SCENARIOS
+
 # On Fortress the server runs as "ruby /usr/bin/ign gazebo ...": 'gz sim' alone missed a Gazebo left over
 # from a manual launch, and the next controller attached to that old world (robot already fallen).
-STALE_PATTERNS = ('rotino_pid/controller', 'rotino_mpc/controller', 'rotino_smc/controller',
+STALE_PATTERNS = ('rotino_pid/controller', 'rotino_mpc/controller',
                   'rotino_benchmark/logger', 'rotino_dashboard', 'gz sim', 'ign gazebo', 'parameter_bridge',
                   'robot_state_publisher', 'ros_gz_sim')
+# lines of the simulation log that make a run invalid
+INVALID_MARKS = ('Failed to configure controller', 'Live commands received')
 
 
 def kill_stale():
@@ -67,49 +74,65 @@ def run_one(law, scenario, duration, out_dir, log_dir):
 
     produced = sorted(f for f in os.listdir(out_dir) if f.startswith(f'rotino_{law}_'))
     if not produced:
-        print(f'  NO CSV produced for {law} - see {log_dir}/{law}.log', flush=True)
+        print(f'  NESSUN CSV per {law}: vedi {log_dir}/{law}.log', flush=True)
         return None
+    with open(os.path.join(log_dir, f'{law}.log'), errors='replace') as f:
+        bad = sorted({m for line in f for m in INVALID_MARKS if m in line})
+    if bad:
+        print(f'  ATTENZIONE, prova probabilmente non valida ({"; ".join(bad)}): vedi {log_dir}/{law}.log')
     print(f'  {produced[-1]}', flush=True)
     return os.path.join(out_dir, produced[-1])
 
 
-def main(argv=None):
-    p = argparse.ArgumentParser(description=__doc__,
-                                formatter_class=argparse.RawDescriptionHelpFormatter)
-    p.add_argument('--scenario', nargs='*', default=[],
-                   help='launch arguments, e.g. push_enable:=true velocity_max:=1.0')
-    p.add_argument('--controllers', default=','.join(CONTROLLERS),
-                   help=f'comma-separated subset of {",".join(CONTROLLERS)}')
-    p.add_argument('--duration', type=float, default=25.0, help='seconds of logging per run')
-    p.add_argument('--name', default=None, help='name of the run directory')
-    p.add_argument('--out', default=os.path.expanduser('~/rotino_ws/benchmark_runs'))
-    args = p.parse_args([a for a in (argv if argv is not None else sys.argv[1:]) if a != '--'])
-
-    laws = [c.strip() for c in args.controllers.split(',') if c.strip()]
-    unknown = [c for c in laws if c not in CONTROLLERS]
-    if unknown:
-        p.error(f'unknown controller(s): {", ".join(unknown)}')
-
-    tag = args.name or (('_'.join(a.split(':=')[0] for a in args.scenario) or 'balance')
-                        + f'_{datetime.now():%Y%m%d_%H%M%S}')
-    run_dir = os.path.join(args.out, tag)
+def run_scenario(run_dir, laws, args, duration, name=None):
+    """Runs the laws one after the other in run_dir (CSVs) and run_dir/logs (simulation output);
+    scenario.json records what was run, so that compare knows the scenario whatever the directory name."""
     log_dir = os.path.join(run_dir, 'logs')
     os.makedirs(log_dir, exist_ok=True)
+    with open(os.path.join(run_dir, 'scenario.json'), 'w') as f:
+        json.dump({'name': name, 'args': list(args), 'duration': duration, 'laws': list(laws),
+                   'date': f'{datetime.now():%Y-%m-%d %H:%M}'}, f, indent=1)
+    return {law: run_one(law, args, duration, run_dir, log_dir) for law in laws}
 
-    print(f'scenario : {" ".join(args.scenario) or "(balance only)"}')
-    print(f'laws     : {", ".join(laws)}')
-    print(f'duration : {args.duration:.0f} s each')
+
+def parse_laws(p, text):
+    laws = [c.strip() for c in text.split(',') if c.strip()]
+    unknown = [c for c in laws if c not in LAWS]
+    if unknown:
+        p.error(f'controllori sconosciuti: {", ".join(unknown)} (disponibili: {", ".join(LAWS)})')
+    return laws
+
+
+def main(argv=None):
+    p = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
+    p.add_argument('name', nargs='?', choices=list(SCENARIOS), help='scenario of the catalogue (scenarios.py)')
+    p.add_argument('--scenario', nargs='*', default=None,
+                   help='free launch arguments instead of a named scenario, e.g. push_enable:=true')
+    p.add_argument('--controllers', default=','.join(LAWS), help=f'subset of {",".join(LAWS)}')
+    p.add_argument('--duration', type=float, default=None, help='seconds of logging per run')
+    p.add_argument('--run-name', default=None, help='name of the run directory')
+    p.add_argument('--out', default=default_out(), help='parent directory (default <ws>/benchmark_runs)')
+    p.add_argument('--no-analysis', action='store_true', help='only the CSVs, no plots nor comparison')
+    args = p.parse_args([a for a in (argv if argv is not None else sys.argv[1:]) if a != '--'])
+
+    if args.name and args.scenario is not None:
+        p.error('usa uno scenario del catalogo oppure --scenario, non entrambi')
+    laws = parse_laws(p, args.controllers)
+    sc = SCENARIOS.get(args.name) if args.name else None
+    launch_args = sc.args if sc else (args.scenario or [])
+    duration = args.duration or (sc.duration if sc else 20.0)
+    base = args.name or ('_'.join(a.split(':=')[0] for a in launch_args) or 'equilibrio')
+    run_dir = os.path.join(args.out, args.run_name or f'{base}_{datetime.now():%Y%m%d_%H%M%S}')
+
+    print(f'scenario : {sc.title if sc else "argomenti liberi"} ({" ".join(launch_args) or "nessun argomento"})')
+    print(f'leggi    : {", ".join(laws)}')
+    print(f'durata   : {duration:.0f} s ciascuna')
     print(f'output   : {run_dir}')
+    run_scenario(run_dir, laws, launch_args, duration, args.name)
 
-    for law in laws:
-        run_one(law, args.scenario, args.duration, run_dir, log_dir)
-
-    print(f'\nDone. Compare with:\n  ros2 run rotino_benchmark compare -- {run_dir}')
-    try:
-        from rotino_benchmark.plot import generate_plots
-        generate_plots(run_dir)
-    except Exception as e:
-        pass
+    if not args.no_analysis:
+        from rotino_benchmark.compare import analyse_scenario
+        analyse_scenario(run_dir)
     return 0
 
 

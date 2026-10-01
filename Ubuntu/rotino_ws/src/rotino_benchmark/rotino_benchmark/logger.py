@@ -45,7 +45,7 @@ HEADER = [
     's_ref_m', 's_err_m',
     'xdot_ref_ms', 'xdot_err_ms',
     'com_z_ref_m', 'com_z_err_mm',
-    'smc_s1', 'push_force_N',
+    'delta_s_m', 'push_force_N',   # desired CoM offset ahead of the axle (MPC delta_s, PID s_des)
     # ground-truth base pose/twist (/rotino/odom) and measured wheel contact points: ZMP study (zmp.py)
     'base_x_m', 'base_y_m', 'base_z_m', 'base_qx', 'base_qy', 'base_qz', 'base_qw',
     'base_vx', 'base_vy', 'base_vz', 'base_wx', 'base_wy', 'base_wz',
@@ -153,7 +153,7 @@ class TestBenchLogger(Node):
                 'yaw_ref': msg.data[6],
                 'sd_ref': msg.data[8],
                 'z_ref': msg.data[10],
-                's1_or_ds': msg.data[11],
+                'delta_s': msg.data[11],
             }
 
     def _zmp_ctrl_cb(self, msg):
@@ -248,7 +248,7 @@ class TestBenchLogger(Node):
             sd_err = xdot - sd_ref
             z_ref = self.wbr_data['z_ref']
             z_err = (com_z - z_ref) * 1000.0  # mm
-            s1 = self.wbr_data['s1_or_ds']
+            delta_s = self.wbr_data['delta_s']
         else:
             th_ref_deg = 0.0
             th_err_deg = math.degrees(theta)
@@ -258,7 +258,7 @@ class TestBenchLogger(Node):
             sd_err = xdot
             z_ref = nan
             z_err = nan
-            s1 = nan
+            delta_s = nan
 
         push_f = self.push_force if (now_s - self.last_wrench_stamp < 0.05) else 0.0
         errors_row = [
@@ -266,7 +266,7 @@ class TestBenchLogger(Node):
             s_ref, s_err,
             sd_ref, sd_err,
             z_ref, z_err,
-            s1, push_f
+            delta_s, push_f
         ]
 
         row = [

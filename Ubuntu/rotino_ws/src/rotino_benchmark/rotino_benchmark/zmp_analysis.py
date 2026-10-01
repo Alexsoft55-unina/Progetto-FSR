@@ -4,7 +4,7 @@ The ZMP is rebuilt from the logged ground-truth base pose and joint angles with 
 formula of rotino_description.zmp (Fortress contacts carry no forces, so no CoP can be measured).
 Needs CSVs written by the logger with the base_* columns; older logs are skipped.
 
-    ros2 run rotino_benchmark zmp -- ~/rotino_ws/benchmark_runs/<run>
+    ros2 run rotino_benchmark zmp -- <scenario_dir>
 """
 
 import argparse
@@ -16,10 +16,9 @@ import sys
 
 import numpy as np
 
+from rotino_benchmark.common import COLORS, LAWS as CONTROLLERS
 from rotino_description import zmp
 
-CONTROLLERS = ('pid', 'mpc', 'smc')
-COLORS = {'mpc': '#1f77b4', 'smc': '#2ca02c', 'pid': '#d62728'}
 BASE_COLS = ('base_x_m', 'base_y_m', 'base_z_m')
 QUAT_COLS = ('base_qx', 'base_qy', 'base_qz', 'base_qw')
 JOINT_COLS = {'left_hip': 'hip_L_pos', 'right_hip': 'hip_R_pos', 'left_knee': 'knee_L_pos',

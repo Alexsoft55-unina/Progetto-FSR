@@ -59,7 +59,7 @@ Sei package, robot rinominato `sebaju` → `RoTino` (package, moduli, topic `/ro
 rotino_description   URDF, mondo, config + libreria di modello CONDIVISA
 rotino_pid           PD in cascata
 rotino_mpc           MPC + TV-LQR + VMC
-rotino_smc           cascata sliding mode
+rotino_smc           cascata sliding mode        (rimosso il 01/10/2026, vedi 4quater)
 rotino_dashboard     dashboard unificata
 rotino_benchmark     logger + campagne + confronto
 ```
@@ -72,16 +72,17 @@ Il PID è stato **portato a coppia** su richiesta, così tutti e tre usano la st
 
 ## 3. Stato verificato
 
+Aggiornato al 01/10/2026. Nel workspace ci sono **due** leggi, PID e MPC; lo SMC è stato rimosso (4quater).
+
 | Cosa | Esito |
 |---|---|
 | `rotino_mpc` in Gazebo | ✅ si bilancia, θ ≈ 0,00° |
-| `rotino_smc` in Gazebo | ✅ ±0,4°, CPU 0,5 ms su 2 ms |
-| `rotino_pid` in Gazebo | ⚠️ **in piedi ma a ~11°**, contro ~5° dell'originale |
-| `rotino_benchmark` | ✅ eseguito end-to-end il 30/09/2026 (4 campagne × 3 leggi) + studio ZMP, vedi `Studio_ZMP.md` |
+| `rotino_pid` in Gazebo | ✅ riprogettato con lo ZMP: θ ≈ 0,00° a regime, tutti gli scenari e il salto, comandi dalla dashboard (`PID_ZMP.md`) |
+| `rotino_benchmark` | ✅ suite di 8 scenari × PID e MPC eseguita il 01/10/2026, vedi `Confronto_PID_MPC.md` |
 | `rotino_dashboard` | ✅ vista laterale funzionante (import `wbr_model` → `model` corretto) + vista ZMP animata |
 | `FSR_robot/PID` originale | ✅ funziona ancora, ±3–7° |
 
-Risultati SMC misurati in `FSR_robot/SMC` (headless): bilanciamento ±0,26°; quota inseguita a <1 mm su sinusoide ±3 cm; impulso 2,7 N·s → picco 11,4°, recupero ~3,5 s; 1 m/s su 5 m → arresto a 4,99 m.
+Storico, 30/09: con `rotino_smc` in Gazebo ±0,4° e 0,5 ms di CPU su 2 ms; il PID di allora stava in piedi a ~11°. Risultati SMC misurati in `FSR_robot/SMC` (headless): bilanciamento ±0,26°; quota inseguita a <1 mm su sinusoide ±3 cm; impulso 2,7 N·s → picco 11,4°, recupero ~3,5 s; 1 m/s su 5 m → arresto a 4,99 m.
 
 ---
 
@@ -144,6 +145,26 @@ Dettagli in `PID_ZMP.md`. Il PID è stato riprogettato: PI sul Capture Point →
 
 ---
 
+## 4quater. Solo PID e MPC; benchmark per il confronto (01/10/2026)
+
+Su richiesta, lo sliding mode è stato tolto dal workspace e dai suoi documenti: package `rotino_smc`, riferimenti in benchmark e documenti, sezioni SMC di `Tecniche_di_controllo`, `Relazione_Controllo_RoTino` e `Architettura_e_Codice`. **Non** sono stati toccati `Matlab/SMC*`, `Simscape/Robot/SMC*` né `report/report.tex`. Il codice resta recuperabile dalla storia git e dal branch locale `backup/lu-smc-2026-09-30`, che contiene anche lo SMC di Lu et al.
+
+Il benchmark è stato riorganizzato per il confronto PID ↔ MPC (`rotino_benchmark`):
+- `scenarios.py` è il catalogo unico: 8 scenari con argomenti, durata e metriche chiave;
+- `suite` li esegue tutti, `campaign -- <scenario>` uno solo;
+- `compare` dà per ogni metrica la legge migliore, tenendo conto del verso della metrica, di una soglia di parità del 5 % e della sua risoluzione. Produce `confronto.md` per scenario e `riepilogo.md/.csv/.png` per la suite;
+- `plot` sovrappone sempre PID e MPC.
+
+Risultato della suite del 01/10: **PID migliore in 12 metriche chiave, MPC in 10, pari 9** (`Confronto_PID_MPC.md`).
+
+Fatti non ovvii:
+- **Il vecchio `plot.py` disegnava quasi solo MPC e SMC** (`for law in ('mpc', 'smc')`). Nelle campagne con il PID 7 grafici su 9 erano vuoti.
+- **Il transitorio di rilascio falsava il "picco di beccheggio".** Il CoM appeso all'ancora è 1,1 cm avanti all'asse (~4,7°), e negli scenari tranquilli il picco era sempre quello, per tutte le leggi. Ora picco, recupero ed energia ignorano il primo 1,5 s.
+- **Su questa macchina LaTeX non ha l'italiano** (`italian.ldf` assente). `docs/compila_pdf.sh` compila una copia con babel inglese e nomi italiani ridefiniti, lasciando intatti i `.tex`. `docs/md2tex.py` rigenera `Tecniche_di_controllo.tex` dal `.md`, perché pandoc non è installato.
+- Le campagne del 30/09 (con lo SMC) sono in `benchmark_runs/archivio_2026-09-30_01/`, non versionato.
+
+---
+
 ## 5. Trappole incontrate — costano ore se le ripeti
 
 - **`pkill -f <pattern>` uccide la shell chiamante** se il pattern compare nella sua stessa riga di comando. Mi è successo due volte. Usa il trucco delle parentesi: `pkill -f "[i]nstall/rotino"`.
@@ -161,6 +182,7 @@ Dettagli in `PID_ZMP.md`. Il PID è stato riprogettato: PI sul Capture Point →
 
 - Documentazione e commenti del progetto: **in italiano** per i documenti, **in inglese** per i commenti nel codice (segue lo stile preesistente).
 - `/rotino/debug` deve restare a **11 campi** e `/rotino/wbr_state` a **18**: `logger.py` li spacchetta posizionalmente e `ros_bridge.py` valida la lunghezza.
+- Le leggi del confronto sono in `rotino_benchmark/common.py` (`LAWS = ('pid', 'mpc')`). Un nuovo scenario va aggiunto a `scenarios.py`, non passato a mano a `campaign`.
 - Dal 01/10 anche il PID pubblica `wbr_state` a 18 campi, oltre a `/rotino/zmp_ctrl` (11 campi, registrato dal logger in 5 colonne). Il substrato comune del confronto resta `/rotino/debug`.
 - Il `theta` di `/rotino/debug` è per tutte le leggi l'inclinazione del CoM dalla verticale, positiva in avanti. Il PID precedente aveva segno opposto e un offset di 4,73°.
 - I workspace in `FSR_robot` restano **intatti**: non toccarli senza chiedere.

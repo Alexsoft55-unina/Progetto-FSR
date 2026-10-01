@@ -56,8 +56,8 @@
 \fancyfoot[C]{\thepage}
 
 \title{\LARGE\textbf{Guida Definitiva al Controllo di RoTino}\\
-\large\textit{Dalla Fisica del Pendolo Inverso a PID, MPC e Sliding Mode:\\
-Spiegazione Passo-Passo, Teoria, Confronto e Analisi dei Disturbi}}
+\large\textit{Dalla Fisica del Pendolo Inverso al PID con lo ZMP e all'MPC:\\
+Spiegazione Passo-Passo, Teoria e Confronto}}
 \author{\textbf{Aldo Rosicarelli} -- Field and Service Robotics}
 \date{Settembre 2026}
 
@@ -66,7 +66,7 @@ Spiegazione Passo-Passo, Teoria, Confronto e Analisi dei Disturbi}}
 \maketitle
 
 \begin{abstract}
-Questo documento offre una trattazione pedagogica, completa e rigorosa dell'architettura di controllo del robot bipede su ruote (\textit{Wheeled Biped Robot}, WBR) denominato \textbf{RoTino}. Vengono analizzate le peculiarità fisiche del sistema (pendolo inverso a lunghezza variabile, fase non minima, asimmetria baricentrica), i motivi per cui determinate tecniche sono state introdotte, il funzionamento dettagliato di ciascuna delle tre leggi implementate nel workspace (\textbf{PID a coppia}, \textbf{MPC + TV-LQR + VMC}, e \textbf{Cascata Sliding Mode}), i rispettivi vantaggi e svantaggi, e una risposta esaustiva alla domanda fondamentale: \textit{perché alla spinta impulsiva MPC e SMC rispondono con un picco simile, ma si comportano in modo radicalmente diverso sui disturbi persistenti?}
+Questo documento offre una trattazione pedagogica, completa e rigorosa dell'architettura di controllo del robot bipede su ruote (\textit{Wheeled Biped Robot}, WBR) denominato \textbf{RoTino}. Vengono analizzate le peculiarità fisiche del sistema (pendolo inverso a lunghezza variabile, fase non minima, asimmetria baricentrica), i motivi per cui determinate tecniche sono state introdotte, il funzionamento delle due leggi del workspace (\textbf{PID con lo Zero Moment Point} e \textbf{MPC + TV-LQR + VMC}), i rispettivi vantaggi e svantaggi, e come si confrontano in Gazebo scenario per scenario.
 \end{abstract}
 
 \tableofcontents
@@ -130,146 +130,108 @@ Il lavoro svolto nel repository ha trasformato un insieme frammentato di script 
 
 \begin{enumerate}
     \item \textbf{Unificazione nel workspace \texttt{rotino\_ws}}: 
-    Creati 6 package ROS 2 standard:
+    Creati 5 package ROS 2 standard:
     \begin{itemize}
         \item \texttt{rotino\_description}: URDF, mondo Gazebo, cinematica e dinamica condivisa;
-        \item \texttt{rotino\_pid}: controllore basato su retroazione statica e PD di giunto;
+        \item \texttt{rotino\_pid}: cascata PID con lo Zero Moment Point come variabile di equilibrio;
         \item \texttt{rotino\_mpc}: architettura disaccoppiata MPC + TV-LQR + VMC;
-        \item \texttt{rotino\_smc}: cascata sliding mode con Super-Twisting e SMC di gamba;
         \item \texttt{rotino\_dashboard}: GUI di monitoraggio in tempo reale;
-        \item \texttt{rotino\_benchmark}: suite di test automatizzati, logger telemetrico a 500 Hz, aggregatore metriche e generatore di grafici.
+        \item \texttt{rotino\_benchmark}: suite di scenari eseguiti con entrambe le leggi, logger telemetrico a 500 Hz, confronto PID--MPC e grafici sovrapposti.
     \end{itemize}
     
     \item \textbf{Porting a coppia omogeneo}:
-    Tutti e tre i controllori agiscono adesso sullo stesso identico substrato: comandi di coppia ruote (\texttt{Float64MultiArray}) e coppie di giunto gambe (\texttt{leg\_effort\_controller}) a 500 Hz ($\Delta t = 2.0\text{ ms}$).
+    Entrambi i controllori agiscono adesso sullo stesso identico substrato: comandi di coppia ruote (\texttt{Float64MultiArray}) e coppie di giunto gambe (\texttt{leg\_effort\_controller}) a 500 Hz ($\Delta t = 2.0\text{ ms}$).
     
     \item \textbf{Risoluzione del Bang-Bang del PID a 500 Hz}:
-    Il PD di giunto originale girava a 2 kHz dentro il motore fisico di MuJoCo. Spostato a 500 Hz nel nodo ROS 2, l'energia iniettabile per ciclo cresceva di 4 volte, mandando in saturazione il termine derivativo $-k_v \dot{q}$ e trasformandolo in un bang-bang a commutazione a ogni passo. Il problema è stato risolto saturando selettivamente lo smorzamento a $\pm 8\text{ N}\cdot\text{m}$.
-    
-    \item \textbf{Eliminazione del Ciclo Limite ad Alta Velocità in SMC}:
-    Nello SMC l'anello esterno usava originariamente la velocità del baricentro $V_{com} = V_{asse} + \omega \times r_{com}$. Poiché durante il dondolio il termine d'oscillazione vale circa $0.4\text{ m/s}$, si chiudeva un anello di retroazione positiva rapido che portava il robot a oscillare a $\pm 6^\circ$ superati i $0.7\text{ m/s}$. Sostituendo con la velocità filtrata dell'asse, lo SMC ha raggiunto stabilmente i \textbf{2.0 m/s}.
-    
-    \item \textbf{Framework di Benchmark Accademico}:
-    Aggiunto il salvataggio automatico di grafici ad alta risoluzione (300 DPI) con linee di riferimento tratteggiate, colonne di errore e ritratti di fase $(\theta, \dot{\theta})$ con marcatore di disturbo e retta della superficie di scorrimento.
+    Il PD di giunto originale girava a 2 kHz dentro il motore fisico di MuJoCo. Spostato a 500 Hz nel nodo ROS 2, l'energia iniettabile per ciclo cresceva di 4 volte, mandando in saturazione il termine derivativo $-k_v \dot{q}$ e trasformandolo in un bang-bang a commutazione a ogni passo. Il problema è stato risolto alla radice passando a un PD cartesiano delle gambe (circa 50 N$\cdot$m/rad in spazio giunti invece di 160--200).
+
+    \item \textbf{PID riprogettato attorno allo ZMP}:
+    Lo studio dello Zero Moment Point (\texttt{docs/Studio\_ZMP.md}) mostrava che il PID era l'unica legge a non rispettarne il criterio. Il controllore è stato riprogettato con lo ZMP come ingresso di controllo (\texttt{docs/PID\_ZMP.md}).
+
+    \item \textbf{Benchmark orientato al confronto}:
+    Un catalogo di otto scenari eseguiti con entrambe le leggi (\texttt{ros2 run rotino\_benchmark suite}), con tabelle PID | MPC che indicano la legge migliore su ogni metrica e grafici sempre sovrapposti.
 \end{enumerate}
 
 % -------------------------------------------------------------------------------------
-\section{Tecnica 1: Il Controllore PID (PD in Parallelo)}
+\section{Tecnica 1: Il Controllore PID con lo Zero Moment Point}
 % -------------------------------------------------------------------------------------
 
-\subsection{Come Funziona}
-Il nome "PID" è convenzionale, poiché nel codice non vi sono integratori attivi sul bilanciamento sagittale. È strutturato su quattro blocchi:
-
+\subsection{L'Idea Fondamentale: lo ZMP come Leva}
+Su un robot a due ruote il poligono di appoggio degenera nel segmento fra i contatti. Longitudinalmente lo ZMP non può muoversi dentro un piede: sta sulla linea dei contatti, e \textbf{sono le ruote a decidere dove si trova}. Con il modello \textit{cart-table} del pendolo inverso lineare (LIPM)
 \begin{equation}
-\tau_{c} = 18 \cdot \Big[ k_\theta (\theta - \theta_{ref}) + k_{\dot{\theta}} \dot{\theta} + k_x (x - x_{ref}) + k_{\dot{x}} (\dot{x} - \dot{x}_{ref}) \Big]
+\ddot{c} = \omega^2 (c - p), \qquad \omega^2 = \frac{g}{h},
 \end{equation}
-
-Tutti e quattro gli stati entrano \textbf{in parallelo} per calcolare la coppia di modo comune sulle ruote. Le gambe sono mosse da PD di giunto indipendenti ad altissima rigidezza ($k_p = 160\text{--}200\text{ N}\cdot\text{m/rad}$, equivalenti a circa $28\text{ kN/m}$ al piede), trattando le gambe come aste rigide.
+dove $c$ è il baricentro, $p$ lo ZMP (cioè il contatto) e $h$ l'altezza del baricentro, lo ZMP è l'ingresso con cui si governa il baricentro. Il PID è una cascata costruita su questa idea:
+\begin{itemize}
+    \item \textbf{Anello esterno, PI sul Capture Point} $\xi = c + \dot{c}/\omega$, che evolve come $\dot{\xi} = \omega(\xi - p)$: decide dove deve stare lo ZMP,
+    \begin{equation}
+    s_{des} = c - p_{des} = s_{ff} - \rho\Big[\frac{\dot{e}_c}{\omega} + \frac{k_\xi}{\omega} e_\xi + \frac{k_i}{\omega}\int e_\xi\Big], \qquad |s_{des}| \le \frac{a_{max}}{\omega^2};
+    \end{equation}
+    \item \textbf{Anello interno, PD sull'offset ZMP}: porta lo ZMP dove serve con la coppia comune delle ruote, $\tau_c = \tau_{ff} + K_s(s - s_{des}) + K_{sd}(\dot{s} - \dot{s}_{ff})$;
+    \item \textbf{Anteprima LIPM}: il riferimento del baricentro è la soluzione limitata di $\ddot{c} = \omega^2(c - p_{ref})$, cioè il percorso pianificato delle ruote filtrato con il nucleo $(\omega/2)e^{-\omega|u|}$. Il robot \textbf{si inclina prima} del gradino di accelerazione, come richiede la fase non minima (Trappola 2);
+    \item \textbf{Imbardata}: PID sulla rotta con feedforward d'attrito (Coulomb e viscoso), che elimina lo stick-slip delle ruote in curva;
+    \item \textbf{Gambe}: PD cartesiano sulla posizione della ruota rispetto all'anca ($1500/5000$ N/m) con il peso in feedforward; il salto usa la stessa macchina a stati di prima.
+\end{itemize}
+I guadagni ($K_s = 60$ N$\cdot$m/m, $K_{sd} = 5$ N$\cdot$m$\cdot$s/m, $\rho = 0.4$, $k_\xi = 1.5$ s$^{-1}$, $k_i = 0.5$ s$^{-2}$) sono stati scelti per \textbf{posizionamento robusto dei poli} sul VL-WIP discretizzato a 500 Hz: con massa $\pm 20\%$, gambe da accosciate a estese e 1--2 campioni di ritardo lo smorzamento minimo resta $0.69$. L'autorità $\rho < 1$ è necessaria: una cascata LIPM "pura" presuppone un anello interno infinitamente veloce, e a 500 Hz il termine $\dot{c}/\omega$ diventerebbe una retroazione positiva sulla velocità delle ruote.
 
 \subsection{Schema a Blocchi del Controllo PID}
-La Figura~\ref{fig:block_pid} illustra l'architettura dettagliata del controllore implementato nel package \texttt{rotino\_pid}. Si evidenziano i quattro canali paralleli sagittali sommati nella coppia di modo comune $\tau_c$, il ramo di guida laterale per l'imbardata $\tau_d$, la Macchina a Stati Finiti (FSM) a 7 fasi per la sequenza dei salti e, soprattutto, la saturazione selettiva a $\pm 8\text{ N}\cdot\text{m}$ sul termine di smorzamento delle gambe, essenziale per prevenire il bang-bang a 500 Hz.
-
 \begin{figure}[htbp]
 \centering
 \resizebox{0.98\textwidth}{!}{
 \begin{tikzpicture}[>=Latex]
-    % Reference Inputs
-    \node (theta_ref) at (-0.6, 3.4) {\scriptsize $\theta_{ref} = -4.73^\circ$};
-    \node (xref) at (-0.6, 1.2) {\scriptsize $x_{ref}, \dot{x}_{ref}$};
-    
-    % Summing nodes
-    \node[sum] (sum_th) at (1.6, 3.4) {$-$};
-    \node[sum] (sum_x) at (1.6, 1.2) {$-$};
-    
-    % Parallel gain blocks
-    \node[gain] (k_th) at (3.6, 4.0) {$k_\theta = 1.0$};
-    \node[gain] (k_thd) at (3.6, 2.8) {$k_{\dot{\theta}} = 0.08$};
-    \node[gain] (k_x) at (3.6, 1.6) {$-k_x = -0.5$};
-    \node[gain] (k_xd) at (3.6, 0.4) {$-k_{\dot{x}} = -0.8$};
-    
-    % Common summer
-    \node[sum] (sum_u) at (5.4, 2.2) {$+$};
-    
-    % Saturation and gear
-    \node[sat, text width=1.5cm] (sat_u) at (7.0, 2.2) {$\text{sat}_{\pm u_{max}}$\\[-1pt]$[0.12, 0.35]$};
-    \node[gain] (gear) at (8.8, 2.2) {$\times (-18)$\\[-1pt]{\tiny Segno Motore}};
-    \node[sum] (sum_mix_l) at (11.0, 2.7) {$+$};
-    \node[sum] (sum_mix_r) at (11.0, 1.7) {$+$};
-    
-    % Yaw loop
-    \node (yaw_ref) at (6.2, -0.6) {\scriptsize $\psi_{cmd}(e_\perp)$};
-    \node[baseblock, text width=2.4cm] (yaw_pd) at (8.8, -0.6) {$\text{PD}_{\psi}$\\Yaw Tracking};
-    
-    % Leg Control & Jump FSM
-    \node[fsm] (fsm) at (3.5, -3.2) {\textbf{Supervisore Salti (FSM)}\\[1pt]7 Stati: Balance, Preload, Thrust, Flight, Land, ...};
-    \node[baseblock, text width=3.8cm] (leg_pd) at (8.6, -3.2) {\textbf{4$\times$ PD Giunti Gambe}\\[1pt]$\tau_{pos} = \text{sat}_{50}(k_p e_q)$\\[1pt]$\mathbf{\tau_{damp} = sat_{\pm 8}(-k_v \dot{q})}$\\[1pt]{\tiny [Fix Anti Bang-Bang 500 Hz]}};
-    
-    % Plant
-    \node[plant] (plant) at (14.2, 0.8) {\textbf{RoTino Robot}\\[3pt]Dinamica WBR\\Simulatore 500 Hz\\Ruote + 4 Giunti};
-    
-    % Connecting arrows - sagittal
-    \draw[->] (theta_ref) -- node[above, very near start, font=\tiny] {$+$} (sum_th);
-    \draw[->] (xref) -- node[above, very near start, font=\tiny] {$+$} (sum_x);
-    
-    \draw[->] (sum_th) |- (k_th);
-    \draw[->] (sum_x) |- (k_x);
-    
-    \draw[->] (k_th) -| node[above, pos=0.8, font=\tiny] {$+$} (sum_u);
-    \draw[->] (k_thd) -| node[above, pos=0.8, font=\tiny] {$+$} (sum_u);
-    \draw[->] (k_x) -| node[below, pos=0.8, font=\tiny] {$+$} (sum_u);
-    \draw[->] (k_xd) -| node[below, pos=0.8, font=\tiny] {$+$} (sum_u);
-    
-    \draw[->] (sum_u) -- node[above, font=\tiny] {$u_{raw}$} (sat_u);
-    \draw[->] (sat_u) -- (gear);
-    \draw[->] (gear) -- node[above, font=\tiny] {$\tau_c$} (10.0, 2.2) |- (sum_mix_l);
-    \draw[->] (10.0, 2.2) |- (sum_mix_r);
-    
-    % Yaw connections
-    \draw[->] (yaw_ref) -- (yaw_pd);
-    \draw[->] (yaw_pd) -| node[right, pos=0.25, font=\tiny] {$-\tau_d$} (sum_mix_l);
-    \draw[->] (yaw_pd) -| node[right, pos=0.25, font=\tiny] {$+\tau_d$} (sum_mix_r);
-    
-    % To plant
-    \draw[->] (sum_mix_l) -- node[above, font=\tiny] {$\tau_L$} (plant.150);
-    \draw[->] (sum_mix_r) -- node[above, font=\tiny] {$\tau_R$} (plant.165);
-    \draw[->] (leg_pd) -| node[above, pos=0.25, font=\tiny] {$\tau_{gambe} \in \mathbb{R}^4$} (plant.220);
-    
-    % FSM to leg pd
-    \draw[->] (fsm) -- node[above, font=\tiny] {$q^*(t)$} (leg_pd);
-    
-    % Feedback paths
-    \draw[->] (plant.east) -- ++(0.6, 0) |- (5.5, 5.4) -| node[above=2pt, pos=0.2, font=\tiny] {$\theta$ (IMU)} (sum_th.north);
-    \draw[->] (14.8, 5.4) -| node[left, pos=0.5, font=\tiny] {$\dot{\theta}$} (k_thd.north);
-    \draw[->] (plant.east) ++(0.6, 0) |- (5.5, -2.0) -| node[below=2pt, pos=0.2, font=\tiny] {$x, \dot{x}$ (Encoders Ruote)} (sum_x.south);
-    \draw[->] (14.5, -2.0) -| node[left, pos=0.5, font=\tiny] {$\dot{x}$} (k_xd.south);
-    
-    \draw[->] (plant.south) |- node[below=2pt, pos=0.4, font=\tiny] {$F_n$ (Sensori Contatto)} (fsm.south);
-    \draw[->] (plant.south) ++(-0.6, 0) |- node[below=2pt, pos=0.3, font=\tiny] {$q, \dot{q}$} (leg_pd.south);
-
-    % Background box for sagittal loop
+    \node[baseblock, text width=2.3cm] (path) at (0, 3.2) {Percorso pianificato\\$p_{ref}(t)$ o teleop};
+    \node[baseblock, text width=2.2cm] (prev) at (3.2, 3.2) {\textbf{Anteprima LIPM}\\nucleo $e^{-\omega|u|}$};
+    \node[sum] (sum_xi) at (5.6, 1.6) {$-$};
+    \node[gain, text width=2.2cm] (dcm) at (7.6, 1.6) {\textbf{PI Capture Point}\\$k_\xi,\ k_i,\ \rho$};
+    \node[sat, text width=1.5cm] (sat) at (9.8, 1.6) {$|s_{des}| \le a_{max}/\omega^2$};
+    \node[sum] (sum_s) at (11.6, 1.6) {$-$};
+    \node[gain, text width=1.9cm] (pd) at (13.4, 1.6) {\textbf{PD offset ZMP}\\$K_s,\ K_{sd}$};
+    \node[baseblock, text width=1.9cm] (ff) at (13.4, 3.2) {feedforward\\$s_{ff},\ \tau_{ff}$};
+    \node[baseblock, text width=2.3cm] (yaw) at (13.4, -0.6) {\textbf{PID rotta}\\+ attrito};
+    \node[fsm] (fsm) at (7.6, -3.0) {\textbf{Supervisore salti}\\7 stati, altezza, teleop};
+    \node[baseblock, text width=3.2cm] (legs) at (13.0, -3.0) {\textbf{PD cartesiano gambe}\\$\tau = J^T[K_p e_p - K_d J\dot{q} + F_{ff}]$};
+    \node[plant] (plant) at (18.2, 0.4) {\textbf{RoTino}\\[3pt]Gazebo 500 Hz\\ruote + 4 giunti};
+    \draw[->] (path) -- (prev);
+    \draw[->] (prev) -| node[above, pos=0.25, font=\tiny] {$\xi_{ref}$} (sum_xi.north);
+    \draw[->] (prev) -- node[above, font=\tiny] {$\ddot{c}_{ref}$} (ff);
+    \draw[->] (sum_xi) -- node[above, font=\tiny] {$e_\xi$} (dcm);
+    \draw[->] (dcm) -- (sat);
+    \draw[->] (sat) -- node[above, font=\tiny] {$s_{des}$} (sum_s);
+    \draw[->] (sum_s) -- (pd);
+    \draw[->] (ff) -- (pd);
+    \draw[->] (pd) -- ++(2.2, 0) node[above, pos=0.5, font=\tiny] {$\tau_c$} |- (plant.160);
+    \draw[->] (yaw) -- ++(2.2, 0) node[above, pos=0.5, font=\tiny] {$\tau_d$} |- (plant.190);
+    \draw[->] (fsm) -- node[above, font=\tiny] {$p^*_{ruota}(t)$} (legs);
+    \draw[->] (legs) -| node[above, pos=0.25, font=\tiny] {$\tau_{gambe}$} (plant.south);
+    \draw[->] (plant.north) |- (11.6, 4.6) -- node[left, pos=0.35, font=\tiny] {$s = c - p$} (sum_s.north);
+    \draw[->] (11.6, 4.6) -| node[above, pos=0.2, font=\tiny] {$\xi = c + \dot{c}/\omega$ (odom + cinematica)} (sum_xi.north east);
     \begin{scope}[on background layer]
-        \node[draw=primary!50, fill=blue!2, dashed, rounded corners, fit=(sum_th) (k_th) (k_xd) (sum_u) (sat_u) (gear)] (box_sag) {};
-        \node[primary, font=\bfseries\scriptsize, anchor=south west] at (box_sag.north west) {Anello Parallelo Sagittale (Coppia Modo Comune $\tau_c$)};
+        \node[draw=primary!50, fill=blue!2, dashed, rounded corners, fit=(sum_xi) (dcm) (sat) (sum_s) (pd) (ff)] (box) {};
+        \node[primary, font=\bfseries\scriptsize, anchor=north west] at (box.south west) {Cascata ZMP (coppia di modo comune)};
     \end{scope}
 \end{tikzpicture}
 }
-\caption{Schema a blocchi dettagliato del controllore PID (\texttt{rotino\_pid}) con 4 anelli sagittali paralleli, anello di imbardata, supervisore dei salti FSM e PD di giunto anti-bang-bang.}
+\caption{Schema a blocchi del controllore PID (\texttt{rotino\_pid}): anteprima LIPM, PI sul Capture Point che fissa lo ZMP desiderato, PD sull'offset ZMP alle ruote, PID di rotta e PD cartesiano delle gambe.}
 \label{fig:block_pid}
 \end{figure}
 
 \subsection{Perché Sceglierlo}
 \begin{itemize}
-    \item \textbf{Semplicità concettuale}: richiede solo nozioni base di controlli automatici;
-    \item \textbf{Costo computazionale trascurabile}: pochissime somme e moltiplicazioni.
+    \item \textbf{Struttura leggibile}: ogni anello ha un significato fisico (dove sta lo ZMP, dove va il Capture Point), e ogni guadagno si interpreta come posizione di un polo;
+    \item \textbf{Costo computazionale piccolo}: circa 0.45 ms per passo, di cui la metà per lo stimatore ZMP di telemetria; nessuna ottimizzazione online;
+    \item \textbf{Anticipo senza ottimizzatore}: l'anteprima LIPM dà la stessa capacità di "vedere il futuro" dell'MPC con un semplice filtro sul percorso pianificato.
 \end{itemize}
 
 \subsection{Vantaggi e Svantaggi}
 \begin{itemize}
-    \item[\textcolor{green}{\textbf{+}}] Facile da implementare al primo stadio di prototipazione.
-    \item[\textcolor{red}{\textbf{--}}] \textbf{Poli quasi non smorzati}: il rapporto tra rigidezza di posizione e smorzamento genera una coppia di poli lenti con $\zeta = 0.069$ (periodo di dondolio di quasi 3 secondi).
-    \item[\textcolor{red}{\textbf{--}}] \textbf{Assetto piegato}: a regime il robot non si stabilizza a $0^\circ$ ma rimane inclinato a circa $10.5^\circ\text{--}11^\circ$.
-    \item[\textcolor{red}{\textbf{--}}] \textbf{Perdita di aderenza}: a causa delle oscillazioni rigide delle gambe, il robot perde il contatto con il suolo per oltre l'80\% del tempo nelle manovre dinamiche.
+    \item[\textcolor{green}{\textbf{+}}] \textbf{Rispetta il criterio ZMP}: in tutti gli scenari senza salto il carico sulla ruota più scarica resta sopra 10 N; all'atterraggio del salto scende a circa 4 N, come per l'MPC (con la versione precedente arrivava a 0 N, con lo ZMP laterale fuori dall'appoggio).
+    \item[\textcolor{green}{\textbf{+}}] \textbf{Inseguimento preciso dei riferimenti pianificati} e \textbf{azione integrale} sul Capture Point: un disturbo costante non lascia un errore di posizione permanente.
+    \item[\textcolor{green}{\textbf{+}}] \textbf{Coppie lisce}: nessun chattering.
+    \item[\textcolor{red}{\textbf{--}}] \textbf{Nessun vincolo pianificato}: i limiti sono saturazioni a posteriori (offset ZMP, coppia), non vincoli su un orizzonte come nell'MPC.
+    \item[\textcolor{red}{\textbf{--}}] \textbf{Disturbi impulsivi}: l'autorità ridotta $\rho = 0.4$ fa inclinare il robot più dell'MPC dopo una spinta.
+    \item[\textcolor{red}{\textbf{--}}] \textbf{Misure ideali}: legge posa e velocità dalla ground truth del simulatore, mentre l'MPC usa IMU e filtro di Kalman.
 \end{itemize}
+Dettagli, progetto dei guadagni e prove in \texttt{docs/PID\_ZMP.md}.
 
 % -------------------------------------------------------------------------------------
 \section{Tecnica 2: MPC + TV-LQR + VMC (L'Approccio del Paper Cui et al.)}
@@ -413,206 +375,78 @@ In appoggio, la rigidezza verticale virtuale è impostata volutamente a zero ($K
     \item[\textcolor{green}{\textbf{+}}] \textbf{Comportamento a regime impeccabile}: beccheggio a regime a $0.000^\circ$ assoluto.
     \item[\textcolor{green}{\textbf{+}}] \textbf{Pianificazione predittiva con vincoli}: rispetta a priori l'aderenza col terreno e l'escursione delle gambe.
     \item[\textcolor{green}{\textbf{+}}] \textbf{Zero chattering}: le coppie alle ruote sono continue, lisce ed estremamente parsimoniose dal punto di vista energetico.
-    \item[\textcolor{red}{\textbf{--}}] \textbf{Nessuna azione integrale sagittale}: se sul torso agisce una spinta costante (es. vento continuo o salita), l'LQR non la azzera e lascia un errore di posizione permanente di decine di centimetri.
+    \item[\textcolor{red}{\textbf{--}}] \textbf{Nessuna azione integrale sagittale}: se sul torso agisce una spinta costante (es. vento continuo o salita), l'LQR non la azzera e lascia un errore di posizione permanente di decine di centimetri (sul modello ridotto, 65 cm con 3 N costanti).
     \item[\textcolor{red}{\textbf{--}}] \textbf{Complessità computazionale}: richiede la risoluzione di due problemi di ottimizzazione QP ogni 10 ms.
 \end{itemize}
 
 % -------------------------------------------------------------------------------------
-\section{Tecnica 3: Cascata Sliding Mode (SMC)}
+\section{Il Confronto PID--MPC}
 % -------------------------------------------------------------------------------------
 
-\subsection{L'Idea Fondamentale: Controllo Robusto Non Lineare in Forma Chiusa}
-Lo Sliding Mode Control (SMC) sostituisce l'ottimizzazione computazionale con una legge geometrica non lineare in grado di forzare lo stato del robot su una determinata "varietà di scorrimento" e mantenercelo a tempo finito, indipendentemente da incertezze di modello o disturbi esterni.
-
-\subsection{Schema a Blocchi del Controllo in Cascata Sliding Mode}
-La Figura~\ref{fig:block_smc} illustra lo schema a blocchi dell'architettura di controllo in cascata implementata in \texttt{rotino\_smc}. Si evidenziano i due anelli principali:
-\begin{itemize}
-    \item \textbf{Anello Esterno}: calcola l'angolo di inclinazione di riferimento $\theta^*$ a partire dall'errore di posizione e velocità dell'asse ruote ($V_{axle}$, opportunamente filtrata ed escludente la velocità del torso $V_{com}$ per evitare fenomeni di dondolio) attraverso un regolatore PI a guadagni negativi saturato a $\pm 12.03^\circ$;
-    \item \textbf{Anello Interno (500 Hz)}: definisce la superficie di scorrimento $s_1 = \dot{\theta} + c_1 e_\theta$, calcola l'accelerazione equivalente con algoritmo Super-Twisting del $2^\circ$ ordine (provvisto di integratore interno di disturbo $W(t)$), e ricava la coppia di trazione $\tau_c$ invertendo la dinamica non lineare del pendolo a gambe articolate (VL-WIP);
-    \item \textbf{Controllo Gambe nello Spazio Operativo (500 Hz)}: SMC task-space su quota e baricentro con rigidezza verticale virtuale ripristinata a $1200\text{ N/m}$.
-\end{itemize}
+\subsection{Come si Misura}
+Il pacchetto \texttt{rotino\_benchmark} esegue un catalogo di otto scenari con entrambe le leggi, a parità di mondo, URDF, attuazione e argomenti: equilibrio, spinta sul torso, trapezio di velocità, va e vieni, variazione di altezza, curva a S lenta e veloce, salto. Per ogni scenario produce una tabella PID | MPC che indica la legge migliore su ogni metrica e dodici grafici sovrapposti. Ogni metrica ha un verso (minore o maggiore è meglio) e una risoluzione: sotto il 5\% o sotto la risoluzione le leggi sono pari.
 
 \begin{figure}[htbp]
 \centering
-\resizebox{0.98\textwidth}{!}{
-\begin{tikzpicture}[>=Latex]
-    % Outer Loop References
-    \node (s_ref) at (-0.6, 3.8) {\scriptsize $s_{ref}$};
-    \node (sdot_ref) at (-0.6, 2.7) {\scriptsize $\dot{s}_{ref}$};
-    
-    % Outer Loop Elements
-    \node[sum] (sum_pos) at (0.8, 3.8) {$-$};
-    \node[gain] (k_pos) at (2.2, 3.8) {$K_{pos}$};
-    \node[sum] (sum_vref) at (3.6, 3.8) {$+$};
-    \node[sat, text width=1.3cm] (sat_vref) at (5.2, 3.8) {$\text{sat}_{\pm 2.0}$\\[-1pt]Vel. Max};
-    \node[sum] (sum_ev) at (7.2, 3.8) {$-$};
-    \node[baseblock, fill=blue!10, text width=2.6cm] (pi_neg) at (9.8, 3.8) {
-        \textbf{PI Velocità}\\[1pt]
-        $\mathbf{K_P = -0.30}$\\[1pt]
-        $\mathbf{K_I = -0.10}$\\[1pt]
-        {\tiny [Guadagni Negativi]}
-    };
-    \node[sat, text width=1.6cm] (sat_th) at (12.7, 3.8) {$\mathbf{sat_{\pm 12.03^\circ}}$\\[-1pt]Limite $\theta^*$};
-    
-    % Inner Loop: Super-Twisting (500 Hz)
-    \node[sum] (sum_th) at (0.8, 0.6) {$-$};
-    \node[baseblock, text width=2.7cm] (surf) at (3.4, 0.6) {
-        \textbf{Superficie $s_1$}\\[1pt]
-        $s_1 = \dot{\theta} + c_1 e_\theta$\\[1pt]
-        $\sigma_\varepsilon(s_1) = \frac{s_1}{|s_1| + \varepsilon}$
-    };
-    \node[baseblock, fill=red!10, draw=accentred, line width=0.8pt, text width=3.6cm] (st_block) at (7.5, 0.6) {
-        \textbf{Super-Twisting ($2^\circ$ Ordine)}\\[1pt]
-        $\nu = -c_1\dot{\theta} - k_a \sqrt{|s_1|} \sigma_\varepsilon + W$\\[1pt]
-        $\dot{W} = -k_b \sigma_\varepsilon(s_1) \ \text{[Anti-Windup]}$\\[1pt]
-        $\mathbf{W(t)} \to \text{Integratore Disturbo}$
-    };
-    \node[baseblock, fill=green!10, draw=accentgreen, line width=0.8pt, text width=3.2cm] (inv_dyn) at (12.0, 0.6) {
-        \textbf{Inversione Dinamica}\\[1pt]
-        $\tau_{c,raw} = \dfrac{\nu - a_2(l)\theta}{2 b_2(l)}$\\[2pt]
-        {\tiny Modello Non Lineare VL-WIP}
-    };
-    \node[sat, text width=1.4cm] (sat_trac) at (15.2, 0.6) {$\text{sat}_{\mu N r}$\\[-1pt]Aderenza};
-    
-    % Yaw PD
-    \node[baseblock, text width=3.2cm] (yaw_pd) at (12.0, -1.8) {$\text{PD}_{\psi} + \tau_{friction} + \tau_{I,\psi}$\\[1pt]{\tiny Imbardata (Lineare LQR)}};
-    
-    % Mixers: mix_r to the left, mix_l to the right (ZERO crossings)
-    \node[sum] (mix_r) at (17.0, 0.0) {$+$};
-    \node[sum] (mix_l) at (18.6, 1.2) {$+$};
-    
-    % Leg SMC
-    \node[baseblock, fill=yellow!15, draw=accentorange, text width=5.4cm] (leg_smc) at (8.5, -3.4) {
-        \textbf{SMC Gambe in Spazio Operativo (500 Hz)}\\[1pt]
-        $s_{leg} = (v_f - v_d) + c_{leg}(p_f - p_d)$\\[1pt]
-        $F = -K_{lin} s_{leg} - \mathbf{K_{sw} \text{sat}(s/\phi)} + F_{ff}$\\[1pt]
-        $\mathbf{K_z = 1200\ N/m} \implies \text{Rigidezza Ripristinata}$\\[1pt]
-        $\tau_{legs} = J^T(q) F + b_{leg}\dot{q}$
-    };
-    
-    % Plant
-    \node[plant] (plant) at (21.4, 0.6) {\textbf{RoTino Robot}\\[3pt]Dinamica WBR\\Simulazione 500 Hz\\Suolo Non Lineare};
-    
-    % Connections Outer
-    \draw[->] (s_ref) -- node[above=1pt, font=\tiny] {$+$} (sum_pos);
-    \draw[->] (sum_pos) -- (k_pos);
-    \draw[->] (k_pos) -- node[above=1pt, font=\tiny] {$+$} (sum_vref);
-    \draw[->] (sdot_ref) -| node[above=1pt, pos=0.2, font=\tiny] {$+$} (sum_vref);
-    \draw[->] (sum_vref) -- (sat_vref);
-    \draw[->] (sat_vref) -- node[above=1pt, font=\tiny] {$v_{ref}$} (sum_ev);
-    \draw[->] (sum_ev) -- node[above=1pt, font=\tiny] {$e_v$} (pi_neg);
-    \draw[->] (pi_neg) -- (sat_th);
-    
-    % Connect Outer to Inner in open corridor y = 2.3
-    \draw[->] (sat_th.south) -- ++(0, -1.5) -| node[above=2pt, pos=0.15, font=\tiny] {$\theta^*$} (sum_th.north);
-    
-    % Connect Inner
-    \draw[->] (sum_th) -- node[above, font=\tiny] {$e_\theta$} (surf);
-    \draw[->] (surf) -- node[above, font=\tiny] {$s_1, \sigma_\varepsilon$} (st_block);
-    \draw[->] (st_block) -- node[above, font=\tiny] {$\nu$} (inv_dyn);
-    \draw[->] (inv_dyn) -- node[above, font=\tiny] {$\tau_{c,raw}$} (sat_trac);
-    
-    % Common mode torque to staggered mixers
-    \draw[->] (sat_trac.east) -- node[above=1pt, font=\tiny] {$\tau_c$} ++(0.6, 0) |- (mix_r.west);
-    \draw[->] (sat_trac.east) ++(0.6, 0) |- (mix_l.west);
-    
-    % Differential yaw torque from yaw_pd to staggered mixers (ZERO crossings)
-    \draw[->] (yaw_pd.east) -| node[right=1pt, pos=0.7, font=\tiny] {$+\tau_d$} (mix_r.south);
-    \draw[->] (yaw_pd.east) -| node[right=1pt, pos=0.7, font=\tiny] {$-\tau_d$} (mix_l.south);
-    
-    % Mixers to Plant
-    \draw[->] (mix_l) -| node[above=1pt, pos=0.3, font=\tiny] {$\tau_L$} (plant.150);
-    \draw[->] (mix_r) -| node[above=1pt, pos=0.3, font=\tiny] {$\tau_R$} (plant.165);
-    \draw[->] (leg_smc) -| node[above=2pt, pos=0.3, font=\tiny] {$\tau_{gambe} \in \mathbb{R}^4$} (plant.215);
-    
-    % Feedback to Outer: Filtered Axle Velocity & Position (properly branched from plant)
-    \draw[->] (plant.east) -- ++(0.6, 0) coordinate (p_up) |- (7.2, 5.2) -| node[above=2pt, pos=0.3, font=\tiny] {$\mathbf{V_{axle}}$ (Filtro $1^\circ$ Ordine, Esclusione $V_{com}$)} (sum_ev.north);
-    \draw[->] (p_up) |- (0.8, 6.0) -| node[above=2pt, pos=0.3, font=\tiny] {$s$ (Posizione)} (sum_pos.north);
-    
-    % Feedback to Inner: Theta and Theta_dot (via lower corridor at y = -0.8)
-    \draw[->] (plant.west) ++(-0.2, -1.4) -- ++(-20.0, 0) -| node[left=1pt, pos=0.1, font=\tiny] {$\theta$ (IMU)} (sum_th.south);
-    \draw[->] (3.4, -0.8) -- node[left=1pt, font=\tiny] {$\dot{\theta}$} (surf.south);
-    
-    % Feedback to Legs
-    \draw[->] (plant.south) |- node[below=2pt, pos=0.4, font=\tiny] {$q, \dot{q}, p_f, v_f$} (leg_smc.east);
-
-    % Background boxes
-    \begin{scope}[on background layer]
-        \node[draw=primary!50, fill=blue!2, dashed, rounded corners, fit=(sum_pos) (sat_th) (pi_neg)] (box_out) {};
-        \node[primary, font=\bfseries\scriptsize, anchor=south west] at (box_out.north west) {Anello Esterno (Posizione $\to$ Velocità Asse $\to \theta^*$)};
-        
-        \node[draw=accentred!50, fill=red!2, dashed, rounded corners, fit=(sum_th) (st_block) (inv_dyn) (sat_trac)] (box_inn) {};
-        \node[accentred, font=\bfseries\scriptsize, anchor=north west] at (box_inn.south west) {Anello Interno Beccheggio (Super-Twisting $2^\circ$ Ordine + Inversione Dinamica)};
-    \end{scope}
-\end{tikzpicture}
-}
-\caption{Schema a blocchi dell'architettura di controllo in cascata Sliding Mode (\texttt{rotino\_smc}) con regolazione di velocità ad asse isolato, anello di beccheggio Super-Twisting del $2^\circ$ ordine, inversione dinamica VL-WIP e SMC nello spazio operativo delle gambe.}
-\label{fig:block_smc}
+\includegraphics[width=\textwidth]{figure_confronto/riepilogo.png}
+\caption{Metriche chiave degli otto scenari: PID (rosso) e MPC (blu), barre normalizzate al valore maggiore.}
+\label{fig:riepilogo}
 \end{figure}
 
-\subsection{Come Funziona nel Dettaglio}
+\subsection{Risultati}
+Su 31 metriche chiave il \textbf{PID è migliore in 12}, l'\textbf{MPC in 10}, e le due leggi sono \textbf{pari in 9}.
 
-\subsubsection{A. L'Anello Esterno di Velocità e Posizione (PI a Guadagni Negativi)}
-Calcola l'angolo di beccheggio desiderato $\theta^*$ a partire dall'errore di velocità e posizione:
-\begin{equation}
-\theta^* = \text{sat}_{\theta_{max}} \Big( K_P (\dot{s} - v_{ref}) + K_I \int (\dot{s} - v_{ref}) dt \Big), \quad K_P = -0.30, \quad K_I = -0.10
-\end{equation}
-\textbf{Perché i guadagni sono negativi?} Come spiegato al punto 1.2, per la fase non minima l'accelerazione è proporzionale all'inclinazione ($\ddot{s} \approx g_{st}\theta$). Con la definizione di errore $e_v = \dot{s} - v_{ref}$, se il robot è troppo lento ($e_v < 0$) deve inclinarsi in avanti ($\theta^* > 0$). Dunque $K_P$ e $K_I$ \textbf{devono essere obbligatoriamente negativi}.
+\begin{table}[h!]
+\centering
+\small
+\renewcommand{\arraystretch}{1.25}
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{lll}
+\toprule
+\textbf{Scenario} & \textbf{Dove vince il PID} & \textbf{Dove vince l'MPC} \\
+\midrule
+Equilibrio & coppia rms 0.021 vs 0.061 N$\cdot$m & -- \\
+Spinta 2.7 N$\cdot$s & recupero 1.97 vs 2.20 s; deriva 0.21 vs 0.29 m & picco $11.3^\circ$ vs $20.9^\circ$; carico ruota 14.8 vs 10.1 N \\
+Trapezio 1 m/s & picco $6.1^\circ$ vs $8.5^\circ$; recupero 1.3 vs 4.6 s & errore di posizione 9 vs 16 mm rms \\
+Va e vieni & picco $2.9^\circ$ vs $4.3^\circ$; coppia 0.097 vs 0.118 N$\cdot$m & errore di posizione 8 vs 18 mm rms \\
+Altezza & coppia 0.024 vs 0.081 N$\cdot$m & beccheggio rms $0.04^\circ$ vs $0.13^\circ$ \\
+Curva a S & -- & errore di posizione 5 vs 10 mm rms \\
+Curva a S veloce & picco $6.6^\circ$ vs $7.4^\circ$; carico ruota 18.2 vs 17.1 N & errore di posizione 10 vs 25 mm; ZMP laterale 12.1 vs 13.2\% \\
+Salto & picco $11.5^\circ$ vs $20.7^\circ$ & recupero 2.7 vs 4.3 s; deriva 0.18 vs 0.21 m \\
+\bottomrule
+\end{tabular}%
+}
+\caption{Metriche chiave in cui una delle due leggi è migliore (PID vs MPC).}
+\end{table}
 
-\subsubsection{B. L'Anello di Beccheggio: Super-Twisting del Secondo Ordine}
-Definita la superficie di scorrimento:
-\begin{equation}
-s_1 = \dot{\theta} + c_1 (\theta - \theta^*), \qquad c_1 = 10\ \text{s}^{-1}
-\end{equation}
-Il controllore inverte esattamente il modello dinamico control-affine:
-\begin{equation}
-\tau_c = \frac{\nu - a_2(l)\theta}{2 b_2(l)}, \qquad \nu = -c_1 \dot{\theta} - k_a \sqrt{|s_1|} \sigma_\varepsilon(s_1) + W, \quad \dot{W} = -k_b \sigma_\varepsilon(s_1)
-\end{equation}
-dove $\sigma_\varepsilon(s_1) = \frac{s_1}{|s_1| + \varepsilon}$ è una funzione segno regolarizzata nello strato limite $\varepsilon = 0.02\ \text{rad/s}$.
-\textbf{Il ruolo chiave di $W(t)$}: $W(t)$ è un integratore discontinuo interno che accumula e annulla automaticamente qualsiasi disturbo, incertezza o discrepanza nei coefficienti $a_2, b_2$.
-
-\subsubsection{C. Lo Sliding Mode delle Gambe}
-Sostituisce il VMC con un'analoga legge in spazio operativo provvista di un termine robusto $K_{sw} = 8\text{ N}$.
-\textbf{Differenza critica}: mentre nell'MPC la quota era mantenuta dall'ottimizzatore, nello SMC la rigidezza verticale virtuale \textbf{deve essere ripristinata} a $1200\text{ N/m}$ (che sale a $14\text{ kN/m}$ dentro lo strato limite), altrimenti in appoggio il robot cederebbe verticalmente.
-
-\subsection{Vantaggi e Svantaggi}
+\begin{tcolorbox}[title=Lettura dei risultati]
 \begin{itemize}
-    \item[\textcolor{green}{\textbf{+}}] \textbf{Cancellazione totale dei disturbi persistenti}: grazie agli integratori $W(t)$ e $\int e_v$, annulla perfettamente l'errore di posizione a regime anche sotto forze continue o carichi sbilanciati.
-    \item[\textcolor{green}{\textbf{+}}] \textbf{Esecuzione istantanea}: formule algebriche esplicite in forma chiusa, tempo di calcolo $< 0.5\text{ ms}$ di CPU (nessun algoritmo iterativo).
-    \item[\textcolor{green}{\textbf{+}}] \textbf{Velocità di crociera elevata}: testato stabilmente fino a \textbf{2.0 m/s} su percorsi rettilinei.
-    \item[\textcolor{red}{\textbf{--}}] \textbf{Presenza di Chattering}: a causa del ritardo introdotto dal filtro su $\dot{\theta}$ (circa 9 ms, corrispondente a uno sfasamento di $32^\circ$ a 70 rad/s), lo stato oscilla attorno allo strato limite generando una fluttuazione di coppia a circa \textbf{10 Hz}.
-    \item[\textcolor{red}{\textbf{--}}] \textbf{Meno reattivo nei primi 100 ms di un impatto}: il guadagno del termine in radice $\sqrt{|s_1|}$ decresce all'aumentare dell'errore, rendendolo temporaneamente più "morbido" di un LQR lineare sotto urti bruschi.
+    \item \textbf{L'MPC segue meglio la posizione}: da 1.8 a 2.5 volte meno errore nei moti pianificati. Pianifica il baricentro su un orizzonte di 0.5 s e l'LQR insegue quel piano; il PID corregge la posizione solo attraverso il Capture Point con autorità $\rho = 0.4$.
+    \item \textbf{Il PID è più dolce}: meno coppia in tutti gli scenari (da 1.1 a 3.3 volte, 7.9 nel salto), meno inclinazione nei moti pianificati grazie all'anteprima LIPM, assestamento più rapido nel trapezio.
+    \item \textbf{Sulle spinte l'MPC contiene meglio l'inclinazione} ($11.3^\circ$ contro $20.9^\circ$), il PID recupera prima e deriva meno.
+    \item \textbf{Sullo ZMP le due leggi sono equivalenti}: nella S veloce entrambe usano il 12--13\% del semi-appoggio e lasciano almeno 17 N sulla ruota più scarica.
 \end{itemize}
+\end{tcolorbox}
 
-% -------------------------------------------------------------------------------------
-\section{Il Confronto Chiave: Analisi dei Disturbi e Phase Portrait}
-% -------------------------------------------------------------------------------------
-
-\subsection{Il Paradosso della Spinta Impulsiva: Perché Rispondono Uguali?}
-Quando applichiamo un impulso orizzontale di $2.7\text{ N}\cdot\text{s}$ per $12.5\text{ ms}$ sul torso, misuriamo in simulazione un picco di beccheggio in avanti quasi identico:
-\begin{equation}
-\theta_{max, MPC} \approx 11.36^\circ \qquad \text{contro} \qquad \theta_{max, SMC} \approx 12.09^\circ
-\end{equation}
-Questo risultato potrebbe far credere che lo Sliding Mode non apporti alcun beneficio di robustezza. La Sezione 6 del documento dimostra che \textbf{questa interpretazione è errata per tre motivi fisici}:
-
-\begin{enumerate}
-    \item \textbf{La spinta è un impulso, non un disturbo adattato}: in 12.5 ms la forza applica un salto istantaneo di velocità angolare $\Delta \dot{\theta} \approx -4.2\text{ rad/s}$. La superficie di scorrimento viene abbandonata all'istante ($s_1 \approx -5\text{ rad/s}$, 250 volte lo strato limite). Lo SMC entra in fase di raggiungimento, dove le proprietà di invarianza non sono attive.
-    \item \textbf{L'aderenza fisica impedisce di annullare la spinta}: fermare il beccheggio durante l'impulso richiederebbe oltre $3.4\text{ N}\cdot\text{m}$ per ruota, ma l'attrito massimo col suolo è $\mu N r \approx 2.8\text{ N}\cdot\text{m}$. La fisica impedisce a qualunque controllore di fare miracoli senza far pattinare le ruote.
-    \item \textbf{Il picco è deciso dalla saturazione progettuale}: per recuperare, il robot deve inclinarsi in avanti. L'MPC è saturato da progetto a $\Delta s \le 0.03\text{ m} \leftrightarrow \mathbf{10.48^\circ}$, mentre lo SMC è saturato a $\theta^* \le \mathbf{12.03^\circ}$. Entrambi i controllori sbattono contro il proprio limite di sicurezza: \textbf{il picco misurato misura il valore numerico scelto nel codice, non la bravura della legge di controllo!}
-\end{enumerate}
-
-\subsection{Dove lo Sliding Mode Stravince: Disturbi Persistenti}
-Se applichiamo un disturbo prolungato nel tempo (es. una forza orizzontale costante di $3\text{ N}$, che simula una salita o una raffica di vento):
-\begin{itemize}
-    \item \textbf{TV-LQR / MPC}: privo di azione integrale, subisce una deriva e si arresta con un \textbf{errore permanente di posizione di ben 65 cm} ($s_{regime} = -0.654\text{ m}$).
-    \item \textbf{Sliding Mode}: la variabile $W(t)$ stima la forza costante e l'anello esterno azzera la posizione, riportando il robot \textbf{esattamente a zero} ($s_{regime} = 0.000\text{ m}$).
-\end{itemize}
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.95\textwidth]{figure_confronto/spinta_disturbo_e_fase.png}
+\caption{Spinta di 2.7 N$\cdot$s: risposta di beccheggio, coppia alle ruote e ritratto di fase $(\theta, \dot\theta)$. Le orbite di entrambe le leggi tornano all'origine: nessun ciclo limite.}
+\label{fig:spinta}
+\end{figure}
 
 \subsection{A Cosa Serve il Piano delle Fasi (\texorpdfstring{$\theta$ vs $\dot{\theta}$}{theta vs thetadot})}
 Il ritratto di fase non è un semplice vezzo grafico:
 \begin{itemize}
-    \item \textbf{Visualizza Reaching Phase e Sliding Phase}: nel grafico si vede l'orbita dello stato che viene scaraventata via dall'impulso, intercetta la retta viola $s_1 = \dot{\theta} + c_1 \theta = 0$ e poi scivola lungo di essa verso l'origine.
-    \item \textbf{Distingue la stabilità asintotica dai cicli limite}: una traiettoria che spira e collassa nel punto $(0,0)$ certifica la convergenza asintotica; una traiettoria che si chiude su un anello ellittico permanente segnala un ciclo limite distruttivo.
+    \item \textbf{Mostra la forma del recupero}: l'orbita viene scaraventata via dall'impulso e poi rientra verso l'origine; la sua ampiezza e il numero di giri misurano quanto il controllore è smorzato.
+    \item \textbf{Distingue la stabilità asintotica dai cicli limite}: una traiettoria che spira e collassa nel punto $(0,0)$ certifica la convergenza; una che si chiude su un anello permanente segnala un ciclo limite, come quello del vecchio PD di giunto delle gambe.
+\end{itemize}
+
+\subsection{Limiti del Confronto}
+\begin{itemize}
+    \item Una sola esecuzione per scenario: differenze di pochi punti percentuali sono dentro la variabilità da prova a prova.
+    \item Il PID legge la ground truth del simulatore, l'MPC la stima IMU + Kalman.
+    \item Il catalogo non contiene disturbi persistenti, dove l'integrale sul Capture Point del PID dovrebbe dare un vantaggio sull'LQR, che non ha azione integrale.
 \end{itemize}
 
 % -------------------------------------------------------------------------------------
@@ -624,23 +458,25 @@ Il ritratto di fase non è un semplice vezzo grafico:
 \small
 \renewcommand{\arraystretch}{1.3}
 \resizebox{\textwidth}{!}{%
-\begin{tabular}{lccc}
+\begin{tabular}{lcc}
 \toprule
-\textbf{Caratteristica} & \textbf{PID} & \textbf{MPC + TV-LQR + VMC} & \textbf{SMC (Sliding Mode)} \\
+\textbf{Caratteristica} & \textbf{PID con ZMP} & \textbf{MPC + TV-LQR + VMC} \\
 \midrule
-\textbf{Architettura} & PD parallelo su 4 stati & Disaccoppiata Gerarchica & Cascata Non Lineare \\
-\textbf{Uso del Modello} & Nessuno (tarato a mano) & VL-WIP + Massa Concentrata & Inversione Modello VL-WIP \\
-\textbf{Stato nominale} & Inclinato a $\sim 11^\circ$ & $\theta = 0.00^\circ$ perfetto & $\theta \approx 0.20^\circ$ \\
-\textbf{Costo Computazionale} & Trascurabile ($< 0.1\text{ ms}$) & Elevato (QP 100 Hz, FISTA) & Minimo ($< 0.5\text{ ms}$, forma chiusa) \\
-\textbf{Gestione Vincoli} & Saturazione a posteriori & Ottimizzazione con anteprima & Saturazione a posteriori \\
-\textbf{Chattering Coppie} & Altissimo (bang-bang a 500 Hz) & Assente (profilo liscio) & Basso ($\sim 10\text{ Hz}$ da ritardo filtro) \\
-\textbf{Spinta Impulsiva} & Instabile / Caduta & Picco $11.36^\circ$, rinculo $-0.9^\circ$ & Picco $12.09^\circ$, rinculo $-12.7^\circ$ \\
-\textbf{Disturbo Persistente} & Errore permanente & Errore di posizione ($65\text{ cm}$) & \textbf{Errore nullo ($0.00\text{ cm}$)} \\
-\textbf{Velocità Massima} & $\sim 0.4\text{ m/s}$ & $0.6\text{ m/s}$ & \textbf{2.0 m/s} \\
+\textbf{Architettura} & Cascata Capture Point $\rightarrow$ ZMP $\rightarrow$ coppia & Disaccoppiata gerarchica \\
+\textbf{Uso del modello} & Feedforward VL-WIP, anteprima LIPM & VL-WIP + massa concentrata \\
+\textbf{Stato} & Ground truth & IMU + Kalman \\
+\textbf{Costo computazionale} & $\sim 0.45$ ms (nessuna ottimizzazione) & QP a 100 Hz (FISTA) \\
+\textbf{Gestione dei vincoli} & Saturazione a posteriori & Ottimizzazione con anteprima \\
+\textbf{Azione integrale} & Capture Point, imbardata & Solo imbardata \\
+\textbf{Inseguimento di posizione} & 10--25 mm rms & \textbf{5--10 mm rms} \\
+\textbf{Coppia richiesta} & \textbf{1.1--3.3 volte meno (7.9 nel salto)} & -- \\
+\textbf{Spinta impulsiva} & Picco $20.9^\circ$, recupero \textbf{2.0 s} & Picco \textbf{$11.3^\circ$}, recupero 2.2 s \\
+\textbf{Carico minimo ruota} & 10--20 N (4.4 N all'atterraggio del salto) & 15--19 N (4.2 N all'atterraggio del salto) \\
+\textbf{Comandi da dashboard} & Sì (fino a 1.5 m/s) & Sì (fino a 0.6 m/s) \\
 \bottomrule
 \end{tabular}%
 }
-\caption{Confronto sintetico tra le tre leggi di controllo implementate in RoTino.}
+\caption{Confronto sintetico tra le due leggi di controllo di RoTino.}
 \end{table}
 
 \end{document}

@@ -3,8 +3,8 @@
 <package format="3">
   <name>rotino_benchmark</name>
   <version>0.1.0</version>
-  <description>Runs the same scenario against every RoTino control law and scores them on the signals
-    all of them publish, so PID, MPC and SMC can be compared on equal terms.</description>
+  <description>Benchmark PID vs MPC of RoTino: a catalogue of scenarios run with both control laws, scored on
+    the signals both publish (plus the reconstructed ZMP), with side-by-side tables and overlaid plots.</description>
   <maintainer email="enzogpt55@libero.it">Alessando Prisco</maintainer>
   <license>TODO: License declaration</license>
 
@@ -18,7 +18,6 @@
   <exec_depend>rotino_description</exec_depend>
   <exec_depend>rotino_pid</exec_depend>
   <exec_depend>rotino_mpc</exec_depend>
-  <exec_depend>rotino_smc</exec_depend>
 
   <test_depend>python3-pytest</test_depend>
 

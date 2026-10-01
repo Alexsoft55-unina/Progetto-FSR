@@ -44,14 +44,14 @@
     </DockSplitter>
    </Container>
   </Tab>
-  <Tab tab_name="Disturbo &amp; Superficie SMC" containers="1">
+  <Tab tab_name="Disturbo &amp; offset CoM" containers="1">
    <Container>
     <DockSplitter count="2" orientation="-" sizes="0.5;0.5">
-     <DockArea name="Superficie Scorrimento s1">
+     <DockArea name="Offset CoM desiderato (delta_s)">
       <plot style="Lines" mode="TimeSeries" flip_y="false" flip_x="false">
-       <range top="1" bottom="-1" left="0" right="25"/>
+       <range top="0.05" bottom="-0.05" left="0" right="25"/>
        <limitY/>
-       <curve color="#9b59b6" name="smc_s1"/>
+       <curve color="#9b59b6" name="delta_s_m"/>
       </plot>
      </DockArea>
      <DockArea name="Forza Disturbo Impulso">
