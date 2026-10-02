@@ -25,6 +25,7 @@ setup(
             'plot = rotino_benchmark.plot:main',
             'zmp = rotino_benchmark.zmp_analysis:main',
             'suite = rotino_benchmark.suite:main',
+            'disturbance = rotino_benchmark.disturbance:main',
         ],
     },
 )

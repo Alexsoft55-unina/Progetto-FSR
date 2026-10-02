@@ -18,7 +18,7 @@ import rclpy
 from ament_index_python.packages import get_package_share_directory
 from rclpy.node import Node
 from nav_msgs.msg import Odometry
-from ros_gz_interfaces.msg import Contacts, EntityWrench
+from ros_gz_interfaces.msg import Contacts, Entity, EntityWrench
 from sensor_msgs.msg import Imu, JointState
 from std_msgs.msg import Float64MultiArray, String
 
@@ -56,6 +56,8 @@ HEADER = [
     # ZMP-based PID (/rotino/zmp_ctrl, NaN for the other laws): longitudinal ZMP ahead of the CoM, desired
     # and actual (contact), capture-point error, reference CoM acceleration, lateral lean command
     'zmp_des_mm', 'zmp_ctrl_mm', 'dcm_err_mm', 'acc_ref_ms2', 'lean_cmd_deg',
+    # step disturbance (rotino_benchmark disturbance): horizontal persistent force on the torso, held
+    'step_force_N',
 ]
 
 FLUSH_EVERY = 100
@@ -124,11 +126,14 @@ class TestBenchLogger(Node):
         self.zmp_ctrl = None
         self.push_force = 0.0
         self.last_wrench_stamp = -math.inf
+        self.step_force = 0.0
 
         self.create_subscription(Float64MultiArray, '/rotino/debug', self._debug_cb, 10)
         self.create_subscription(Float64MultiArray, '/rotino/wbr_state', self._wbr_cb, 10)
         self.create_subscription(Float64MultiArray, '/rotino/zmp_ctrl', self._zmp_ctrl_cb, 10)
         self.create_subscription(EntityWrench, '/world/rotino_world/wrench', self._wrench_cb, 10)
+        self.create_subscription(EntityWrench, '/world/rotino_world/wrench/persistent', self._step_cb, 10)
+        self.create_subscription(Entity, '/world/rotino_world/wrench/clear', self._step_clear_cb, 10)
         self.create_subscription(String, '/rotino/jump_state', self._jump_state_cb, 10)
         self.create_subscription(JointState, '/joint_states', self._joint_state_cb, 10)
         self.create_subscription(Float64MultiArray, '/wheel_effort_controller/commands',
@@ -167,6 +172,12 @@ class TestBenchLogger(Node):
         fy = msg.wrench.force.y
         self.push_force = math.hypot(fx, fy)
         self.last_wrench_stamp = self.get_clock().now().nanoseconds * 1e-9
+
+    def _step_cb(self, msg):
+        self.step_force += math.hypot(msg.wrench.force.x, msg.wrench.force.y)   # persistent wrenches add up
+
+    def _step_clear_cb(self, _msg):
+        self.step_force = 0.0
 
     def _jump_state_cb(self, msg):
         self.jump_state = msg.data
@@ -289,6 +300,7 @@ class TestBenchLogger(Node):
             *self._contact_xyz('left', now_s), *self._contact_xyz('right', now_s),
             self.odom_stamp, self.joints_stamp,
             *(self.zmp_ctrl if self.zmp_ctrl is not None else [nan] * 5),
+            self.step_force,
         ]
         self._writer.writerow(row)
         self._row_count += 1

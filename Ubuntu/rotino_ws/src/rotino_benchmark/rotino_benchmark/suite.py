@@ -34,7 +34,9 @@ def main(argv=None):
 
     if args.list:
         for name, sc in SCENARIOS.items():
-            print(f'{name:16s} {sc.duration:4.0f} s  {sc.title}: {sc.description}  [{" ".join(sc.args) or "-"}]')
+            step = f"  gradino {sc.disturbance['force']:+.1f} N" if sc.disturbance else ''
+            print(f'{name:16s} {sc.duration:4.0f} s  {sc.title}: {sc.description}  '
+                  f'[{" ".join(sc.args) or "-"}]{step}')
         return 0
     from rotino_benchmark.compare import analyse_suite
     if args.analisi:
@@ -52,7 +54,7 @@ def main(argv=None):
     for i, name in enumerate(names, 1):
         sc = SCENARIOS[name]
         print(f'\n######## [{i}/{len(names)}] {name}: {sc.title}', flush=True)
-        run_scenario(os.path.join(suite_dir, name), laws, sc.args, sc.duration, name)
+        run_scenario(os.path.join(suite_dir, name), laws, sc.args, sc.duration, name, sc.disturbance)
     return 0 if analyse_suite(suite_dir) else 1
 
 

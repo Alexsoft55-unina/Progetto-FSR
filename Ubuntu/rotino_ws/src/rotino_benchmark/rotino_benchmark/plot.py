@@ -4,6 +4,8 @@
 
 Figures: tracking and errors, disturbance response and phase portrait, wheel torques, legs, attitude,
 power and energy, horizontal phase portrait, IMU accelerations, plus the ZMP figures of zmp_analysis.
+The platform scenarios (scenarios.py, `zones`) add terreno.png: the signals against the distance travelled,
+with the obstacles shaded.
 """
 
 import argparse
@@ -24,7 +26,7 @@ NAN = float('nan')
 COLUMNS = {
     't': 'time_s', 'th': 'theta_deg', 'th_d': 'theta_dot_degs', 'x': 'x_m', 'v': 'xdot_ms', 'z': 'com_z_m',
     'th_ref': 'theta_ref_deg', 'th_err': 'theta_err_deg', 's_ref': 's_ref_m', 's_err': 's_err_m',
-    'v_ref': 'xdot_ref_ms', 'v_err': 'xdot_err_ms', 'push_f': 'push_force_N',
+    'v_ref': 'xdot_ref_ms', 'v_err': 'xdot_err_ms', 'push_f': 'push_force_N', 'step_f': 'step_force_N',
     'tau_l': 'wheel_L_torque_cmd', 'tau_r': 'wheel_R_torque_cmd',
     'hip': 'hip_L_pos', 'knee': 'knee_L_pos', 'hip_u': 'hip_L_torque_cmd', 'knee_u': 'knee_L_torque_cmd',
     'hip_v': 'hip_L_vel', 'knee_v': 'knee_L_vel', 'wheel_v': 'wheel_L_vel',
@@ -82,11 +84,19 @@ def _style(ax, ylabel, title=None, legend=True):
 
 
 def push_time(data):
+    """Onset of the disturbance (impulsive push or step force), or None."""
+    return disturbance_onset(data)[0]
+
+
+def disturbance_onset(data):
+    """(time, 'spinta' | 'gradino') of the first push or step force above 1 N, or (None, None)."""
     for d in data.values():
-        for ti, f in zip(d['t'], d['push_f']):
-            if f > 1.0:
-                return ti
-    return None
+        for ti, fp, fs in zip(d['t'], d['push_f'], d['step_f']):
+            if fp > 1.0:
+                return ti, 'spinta'
+            if fs > 1.0:
+                return ti, 'gradino'
+    return None, None
 
 
 # ---------------------------------------------------------------------------- figures
@@ -119,7 +129,7 @@ def plot_tracking(data, out_dir):
 
 def plot_disturbance(data, out_dir):
     """Pitch and wheel torque around the largest disturbance, and the (theta, theta_dot) portrait."""
-    t0 = push_time(data)
+    t0, kind = disturbance_onset(data)
     if t0 is None:     # no push: centre on the largest pitch excursion of either law
         t0 = max(((abs(th), t) for d in data.values() for t, th in zip(d['t'], d['th']) if not math.isnan(th)),
                  default=(0.0, 4.0))[1] - 1.0
@@ -128,15 +138,16 @@ def plot_disturbance(data, out_dir):
     ax_th, ax_tau, ax_ph = fig.add_subplot(gs[0, 0]), fig.add_subplot(gs[1, 0]), fig.add_subplot(gs[:, 1])
     for law in _laws(data):
         d = data[law]
-        idx = [i for i, t in enumerate(d['t']) if t0 - 1.0 <= t <= t0 + 6.0] or list(range(len(d['t'])))
+        span = 12.0 if kind == 'gradino' else 6.0          # a held force: show the new equilibrium too
+        idx = [i for i, t in enumerate(d['t']) if t0 - 1.0 <= t <= t0 + span] or list(range(len(d['t'])))
         sub = lambda k: [d[k][i] for i in idx]  # noqa: E731
         ax_th.plot(sub('t'), sub('th'), color=COLORS[law], lw=1.4, label=LABELS[law])
         ax_tau.plot(sub('t'), sub('u'), color=COLORS[law], lw=1.2, label=LABELS[law])
         ax_ph.plot(sub('th'), sub('th_d'), color=COLORS[law], lw=1.2, alpha=0.85, label=LABELS[law])
         ax_ph.plot(d['th'][idx[0]], d['th_d'][idx[0]], 'o', color=COLORS[law], mec='k')
-    if push_time(data) is not None:
+    if kind is not None:
         for a in (ax_th, ax_tau):
-            a.axvline(t0, color='#e74c3c', ls='--', lw=1.1, label='spinta')
+            a.axvline(t0, color='#e74c3c', ls='--', lw=1.1, label=kind)
     _style(ax_th, 'beccheggio [deg]', 'Risposta al disturbo')
     _style(ax_tau, 'coppia ruote media [Nm]')
     ax_tau.set_xlabel('tempo dal rilascio [s]')
@@ -232,6 +243,32 @@ def plot_imu(data, out_dir):
     return _save(fig, out_dir, 'imu.png')
 
 
+def plot_terrain(data, out_dir, zones, title):
+    """Pitch, CoM height, roll and wheel torque against the distance travelled along the path, with the
+    obstacles of the platform shaded: where each law is disturbed, not when."""
+    fig, ax = plt.subplots(4, 1, figsize=(11, 10), sharex=True)
+    for law in _laws(data):
+        d = data[law]
+        s = d['x']
+        ax[0].plot(s, d['th'], color=COLORS[law], lw=1.1, label=LABELS[law])
+        # the two laws publish different CoM heights (whole robot / upper body): plot the change from the start
+        z0 = sorted(v for v in d['z'][:250] if not math.isnan(v))
+        z0 = z0[len(z0) // 2] if z0 else 0.0
+        ax[1].plot(s, [1e3 * (v - z0) for v in d['z']], color=COLORS[law], lw=1.1, label=LABELS[law])
+        ax[2].plot(s, d['roll'], color=COLORS[law], lw=1.1, label=LABELS[law])
+        ax[3].plot(s, d['tau_l'], color=COLORS[law], lw=0.9, label=f'{LABELS[law]} sinistra')
+        ax[3].plot(s, d['tau_r'], color=COLORS[law], lw=0.9, ls='--', label=f'{LABELS[law]} destra')
+    for a in ax:
+        for k, (z0, z1, lab) in enumerate(zones):
+            a.axvspan(z0, z1, color='#b9770e', alpha=0.15, lw=0, label=lab if a is ax[0] and k == 0 else None)
+    _style(ax[0], 'beccheggio [deg]', f'{title}: segnali lungo il percorso (zone = ostacoli)')
+    _style(ax[1], 'variazione altezza CoM [mm]')
+    _style(ax[2], 'rollio [deg]')
+    _style(ax[3], 'coppia ruote [Nm]')
+    ax[3].set_xlabel('distanza percorsa dalla partenza [m]')
+    return _save(fig, out_dir, 'terreno.png')
+
+
 def generate_plots(run_dir, out_dir=None):
     """All figures of a scenario; returns the zmp_analysis results ({law: series}, {} if unavailable) for
     reuse, or None when there is no data."""
@@ -243,6 +280,11 @@ def generate_plots(run_dir, out_dir=None):
     os.makedirs(out_dir, exist_ok=True)
     saved = [f(data, out_dir) for f in (plot_tracking, plot_disturbance, plot_wheels, plot_legs, plot_attitude,
                                         plot_power, plot_horizontal_phase, plot_imu)]
+    from rotino_benchmark.compare import scenario_name
+    from rotino_benchmark.scenarios import SCENARIOS
+    sc = SCENARIOS.get(scenario_name(run_dir))
+    if sc and sc.zones:
+        saved.append(plot_terrain(data, out_dir, sc.zones, sc.title))
     results = {}
     try:
         from rotino_benchmark.zmp_analysis import analyse_run, generate_zmp_plots, write_zmp_csv

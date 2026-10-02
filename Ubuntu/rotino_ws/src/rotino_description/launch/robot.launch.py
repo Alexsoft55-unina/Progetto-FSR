@@ -81,7 +81,9 @@ def generate_launch_description():
         package='ros_gz_sim',
         executable='create',
         output='screen',
-        arguments=['-topic', 'robot_description', '-name', 'rotino', '-z', str(SPAWN_HEIGHT)],
+        arguments=['-topic', 'robot_description', '-name', 'rotino', '-z', str(SPAWN_HEIGHT),
+                   '-x', LaunchConfiguration('spawn_x'), '-y', LaunchConfiguration('spawn_y'),
+                   '-Y', LaunchConfiguration('spawn_yaw')],
     )
 
     bridge = Node(
@@ -96,6 +98,9 @@ def generate_launch_description():
             RIGHT_CONTACT_GZ_TOPIC + '@ros_gz_interfaces/msg/Contacts[gz.msgs.Contacts',
             '/rotino/release@std_msgs/msg/Empty]gz.msgs.Empty',
             '/world/rotino_world/wrench@ros_gz_interfaces/msg/EntityWrench]gz.msgs.EntityWrench',
+            # persistent wrench (applied every physics step until cleared): step disturbance of rotino_benchmark
+            '/world/rotino_world/wrench/persistent@ros_gz_interfaces/msg/EntityWrench]gz.msgs.EntityWrench',
+            '/world/rotino_world/wrench/clear@ros_gz_interfaces/msg/Entity]gz.msgs.Entity',
         ],
         remappings=[
             (LEFT_CONTACT_GZ_TOPIC, '/rotino/left_wheel_contact'),
@@ -140,6 +145,11 @@ def generate_launch_description():
         DeclareLaunchArgument('gui', default_value='true', description='Start the Gazebo GUI'),
         DeclareLaunchArgument('dashboard', default_value='false',
                               description='Open the real-time rotino_dashboard GUI'),
+        # spawn pose on the ground plane: the anchor of the world welds the torso where it appears, so the
+        # robot can start in front of the uneven-ground platforms (rotino_benchmark scenarios)
+        DeclareLaunchArgument('spawn_x', default_value='0.0', description='Spawn x [m]'),
+        DeclareLaunchArgument('spawn_y', default_value='0.0', description='Spawn y [m]'),
+        DeclareLaunchArgument('spawn_yaw', default_value='0.0', description='Spawn heading [rad]'),
         DeclareLaunchArgument('start_controller', default_value='true',
                               description='Start the controller here; set false to launch it by hand'),
         *[DeclareLaunchArgument(name, default_value=default, description=desc)

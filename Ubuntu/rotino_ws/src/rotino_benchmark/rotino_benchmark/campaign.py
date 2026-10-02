@@ -7,6 +7,7 @@ result (a stale dashboard publishing /rotino/cmd_vel put a controller into teleo
 
     ros2 run rotino_benchmark campaign -- spinta                        # a scenario of scenarios.py
     ros2 run rotino_benchmark campaign -- --scenario push_enable:=true push_impulse:=4.0 --duration 20
+    ros2 run rotino_benchmark campaign -- --gradino 5.0 --gradino-t 4.0     # step force of 5 N at 4 s
     ros2 run rotino_benchmark suite                                     # every scenario (suite.py)
 """
 
@@ -25,7 +26,7 @@ from rotino_benchmark.scenarios import SCENARIOS
 # On Fortress the server runs as "ruby /usr/bin/ign gazebo ...": 'gz sim' alone missed a Gazebo left over
 # from a manual launch, and the next controller attached to that old world (robot already fallen).
 STALE_PATTERNS = ('rotino_pid/controller', 'rotino_mpc/controller',
-                  'rotino_benchmark/logger', 'rotino_dashboard', 'gz sim', 'ign gazebo', 'parameter_bridge',
+                  'rotino_benchmark/logger', 'rotino_benchmark/disturbance', 'rotino_dashboard', 'gz sim', 'ign gazebo', 'parameter_bridge',
                   'robot_state_publisher', 'ros_gz_sim')
 # lines of the simulation log that make a run invalid
 INVALID_MARKS = ('Failed to configure controller', 'Live commands received')
@@ -38,7 +39,17 @@ def kill_stale():
     time.sleep(2.0)
 
 
-def run_one(law, scenario, duration, out_dir, log_dir):
+def disturbance_cmd(disturbance):
+    """Command line of the step-disturbance node, or None."""
+    if not disturbance:
+        return None
+    return ['ros2', 'run', 'rotino_benchmark', 'disturbance', '--ros-args', '-p', 'use_sim_time:=true',
+            '-p', f"force:={float(disturbance['force'])}",
+            '-p', f"start_time:={float(disturbance.get('start_time', 4.0))}",
+            '-p', f"duration:={float(disturbance.get('duration', 0.0))}"]
+
+
+def run_one(law, scenario, duration, out_dir, log_dir, disturbance=None):
     print(f'\n=== {law.upper()} ===', flush=True)
     kill_stale()
     os.makedirs(out_dir, exist_ok=True)
@@ -56,16 +67,21 @@ def run_one(law, scenario, duration, out_dir, log_dir):
         # to the first 4 s of the run. Rows are written only from /rotino/debug, i.e. after the release.
         log = subprocess.Popen(logger, stdout=sim_log, stderr=subprocess.STDOUT,
                                preexec_fn=os.setsid)
+        procs = [log, sim]
+        cmd = disturbance_cmd(disturbance)
+        if cmd:                               # waits for /rotino/debug, i.e. for the release
+            procs.insert(0, subprocess.Popen(cmd, stdout=sim_log, stderr=subprocess.STDOUT,
+                                             preexec_fn=os.setsid))
         try:
             time.sleep(4.0 + duration)
         finally:
-            for proc in (log, sim):
+            for proc in procs:
                 try:
                     os.killpg(os.getpgid(proc.pid), signal.SIGINT)
                 except ProcessLookupError:
                     pass
             time.sleep(3.0)
-            for proc in (log, sim):
+            for proc in procs:
                 try:
                     os.killpg(os.getpgid(proc.pid), signal.SIGKILL)
                 except ProcessLookupError:
@@ -84,15 +100,15 @@ def run_one(law, scenario, duration, out_dir, log_dir):
     return os.path.join(out_dir, produced[-1])
 
 
-def run_scenario(run_dir, laws, args, duration, name=None):
+def run_scenario(run_dir, laws, args, duration, name=None, disturbance=None):
     """Runs the laws one after the other in run_dir (CSVs) and run_dir/logs (simulation output);
     scenario.json records what was run, so that compare knows the scenario whatever the directory name."""
     log_dir = os.path.join(run_dir, 'logs')
     os.makedirs(log_dir, exist_ok=True)
     with open(os.path.join(run_dir, 'scenario.json'), 'w') as f:
         json.dump({'name': name, 'args': list(args), 'duration': duration, 'laws': list(laws),
-                   'date': f'{datetime.now():%Y-%m-%d %H:%M}'}, f, indent=1)
-    return {law: run_one(law, args, duration, run_dir, log_dir) for law in laws}
+                   'disturbance': disturbance, 'date': f'{datetime.now():%Y-%m-%d %H:%M}'}, f, indent=1)
+    return {law: run_one(law, args, duration, run_dir, log_dir, disturbance) for law in laws}
 
 
 def parse_laws(p, text):
@@ -109,6 +125,9 @@ def main(argv=None):
     p.add_argument('--scenario', nargs='*', default=None,
                    help='free launch arguments instead of a named scenario, e.g. push_enable:=true')
     p.add_argument('--controllers', default=','.join(LAWS), help=f'subset of {",".join(LAWS)}')
+    p.add_argument('--gradino', type=float, default=None, metavar='N',
+                   help='step force on the torso [N, + = backwards], with --scenario or alone')
+    p.add_argument('--gradino-t', type=float, default=4.0, metavar='S', help='step start after release [s]')
     p.add_argument('--duration', type=float, default=None, help='seconds of logging per run')
     p.add_argument('--run-name', default=None, help='name of the run directory')
     p.add_argument('--out', default=default_out(), help='parent directory (default <ws>/benchmark_runs)')
@@ -121,14 +140,21 @@ def main(argv=None):
     sc = SCENARIOS.get(args.name) if args.name else None
     launch_args = sc.args if sc else (args.scenario or [])
     duration = args.duration or (sc.duration if sc else 20.0)
-    base = args.name or ('_'.join(a.split(':=')[0] for a in launch_args) or 'equilibrio')
+    if args.name and args.gradino is not None:
+        p.error('--gradino vale con --scenario o da solo, non con uno scenario del catalogo')
+    disturbance = (sc.disturbance if sc else
+                   ({'force': args.gradino, 'start_time': args.gradino_t} if args.gradino is not None else None))
+    base = args.name or ('_'.join(a.split(':=')[0] for a in launch_args)
+                         or ('gradino' if disturbance else 'equilibrio'))
     run_dir = os.path.join(args.out, args.run_name or f'{base}_{datetime.now():%Y%m%d_%H%M%S}')
 
     print(f'scenario : {sc.title if sc else "argomenti liberi"} ({" ".join(launch_args) or "nessun argomento"})')
     print(f'leggi    : {", ".join(laws)}')
     print(f'durata   : {duration:.0f} s ciascuna')
+    if disturbance:
+        print(f"gradino  : {disturbance['force']:+.2f} N a t={disturbance.get('start_time', 4.0):.1f} s")
     print(f'output   : {run_dir}')
-    run_scenario(run_dir, laws, launch_args, duration, args.name)
+    run_scenario(run_dir, laws, launch_args, duration, args.name, disturbance)
 
     if not args.no_analysis:
         from rotino_benchmark.compare import analyse_scenario
